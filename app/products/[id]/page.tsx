@@ -3,6 +3,9 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { products } from "@/data/products";
 import AddToCartButton from "@/components/AddToCartButton";
+import Navbar from "@/components/Navbar";
+
+export const dynamic = "force-dynamic";
 
 type Props = {
   params: Promise<{
