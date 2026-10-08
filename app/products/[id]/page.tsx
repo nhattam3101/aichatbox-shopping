@@ -5,7 +5,11 @@ import { products } from "@/data/products";
 import AddToCartButton from "@/components/AddToCartButton";
 import Navbar from "@/components/Navbar";
 
-export const dynamic = "force-dynamic";
+export function generateStaticParams() {
+  return products.map((product) => ({
+    id: product.id.toString(),
+  }));
+}
 
 type Props = {
   params: Promise<{
