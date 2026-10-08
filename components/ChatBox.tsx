@@ -37,7 +37,9 @@ export default function ChatBox() {
       content: trimmedMessage,
     };
 
-    setMessages((prev) => [...prev, userMessage]);
+    const updatedMessages: Message[] = [...messages, userMessage];
+
+    setMessages(updatedMessages);
     setMessage("");
     setIsLoading(true);
 
@@ -48,7 +50,7 @@ export default function ChatBox() {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          message: trimmedMessage,
+          messages: updatedMessages,
         }),
       });
 
@@ -88,6 +90,7 @@ export default function ChatBox() {
 
   return (
     <>
+      {/* Floating button */}
       <button
         onClick={() => setIsOpen(true)}
         className="fixed bottom-8 right-8 z-40 rounded-full bg-black px-5 py-4 text-white shadow-xl transition hover:scale-105"
@@ -95,8 +98,10 @@ export default function ChatBox() {
         AI tư vấn
       </button>
 
+      {/* Chat window */}
       {isOpen && (
         <div className="fixed bottom-24 right-8 z-50 flex h-[500px] w-[360px] flex-col overflow-hidden rounded-3xl border border-black/10 bg-white shadow-2xl">
+          {/* Header */}
           <div className="flex items-center justify-between border-b border-black/10 px-5 py-4">
             <div>
               <h2 className="font-semibold">SleeveAI Assistant</h2>
@@ -113,6 +118,7 @@ export default function ChatBox() {
             </button>
           </div>
 
+          {/* Messages */}
           <div className="flex-1 space-y-4 overflow-y-auto bg-[#f7f5f2] p-4">
             {messages.map((item, index) => (
               <div
@@ -134,6 +140,7 @@ export default function ChatBox() {
             )}
           </div>
 
+          {/* Input */}
           <div className="border-t border-black/10 bg-white p-4">
             <div className="flex gap-2">
               <input

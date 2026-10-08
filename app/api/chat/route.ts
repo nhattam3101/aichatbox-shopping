@@ -5,12 +5,24 @@ const ai = new GoogleGenAI({
   apiKey: process.env.GEMINI_API_KEY,
 });
 
+type ChatMessage = {
+  role: "user" | "assistant";
+  content: string;
+};
+
 export async function POST(request: Request) {
   try {
-    const { message } = await request.json();
+    const { messages } = await request.json();
 
-    if (!message?.trim()) {
-      return Response.json({ error: "Message is required" }, { status: 400 });
+    if (!Array.isArray(messages) || messages.length === 0) {
+      return Response.json(
+        {
+          error: "Messages are required",
+        },
+        {
+          status: 400,
+        },
+      );
     }
 
     const productData = products
@@ -27,6 +39,14 @@ Phù hợp: ${product.suitableFor.join(", ")}
       )
       .join("\n");
 
+    const conversation = (messages as ChatMessage[])
+      .map((item) => {
+        const role = item.role === "user" ? "Khách hàng" : "SleeveAI";
+
+        return `${role}: ${item.content}`;
+      })
+      .join("\n");
+
     const prompt = `
 Bạn là SleeveAI, nhân viên tư vấn của cửa hàng bao laptop.
 
@@ -34,16 +54,23 @@ Nhiệm vụ:
 - Tư vấn size bao laptop.
 - Tư vấn sản phẩm theo kích thước laptop.
 - Tư vấn theo màu sắc và ngân sách.
-- Chỉ được gợi ý sản phẩm có trong danh sách.
+- Ghi nhớ ngữ cảnh của cuộc hội thoại.
+- Nếu khách nói "mẫu đó", "màu đó", "cái vừa nói" hoặc câu tương tự, hãy dựa vào lịch sử hội thoại.
+- Chỉ được gợi ý sản phẩm có trong danh sách sản phẩm bên dưới.
 - Không tự bịa sản phẩm.
-- Nếu khách chưa cung cấp đủ thông tin thì hỏi lại.
-- Trả lời ngắn gọn, dễ hiểu, bằng tiếng Việt.
+- Nếu chưa đủ thông tin để tư vấn chính xác, hãy hỏi thêm.
+- Trả lời ngắn gọn, dễ hiểu và bằng tiếng Việt.
+- Ưu tiên tư vấn như một nhân viên bán hàng thân thiện.
 
 Danh sách sản phẩm:
+
 ${productData}
 
-Khách hàng hỏi:
-${message}
+Lịch sử hội thoại:
+
+${conversation}
+
+Hãy trả lời câu cuối cùng của khách hàng dựa trên toàn bộ ngữ cảnh hội thoại.
 `;
 
     const response = await ai.models.generateContent({
@@ -59,8 +86,12 @@ ${message}
     console.error("Gemini error:", error);
 
     return Response.json(
-      { error: "Không thể kết nối với AI." },
-      { status: 500 },
+      {
+        error: "Không thể kết nối với AI.",
+      },
+      {
+        status: 500,
+      },
     );
   }
 }

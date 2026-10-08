@@ -1,21 +1,14 @@
+import Link from "next/link";
 import Image from "next/image";
 import { products } from "@/data/products";
 import ChatBox from "@/components/ChatBox";
+import Navbar from "@/components/Navbar";
 
 export default function Home() {
   return (
     <main className="min-h-screen bg-[#f7f5f2] text-[#1f1f1f]">
       {/* Header */}
-      <header className="flex items-center justify-between border-b border-black/10 bg-white px-10 py-6">
-        <h1 className="text-2xl font-bold tracking-wide">SleeveAI</h1>
-
-        <nav className="flex gap-8 text-sm font-medium">
-          <a href="#">Trang chủ</a>
-          <a href="#">Sản phẩm</a>
-          <a href="#">Về chúng tôi</a>
-          <a href="#">Giỏ hàng</a>
-        </nav>
-      </header>
+      <Navbar />
 
       {/* Hero */}
       <section className="grid min-h-[520px] items-center gap-10 px-10 md:grid-cols-2 md:px-20">
@@ -36,9 +29,12 @@ export default function Home() {
           </p>
 
           <div className="mt-8 flex gap-4">
-            <button className="rounded-full bg-black px-6 py-3 text-white">
+            <Link
+              href="/products"
+              className="rounded-full bg-black px-6 py-3 text-white"
+            >
               Xem sản phẩm
-            </button>
+            </Link>
 
             <button className="rounded-full border border-black px-6 py-3">
               Hỏi AI
@@ -78,6 +74,7 @@ export default function Home() {
           {products.map((product, index) => (
             <ProductCard
               key={product.id}
+              id={product.id}
               name={product.name}
               size={product.size}
               price={`${product.price.toLocaleString("vi-VN")}đ`}
@@ -95,12 +92,14 @@ export default function Home() {
 }
 
 function ProductCard({
+  id,
   name,
   size,
   price,
   image,
   eager,
 }: {
+  id: number;
   name: string;
   size: string;
   price: string;
@@ -108,7 +107,7 @@ function ProductCard({
   eager: boolean;
 }) {
   return (
-    <div>
+    <Link href={`/products/${id}`} className="group block">
       <div className="relative h-72 overflow-hidden rounded-2xl bg-[#eeeae5]">
         <Image
           src={image}
@@ -116,15 +115,17 @@ function ProductCard({
           fill
           sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
           loading={eager ? "eager" : "lazy"}
-          className="object-cover"
+          className="object-cover transition duration-300 group-hover:scale-105"
         />
       </div>
 
       <div className="mt-4">
         <h3 className="text-lg font-semibold">{name}</h3>
+
         <p className="mt-1 text-sm text-gray-500">{size}</p>
+
         <p className="mt-3 font-semibold">{price}</p>
       </div>
-    </div>
+    </Link>
   );
 }
