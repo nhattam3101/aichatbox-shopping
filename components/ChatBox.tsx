@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 
 type Message = {
   role: "user" | "assistant";
@@ -11,6 +11,7 @@ export default function ChatBox() {
   const [isOpen, setIsOpen] = useState(false);
   const [message, setMessage] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const messagesEndRef = useRef<HTMLDivElement>(null);
 
   const [messages, setMessages] = useState<Message[]>([
     {
@@ -24,6 +25,12 @@ export default function ChatBox() {
         'Bạn có thể hỏi ví dụ: "Laptop của tôi dài 32cm thì dùng size nào?"',
     },
   ]);
+
+  useEffect(() => {
+    if (isOpen) {
+      messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    }
+  }, [messages, isLoading, isOpen]);
 
   async function handleSend() {
     const trimmedMessage = message.trim();
@@ -57,7 +64,7 @@ export default function ChatBox() {
       const data = await response.json();
 
       if (!response.ok) {
-        throw new Error(data.error || "AI request failed");
+        throw new Error(data.error || "Không thể kết nối với AI lúc này.");
       }
 
       const aiMessage: Message = {
@@ -69,12 +76,16 @@ export default function ChatBox() {
     } catch (error) {
       console.error(error);
 
+      const errorMessage =
+        error instanceof Error && error.message
+          ? error.message
+          : "Xin lỗi, hiện tại mình không thể kết nối với AI. Bạn thử lại sau nhé.";
+
       setMessages((prev) => [
         ...prev,
         {
           role: "assistant",
-          content:
-            "Xin lỗi, hiện tại mình không thể kết nối với AI. Bạn thử lại sau nhé.",
+          content: errorMessage,
         },
       ]);
     } finally {
@@ -126,8 +137,8 @@ export default function ChatBox() {
                 key={index}
                 className={
                   item.role === "user"
-                    ? "ml-auto max-w-[85%] rounded-2xl rounded-tr-sm bg-black px-4 py-3 text-sm text-white"
-                    : "max-w-[85%] rounded-2xl rounded-tl-sm bg-white px-4 py-3 text-sm shadow-sm"
+                    ? "ml-auto max-w-[85%] whitespace-pre-wrap break-words rounded-2xl rounded-tr-sm bg-black px-4 py-3 text-sm text-white"
+                    : "max-w-[85%] whitespace-pre-wrap break-words rounded-2xl rounded-tl-sm bg-white px-4 py-3 text-sm shadow-sm"
                 }
               >
                 {item.content}
@@ -139,6 +150,8 @@ export default function ChatBox() {
                 AI đang tư vấn...
               </div>
             )}
+
+            <div ref={messagesEndRef} />
           </div>
 
           {/* Input */}

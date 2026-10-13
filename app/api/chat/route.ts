@@ -73,41 +73,87 @@ ${conversation}
 Hãy trả lời câu cuối cùng của khách hàng dựa trên toàn bộ ngữ cảnh hội thoại.
 `;
 
-    console.log("Sending request to Gemini API..."); // Debug log
-    
-    const response = await ai.models.generateContent({
-      model: "gemini-1.5-flash", // Fixed model name
-      contents: prompt,
-    });
+    const apiKey = process.env.GEMINI_API_KEY;
+    if (!apiKey) {
+      return Response.json(
+        {
+          error: "Chưa cấu hình GEMINI_API_KEY trong file .env.local",
+        },
+        {
+          status: 500,
+        }
+      );
+    }
 
-    console.log("Received response from Gemini API:", response.text); // Debug log
+    const CANDIDATE_MODELS = [
+      "gemini-flash-lite-latest",
+      "gemini-3.5-flash-lite",
+      "gemini-3.1-flash-lite",
+      "gemini-3.8-flash",
+    ];
+
+    let responseText: string | null = null;
+    let lastError: unknown = null;
+
+    for (const model of CANDIDATE_MODELS) {
+      try {
+        console.log(`Sending request to Gemini API with model: ${model}...`);
+        const response = await ai.models.generateContent({
+          model,
+          contents: prompt,
+        });
+
+        if (response?.text) {
+          responseText = response.text;
+          console.log(`Received response from Gemini (${model}):`, response.text.substring(0, 100));
+          break;
+        }
+      } catch (err) {
+        console.warn(`Model ${model} error, trying fallback model...`, err);
+        lastError = err;
+      }
+    }
+
+    if (!responseText) {
+      throw lastError || new Error("Không thể tạo nội dung từ AI");
+    }
 
     return Response.json({
-      reply:
-        response.text ?? "Xin lỗi, mình chưa thể đưa ra câu trả lời lúc này.",
+      reply: responseText,
     });
   } catch (error) {
     console.error("Gemini error:", error);
     
     // More specific error handling
     if (error instanceof Error) {
-      if (error.message.includes("API key")) {
+      const msg = error.message;
+      if (msg.includes("API key") || msg.includes("API_KEY_INVALID")) {
         return Response.json(
           {
-            error: "Lỗi cấu hình API key. Vui lòng liên hệ quản trị viên.",
+            error: "Lỗi cấu hình API key. Vui lòng kiểm tra lại GEMINI_API_KEY.",
           },
           {
             status: 500,
           }
         );
       }
-      if (error.message.includes("quota") || error.message.includes("429")) {
+      if (msg.includes("quota") || msg.includes("429") || msg.includes("RESOURCE_EXHAUSTED")) {
         return Response.json(
           {
-            error: "Hệ thống đang bận. Vui lòng thử lại sau quelques giây.",
+            error: "Hệ thống đang bận hoặc quá hạn mức yêu cầu. Vui lòng thử lại sau giây lát.",
           },
           {
             status: 429,
+          }
+        );
+      }
+      if (msg.includes("503") || msg.includes("UNAVAILABLE")) {
+        return Response.json(
+          {
+            error: "Máy chủ AI hiện đang chịu tải cao. Vui lòng thử lại sau vài giây.",
+          },
+          {
+            status: 503,
           }
         );
       }
@@ -115,7 +161,7 @@ Hãy trả lời câu cuối cùng của khách hàng dựa trên toàn bộ ng�
 
     return Response.json(
       {
-        error: "Không thể kết nối với AI. Vui lòng thử lại позже.",
+        error: "Không thể kết nối với AI lúc này. Vui lòng thử lại sau.",
       },
       {
         status: 500,
