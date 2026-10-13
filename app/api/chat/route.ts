@@ -41,16 +41,17 @@ Phù hợp: ${product.suitableFor.join(", ")}
 
     const conversation = (messages as ChatMessage[])
       .map((item) => {
-        const role = item.role === "user" ? "Khách hàng" : "SleeveAI";
+        const role = item.role === "user" ? "Khách hàng" : "CaseUp Assistant";
 
         return `${role}: ${item.content}`;
       })
       .join("\n");
 
     const prompt = `
-Bạn là SleeveAI, nhân viên tư vấn của cửa hàng bao laptop.
+Bạn là CaseUp Assistant, nhân viên AI tư vấn của cửa hàng bao laptop CaseUp.
 
 Nhiệm vụ:
+- Khi xưng hô hoặc giới thiệu bản thân, hãy tự xưng là CaseUp Assistant hoặc nhân viên tư vấn của CaseUp (tuyệt đối không tự nhận là SleeveAI).
 - Tư vấn size bao laptop.
 - Tư vấn sản phẩm theo kích thước laptop.
 - Tư vấn theo màu sắc và ngân sách.
@@ -60,7 +61,7 @@ Nhiệm vụ:
 - Không tự bịa sản phẩm.
 - Nếu chưa đủ thông tin để tư vấn chính xác, hãy hỏi thêm.
 - Trả lời ngắn gọn, dễ hiểu và bằng tiếng Việt.
-- Ưu tiên tư vấn như một nhân viên bán hàng thân thiện.
+- Ưu tiên tư vấn như một nhân viên bán hàng thân thiện của CaseUp.
 
 Danh sách sản phẩm:
 

@@ -9,7 +9,7 @@ export default function AboutPage() {
       <section className="px-10 py-20 md:px-20">
         <div className="max-w-4xl">
           <p className="text-sm uppercase tracking-[0.2em] text-gray-500">
-            About SleeveAI
+            About CaseUp
           </p>
 
           <h1 className="mt-3 text-5xl font-bold leading-tight">
@@ -19,13 +19,13 @@ export default function AboutPage() {
           </h1>
 
           <p className="mt-8 text-lg leading-8 text-gray-600">
-            SleeveAI là website demo bán bao laptop tích hợp AI tư vấn. Hệ thống
+            CaseUp là website bán bao laptop tích hợp AI tư vấn. Hệ thống
             hỗ trợ khách hàng lựa chọn sản phẩm dựa trên kích thước laptop, màu
             sắc, nhu cầu sử dụng và ngân sách.
           </p>
 
           <p className="mt-5 text-lg leading-8 text-gray-600">
-            Mục tiêu của SleeveAI là mô phỏng cách AI có thể hỗ trợ hoạt động
+            Mục tiêu của CaseUp là mô phỏng cách AI có thể hỗ trợ hoạt động
             bán hàng trực tuyến bằng cách giảm thời gian tìm kiếm sản phẩm và
             đưa ra gợi ý phù hợp hơn với nhu cầu khách hàng.
           </p>
