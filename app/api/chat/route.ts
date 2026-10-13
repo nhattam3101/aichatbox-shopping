@@ -21,7 +21,7 @@ export async function POST(request: Request) {
         },
         {
           status: 400,
-        },
+        }
       );
     }
 
@@ -73,10 +73,14 @@ ${conversation}
 Hãy trả lời câu cuối cùng của khách hàng dựa trên toàn bộ ngữ cảnh hội thoại.
 `;
 
+    console.log("Sending request to Gemini API..."); // Debug log
+    
     const response = await ai.models.generateContent({
-      model: "gemini-3.8-flash",
+      model: "gemini-1.5-flash", // Fixed model name
       contents: prompt,
     });
+
+    console.log("Received response from Gemini API:", response.text); // Debug log
 
     return Response.json({
       reply:
@@ -84,14 +88,38 @@ Hãy trả lời câu cuối cùng của khách hàng dựa trên toàn bộ ng�
     });
   } catch (error) {
     console.error("Gemini error:", error);
+    
+    // More specific error handling
+    if (error instanceof Error) {
+      if (error.message.includes("API key")) {
+        return Response.json(
+          {
+            error: "Lỗi cấu hình API key. Vui lòng liên hệ quản trị viên.",
+          },
+          {
+            status: 500,
+          }
+        );
+      }
+      if (error.message.includes("quota") || error.message.includes("429")) {
+        return Response.json(
+          {
+            error: "Hệ thống đang bận. Vui lòng thử lại sau quelques giây.",
+          },
+          {
+            status: 429,
+          }
+        );
+      }
+    }
 
     return Response.json(
       {
-        error: "Không thể kết nối với AI.",
+        error: "Không thể kết nối với AI. Vui lòng thử lại позже.",
       },
       {
         status: 500,
-      },
+      }
     );
   }
 }

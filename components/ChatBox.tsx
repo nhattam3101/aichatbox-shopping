@@ -16,7 +16,7 @@ export default function ChatBox() {
     {
       role: "assistant",
       content:
-        "Xin chào. Mình có thể giúp bạn chọn bao laptop phù hợp theo kích thước, màu sắc và ngân sách.",
+        "Xin chào! Mình là AI của CaseUp. Mình có thể giúp bạn chọn bao laptop phù hợp theo kích thước, màu sắc và ngân sách.",
     },
     {
       role: "assistant",
@@ -92,6 +92,7 @@ export default function ChatBox() {
     <>
       {/* Floating button */}
       <button
+        id="chatbox-toggle"
         onClick={() => setIsOpen(true)}
         className="fixed bottom-8 right-8 z-40 rounded-full bg-black px-5 py-4 text-white shadow-xl transition hover:scale-105"
       >
@@ -104,9 +105,9 @@ export default function ChatBox() {
           {/* Header */}
           <div className="flex items-center justify-between border-b border-black/10 px-5 py-4">
             <div>
-              <h2 className="font-semibold">SleeveAI Assistant</h2>
+              <h2 className="font-semibold">CaseUp Assistant</h2>
 
-              <p className="text-xs text-gray-500">Tư vấn size và sản phẩm</p>
+              <p className="text-xs text-gray-500">AI tư vấn của CaseUp</p>
             </div>
 
             <button

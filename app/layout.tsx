@@ -14,8 +14,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "SleeveAI",
-  description: "AI hỗ trợ tư vấn bao laptop",
+  title: "CaseUp – Bao Laptop Thông Minh",
+  description: "CaseUp – Cửa hàng bao laptop với AI tư vấn chọn size và sản phẩm phù hợp.",
 };
 
 export default function RootLayout({

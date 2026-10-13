@@ -7,24 +7,45 @@ import {
   useState,
   ReactNode,
 } from "react";
+import CartToast from "@/components/CartToast";
 
-type CartItem = {
+export type CartItem = {
   id: number;
   name: string;
   price: number;
   image: string;
   size: string;
   quantity: number;
+  selectedColor?: string;
+};
+
+export type ToastNotification = {
+  id: string;
+  product: {
+    id: number;
+    name: string;
+    price: number;
+    image: string;
+    size: string;
+    quantity: number;
+    selectedColor?: string;
+  };
 };
 
 type CartContextType = {
   cart: CartItem[];
-  addToCart: (item: Omit<CartItem, "quantity">) => void;
-  removeFromCart: (id: number) => void;
-  increaseQuantity: (id: number) => void;
-  decreaseQuantity: (id: number) => void;
+  addToCart: (
+    item: Omit<CartItem, "quantity"> & { quantity?: number },
+    showToast?: boolean
+  ) => void;
+  removeFromCart: (id: number, selectedColor?: string) => void;
+  increaseQuantity: (id: number, selectedColor?: string) => void;
+  decreaseQuantity: (id: number, selectedColor?: string) => void;
+  clearCart: () => void;
   totalItems: number;
   totalPrice: number;
+  toast: ToastNotification | null;
+  hideToast: () => void;
 };
 
 const CartContext = createContext<CartContextType | undefined>(undefined);
@@ -32,6 +53,7 @@ const CartContext = createContext<CartContextType | undefined>(undefined);
 export function CartProvider({ children }: { children: ReactNode }) {
   const [cart, setCart] = useState<CartItem[]>([]);
   const [isLoaded, setIsLoaded] = useState(false);
+  const [toast, setToast] = useState<ToastNotification | null>(null);
 
   // Đọc cart từ localStorage khi app load
   useEffect(() => {
@@ -55,18 +77,31 @@ export function CartProvider({ children }: { children: ReactNode }) {
     localStorage.setItem("cart", JSON.stringify(cart));
   }, [cart, isLoaded]);
 
-  function addToCart(item: Omit<CartItem, "quantity">) {
+  function hideToast() {
+    setToast(null);
+  }
+
+  function addToCart(
+    item: Omit<CartItem, "quantity"> & { quantity?: number },
+    showToast = true
+  ) {
+    const qtyToAdd = item.quantity && item.quantity > 0 ? item.quantity : 1;
+
     setCart((prev) => {
-      const existingItem = prev.find((cartItem) => cartItem.id === item.id);
+      const existingItem = prev.find(
+        (cartItem) =>
+          cartItem.id === item.id && cartItem.selectedColor === item.selectedColor
+      );
 
       if (existingItem) {
         return prev.map((cartItem) =>
-          cartItem.id === item.id
+          cartItem.id === item.id &&
+          cartItem.selectedColor === item.selectedColor
             ? {
                 ...cartItem,
-                quantity: cartItem.quantity + 1,
+                quantity: cartItem.quantity + qtyToAdd,
               }
-            : cartItem,
+            : cartItem
         );
       }
 
@@ -74,49 +109,85 @@ export function CartProvider({ children }: { children: ReactNode }) {
         ...prev,
         {
           ...item,
-          quantity: 1,
+          quantity: qtyToAdd,
         },
       ];
     });
+
+    if (showToast) {
+      setToast({
+        id: Date.now().toString(),
+        product: {
+          id: item.id,
+          name: item.name,
+          price: item.price,
+          image: item.image,
+          size: item.size,
+          quantity: qtyToAdd,
+          selectedColor: item.selectedColor,
+        },
+      });
+    }
   }
 
-  function removeFromCart(id: number) {
-    setCart((prev) => prev.filter((item) => item.id !== id));
-  }
-
-  function increaseQuantity(id: number) {
+  function removeFromCart(id: number, selectedColor?: string) {
     setCart((prev) =>
-      prev.map((item) =>
-        item.id === id
+      prev.filter((item) =>
+        selectedColor !== undefined
+          ? !(item.id === id && item.selectedColor === selectedColor)
+          : item.id !== id
+      )
+    );
+  }
+
+  function increaseQuantity(id: number, selectedColor?: string) {
+    setCart((prev) =>
+      prev.map((item) => {
+        const matches =
+          selectedColor !== undefined
+            ? item.id === id && item.selectedColor === selectedColor
+            : item.id === id;
+
+        return matches
           ? {
               ...item,
               quantity: item.quantity + 1,
             }
-          : item,
-      ),
+          : item;
+      })
     );
   }
 
-  function decreaseQuantity(id: number) {
+  function decreaseQuantity(id: number, selectedColor?: string) {
     setCart((prev) =>
       prev
-        .map((item) =>
-          item.id === id
+        .map((item) => {
+          const matches =
+            selectedColor !== undefined
+              ? item.id === id && item.selectedColor === selectedColor
+              : item.id === id;
+
+          return matches
             ? {
                 ...item,
                 quantity: item.quantity - 1,
               }
-            : item,
-        )
-        .filter((item) => item.quantity > 0),
+            : item;
+        })
+        .filter((item) => item.quantity > 0)
     );
+  }
+
+  function clearCart() {
+    setCart([]);
+    localStorage.removeItem("cart");
   }
 
   const totalItems = cart.reduce((total, item) => total + item.quantity, 0);
 
   const totalPrice = cart.reduce(
     (total, item) => total + item.price * item.quantity,
-    0,
+    0
   );
 
   return (
@@ -127,11 +198,15 @@ export function CartProvider({ children }: { children: ReactNode }) {
         removeFromCart,
         increaseQuantity,
         decreaseQuantity,
+        clearCart,
         totalItems,
         totalPrice,
+        toast,
+        hideToast,
       }}
     >
       {children}
+      {toast && <CartToast notification={toast} onClose={hideToast} />}
     </CartContext.Provider>
   );
 }
