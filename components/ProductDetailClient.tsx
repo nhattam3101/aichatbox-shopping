@@ -10,6 +10,8 @@ import Navbar from "@/components/Navbar";
 import ChatBox from "@/components/ChatBox";
 import OpenChatButton from "@/components/OpenChatButton";
 import { useCart } from "@/components/CartContext";
+import { useWishlist } from "@/components/WishlistContext";
+import { useCompare } from "@/components/ProductCompareModal";
 
 type Props = {
   product: Product;
@@ -19,19 +21,26 @@ type Props = {
 export default function ProductDetailClient({ product, relatedProducts }: Props) {
   const router = useRouter();
   const { addToCart } = useCart();
+  const { isInWishlist, toggleWishlist } = useWishlist();
+  const { isInCompare, toggleCompare } = useCompare();
 
   const [selectedImage, setSelectedImage] = useState(product.image);
   const [selectedColor, setSelectedColor] = useState(product.colors[0] || "");
   const [quantity, setQuantity] = useState(1);
   const [activeTab, setActiveTab] = useState<"description" | "details" | "reviews">("description");
 
+  const isFavorite = isInWishlist(product.id);
+  const isCompared = isInCompare(product.id);
+
   // Gallery images (main product image + alternate views)
-  const galleryImages = [
-    product.image,
-    "/products/bao2.jpg",
-    "/products/bao3.jpg",
-    "/products/bao4.jpg",
-  ];
+  const galleryImages = product.gallery && product.gallery.length > 0
+    ? product.gallery
+    : [
+        product.image,
+        "/products/bao2.jpg",
+        "/products/bao3.jpg",
+        "/products/bao4.jpg",
+      ];
 
   const discountPercent = product.originalPrice
     ? Math.round(((product.originalPrice - product.price) / product.originalPrice) * 100)
@@ -54,10 +63,10 @@ export default function ProductDetailClient({ product, relatedProducts }: Props)
   }
 
   const guarantees = [
-    { icon: "🚚", title: "Freeship toàn quốc", desc: "Đơn từ 200k" },
-    { icon: "🔄", title: "Đổi trả 7 ngày", desc: "Nếu không vừa size" },
-    { icon: "🛡️", title: "Chống sốc 3 lớp", desc: "Lót nhung êm ái" },
-    { icon: "🤖", title: "AI tư vấn 24/7", desc: "Hỗ trợ chọn size ngay" },
+    { icon: "🚚", title: "Freeship toàn quốc", desc: "Đơn từ 300k" },
+    { icon: "🔄", title: "Đổi trả 7 ngày", desc: "Không vừa size đổi ngay" },
+    { icon: "🛡️", title: "Chống va đập", desc: "Đệm khí an tâm" },
+    { icon: "🤖", title: "AI tư vấn 24/7", desc: "Hỗ trợ chọn size chuẩn" },
   ];
 
   return (
@@ -69,7 +78,7 @@ export default function ProductDetailClient({ product, relatedProducts }: Props)
       <section className="py-10">
         <div className="mx-auto max-w-7xl px-6 md:px-12 lg:px-20">
           {/* Breadcrumbs */}
-          <nav aria-label="Breadcrumb" className="mb-6 flex items-center gap-2 text-sm text-gray-500">
+          <nav aria-label="Breadcrumb" className="mb-6 flex items-center gap-2 text-xs sm:text-sm text-gray-500">
             <Link href="/" className="hover:text-amber-600 transition-colors">
               Trang chủ
             </Link>
@@ -78,7 +87,7 @@ export default function ProductDetailClient({ product, relatedProducts }: Props)
               Sản phẩm
             </Link>
             <span>/</span>
-            <span className="font-medium text-gray-900 line-clamp-1">{product.name}</span>
+            <span className="font-semibold text-gray-900 line-clamp-1">{product.name}</span>
           </nav>
 
           <div className="grid gap-12 lg:grid-cols-2">
@@ -102,10 +111,41 @@ export default function ProductDetailClient({ product, relatedProducts }: Props)
                     </span>
                   )}
                   {discountPercent && (
-                    <span className="rounded-full bg-red-500 px-3 py-1 text-xs font-bold text-white shadow-sm">
+                    <span className="rounded-full bg-rose-500 px-3 py-1 text-xs font-bold text-white shadow-sm">
                       -{discountPercent}%
                     </span>
                   )}
+                </div>
+
+                {/* Top right quick buttons: Wishlist & Compare */}
+                <div className="absolute right-4 top-4 flex flex-col gap-2 z-10">
+                  <button
+                    onClick={() => toggleWishlist(product)}
+                    className={`flex h-10 w-10 items-center justify-center rounded-full shadow-md backdrop-blur-md transition hover:scale-110 ${
+                      isFavorite
+                        ? "bg-white text-rose-500"
+                        : "bg-white/90 text-gray-400 hover:text-rose-500"
+                    }`}
+                    title={isFavorite ? "Bỏ yêu thích" : "Lưu vào yêu thích"}
+                  >
+                    <svg className="h-5 w-5 fill-current" viewBox="0 0 24 24">
+                      <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" />
+                    </svg>
+                  </button>
+
+                  <button
+                    onClick={() => toggleCompare(product)}
+                    className={`flex h-10 w-10 items-center justify-center rounded-full shadow-md backdrop-blur-md transition hover:scale-110 ${
+                      isCompared
+                        ? "bg-amber-500 text-white"
+                        : "bg-white/90 text-gray-500 hover:text-amber-600"
+                    }`}
+                    title="So sánh với sản phẩm khác"
+                  >
+                    <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4" />
+                    </svg>
+                  </button>
                 </div>
               </div>
 
@@ -148,13 +188,17 @@ export default function ProductDetailClient({ product, relatedProducts }: Props)
                     Đã bán <strong className="text-gray-800">{product.sold}</strong>
                   </span>
                   <span className="text-gray-300">•</span>
+                  <span className="rounded-md bg-amber-100/60 px-2.5 py-0.5 text-xs font-bold text-amber-800">
+                    {product.category}
+                  </span>
+                  <span className="text-gray-300">•</span>
                   <span className="rounded-md bg-gray-100 px-2.5 py-0.5 text-xs font-medium text-gray-600">
-                    Size: {product.size}
+                    {product.size}
                   </span>
                 </div>
 
                 {/* Name */}
-                <h1 className="mt-3 text-3xl font-bold tracking-tight md:text-4xl text-gray-900">
+                <h1 className="mt-3 text-3xl font-extrabold tracking-tight md:text-4xl text-gray-900">
                   {product.name}
                 </h1>
 
@@ -169,7 +213,7 @@ export default function ProductDetailClient({ product, relatedProducts }: Props)
                     </span>
                   )}
                   {discountPercent && (
-                    <span className="rounded-full bg-red-50 px-2 py-0.5 text-xs font-semibold text-red-600">
+                    <span className="rounded-full bg-rose-50 px-2 py-0.5 text-xs font-bold text-rose-600">
                       Tiết kiệm {discountPercent}%
                     </span>
                   )}
@@ -180,14 +224,34 @@ export default function ProductDetailClient({ product, relatedProducts }: Props)
                   {product.description}
                 </p>
 
+                {/* Quick Spec Pills */}
+                <div className="mt-5 grid grid-cols-2 gap-2 text-xs bg-[#f8f6f2] p-3.5 rounded-2xl border border-black/5">
+                  <div>
+                    <span className="text-gray-400">Máy tối đa:</span>
+                    <span className="ml-1.5 font-bold text-gray-800">{product.maxWidth} × {product.maxHeight} cm</span>
+                  </div>
+                  <div>
+                    <span className="text-gray-400">Chất liệu:</span>
+                    <span className="ml-1.5 font-bold text-gray-800">{product.material}</span>
+                  </div>
+                  <div>
+                    <span className="text-gray-400">Chống nước:</span>
+                    <span className={`ml-1.5 font-bold ${product.waterproof ? "text-emerald-600" : "text-gray-600"}`}>
+                      {product.waterproof ? "Có" : "Kháng bụi nhẹ"}
+                    </span>
+                  </div>
+                  <div>
+                    <span className="text-gray-400">Trọng lượng:</span>
+                    <span className="ml-1.5 font-bold text-gray-800">{product.weight}</span>
+                  </div>
+                </div>
+
                 {/* Color Selection */}
                 {product.colors && product.colors.length > 0 && (
                   <div className="mt-6 border-t border-black/5 pt-5">
-                    <div className="flex items-center justify-between">
-                      <span className="text-sm font-semibold text-gray-800">
-                        Màu sắc: <span className="font-normal text-gray-600">{selectedColor}</span>
-                      </span>
-                    </div>
+                    <span className="text-sm font-semibold text-gray-800">
+                      Màu sắc: <span className="font-normal text-gray-600">{selectedColor}</span>
+                    </span>
                     <div className="mt-3 flex flex-wrap gap-2.5">
                       {product.colors.map((color) => {
                         const isChosen = selectedColor === color;
@@ -224,7 +288,7 @@ export default function ProductDetailClient({ product, relatedProducts }: Props)
                       >
                         <span className="text-lg font-bold">−</span>
                       </button>
-                      <span className="w-12 text-center text-sm font-semibold text-gray-900">
+                      <span className="w-12 text-center text-sm font-bold text-gray-900">
                         {quantity}
                       </span>
                       <button
@@ -236,7 +300,7 @@ export default function ProductDetailClient({ product, relatedProducts }: Props)
                         <span className="text-lg font-bold">+</span>
                       </button>
                     </div>
-                    <span className="text-xs text-gray-500">Còn hàng sẵn sàng giao</span>
+                    <span className="text-xs font-medium text-emerald-600">✓ Còn hàng sẵn sàng đóng gói</span>
                   </div>
                 </div>
 
@@ -257,7 +321,7 @@ export default function ProductDetailClient({ product, relatedProducts }: Props)
                     onClick={handleBuyNow}
                     className="flex-1 rounded-full bg-amber-500 px-6 py-4 font-semibold text-white transition-all hover:bg-amber-600 hover:shadow-lg flex items-center justify-center gap-2"
                   >
-                    <span>⚡ Mua ngay</span>
+                    <span>⚡ Mua ngay COD</span>
                   </button>
                 </div>
 
@@ -298,7 +362,7 @@ export default function ProductDetailClient({ product, relatedProducts }: Props)
                     : "border-transparent text-gray-500 hover:text-gray-900"
                 }`}
               >
-                Thông số kích thước
+                Thông số kỹ thuật
               </button>
               <button
                 type="button"
@@ -309,27 +373,36 @@ export default function ProductDetailClient({ product, relatedProducts }: Props)
                     : "border-transparent text-gray-500 hover:text-gray-900"
                 }`}
               >
-                Đánh giá ({product.sold})
+                Đánh giá khách hàng ({product.sold})
               </button>
             </div>
 
             <div className="mt-6">
               {activeTab === "description" && (
-                <div className="space-y-4 text-gray-700 leading-relaxed max-w-3xl">
+                <div className="space-y-4 text-gray-700 leading-relaxed max-w-3xl text-sm">
                   <p>{product.description}</p>
                   <p>
-                    Dòng bao chống sốc <strong>{product.name}</strong> được thiết kế tối giản, hiện đại, mang lại sự bảo vệ tối đa cho chiếc máy tính của bạn khi di chuyển. Lớp đệm mút cao cấp hấp thụ lực chấn động cực tốt kết hợp lớp vải lót nhung mềm mại chống xước thân máy.
+                    Dòng bao chống sốc <strong>{product.name}</strong> được thiết kế theo tiêu chuẩn công thái học hiện đại, bảo vệ toàn diện cho laptop khi bạn đi làm, đi học hoặc công tác xa.
                   </p>
-                  <ul className="list-disc pl-5 space-y-1 text-sm text-gray-600">
-                    <li>Khóa kéo đôi trơn tru, bền bỉ, dễ dàng thao tác.</li>
-                    <li>Chất liệu bên ngoài kháng nước nhẹ, ngăn bụi bẩn hiệu quả.</li>
-                    <li>Form dáng ôm vừa vặn, không cồng kềnh khi bỏ vào balo hoặc túi xách.</li>
-                  </ul>
+                  {product.features && (
+                    <div className="mt-4">
+                      <h4 className="font-bold text-gray-900 mb-2">Đặc điểm nổi bật:</h4>
+                      <ul className="list-disc pl-5 space-y-1.5 text-gray-600">
+                        {product.features.map((feat, i) => (
+                          <li key={i}>{feat}</li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
                 </div>
               )}
 
               {activeTab === "details" && (
                 <div className="max-w-xl space-y-3">
+                  <div className="flex justify-between border-b border-gray-100 py-2.5 text-sm">
+                    <span className="text-gray-500">Phân loại dòng máy</span>
+                    <span className="font-semibold text-gray-900">{product.category}</span>
+                  </div>
                   <div className="flex justify-between border-b border-gray-100 py-2.5 text-sm">
                     <span className="text-gray-500">Kích thước phù hợp</span>
                     <span className="font-semibold text-gray-900">{product.size}</span>
@@ -341,16 +414,26 @@ export default function ProductDetailClient({ product, relatedProducts }: Props)
                     </span>
                   </div>
                   <div className="flex justify-between border-b border-gray-100 py-2.5 text-sm">
+                    <span className="text-gray-500">Chất liệu cấu tạo</span>
+                    <span className="font-semibold text-gray-900">{product.material}</span>
+                  </div>
+                  <div className="flex justify-between border-b border-gray-100 py-2.5 text-sm">
+                    <span className="text-gray-500">Kháng nước</span>
+                    <span className="font-semibold text-gray-900">
+                      {product.waterproof ? "Có (Chống tia nước văng)" : "Kháng bụi nhẹ"}
+                    </span>
+                  </div>
+                  <div className="flex justify-between border-b border-gray-100 py-2.5 text-sm">
+                    <span className="text-gray-500">Trọng lượng siêu nhẹ</span>
+                    <span className="font-semibold text-gray-900">{product.weight}</span>
+                  </div>
+                  <div className="flex justify-between border-b border-gray-100 py-2.5 text-sm">
                     <span className="text-gray-500">Màu sắc có sẵn</span>
                     <span className="font-semibold text-gray-900">{product.colors.join(", ")}</span>
                   </div>
-                  <div className="flex justify-between border-b border-gray-100 py-2.5 text-sm">
-                    <span className="text-gray-500">Đối tượng phù hợp</span>
-                    <span className="font-semibold text-gray-900">{product.suitableFor.join(", ")}</span>
-                  </div>
                   <div className="flex justify-between py-2.5 text-sm">
-                    <span className="text-gray-500">Chất liệu</span>
-                    <span className="font-semibold text-gray-900">Vải Canvas & Lót nhung chống sốc</span>
+                    <span className="text-gray-500">Thích hợp cho</span>
+                    <span className="font-semibold text-gray-900">{product.suitableFor.join(", ")}</span>
                   </div>
                 </div>
               )}
@@ -364,29 +447,29 @@ export default function ProductDetailClient({ product, relatedProducts }: Props)
                       <span className="text-xs text-gray-500">{product.sold} đánh giá</span>
                     </div>
                     <div className="text-sm text-gray-600">
-                      <p className="font-medium text-gray-900">98% khách hàng hài lòng về độ vừa vặn và bảo vệ chống va đập.</p>
+                      <p className="font-medium text-gray-900">98% khách hàng đánh giá 5 sao về độ vừa vặn và bảo vệ chống va đập.</p>
                       <p className="mt-1 text-xs text-gray-500">Tất cả đánh giá đều từ người mua hàng thực tế tại CaseUp.</p>
                     </div>
                   </div>
 
                   <div className="space-y-4 pt-4 border-t border-gray-100">
-                    <div className="rounded-xl bg-[#fafaf8] p-4">
+                    <div className="rounded-2xl bg-[#fafaf8] p-4 border border-black/5">
                       <div className="flex items-center justify-between">
-                        <span className="font-semibold text-sm">Trần Hoàng Long</span>
+                        <span className="font-bold text-sm">Trần Hoàng Long</span>
                         <span className="text-xs text-gray-400">1 ngày trước</span>
                       </div>
                       <div className="text-amber-500 text-xs mt-1">★★★★★</div>
-                      <p className="mt-2 text-sm text-gray-600">
+                      <p className="mt-2 text-xs sm:text-sm text-gray-600">
                         Bao vừa khít máy, lớp lót nhung bên trong sờ êm tay cực kỳ. Màu sắc đẹp đúng như ảnh, đóng gói kỹ!
                       </p>
                     </div>
-                    <div className="rounded-xl bg-[#fafaf8] p-4">
+                    <div className="rounded-2xl bg-[#fafaf8] p-4 border border-black/5">
                       <div className="flex items-center justify-between">
-                        <span className="font-semibold text-sm">Nguyễn Mai Phương</span>
+                        <span className="font-bold text-sm">Nguyễn Mai Phương</span>
                         <span className="text-xs text-gray-400">3 ngày trước</span>
                       </div>
                       <div className="text-amber-500 text-xs mt-1">★★★★★</div>
-                      <p className="mt-2 text-sm text-gray-600">
+                      <p className="mt-2 text-xs sm:text-sm text-gray-600">
                         Nhờ AI tư vấn kích thước nên đặt về vừa như in cho con Macbook 14 inch. Rất hài lòng với dịch vụ shop!
                       </p>
                     </div>
@@ -408,14 +491,14 @@ export default function ProductDetailClient({ product, relatedProducts }: Props)
                   Gợi ý thêm
                 </span>
                 <h2 className="mt-1 text-2xl font-bold text-gray-900 md:text-3xl">
-                  Sản phẩm tương tự
+                  Sản phẩm tương tự cùng kích thước
                 </h2>
               </div>
               <Link
                 href="/products"
                 className="text-sm font-semibold text-amber-600 hover:text-amber-700 transition"
               >
-                Xem tất cả →
+                Xem tất cả 24 mẫu →
               </Link>
             </div>
 
@@ -424,9 +507,9 @@ export default function ProductDetailClient({ product, relatedProducts }: Props)
                 <Link
                   key={item.id}
                   href={`/products/${item.id}`}
-                  className="group block rounded-2xl bg-[#fafaf8] p-4 transition-all hover:-translate-y-1 hover:shadow-lg border border-black/5"
+                  className="group block rounded-3xl bg-[#fafaf8] p-4 transition-all hover:-translate-y-1 hover:shadow-lg border border-black/5"
                 >
-                  <div className="relative aspect-square w-full overflow-hidden rounded-xl bg-[#f2eee9]">
+                  <div className="relative aspect-square w-full overflow-hidden rounded-2xl bg-[#f2eee9]">
                     <Image
                       src={item.image}
                       alt={item.name}
@@ -435,7 +518,7 @@ export default function ProductDetailClient({ product, relatedProducts }: Props)
                       className="object-contain p-3 transition-transform duration-300 group-hover:scale-105"
                     />
                     {item.badge && (
-                      <span className="absolute left-2 top-2 rounded-full bg-amber-500 px-2 py-0.5 text-[10px] font-bold text-white">
+                      <span className="absolute left-2.5 top-2.5 rounded-full bg-amber-500 px-2 py-0.5 text-[10px] font-bold text-white">
                         {item.badge}
                       </span>
                     )}
@@ -445,10 +528,10 @@ export default function ProductDetailClient({ product, relatedProducts }: Props)
                       <span>{item.size}</span>
                       <span className="text-amber-600 font-semibold">★ {item.rating}</span>
                     </div>
-                    <h3 className="mt-1 text-sm font-semibold text-gray-900 line-clamp-1 group-hover:text-amber-600 transition-colors">
+                    <h3 className="mt-1 text-sm font-bold text-gray-900 line-clamp-1 group-hover:text-amber-600 transition-colors">
                       {item.name}
                     </h3>
-                    <p className="mt-1 text-sm font-bold text-amber-600">
+                    <p className="mt-1 text-sm font-extrabold text-amber-600">
                       {item.price.toLocaleString("vi-VN")}₫
                     </p>
                   </div>

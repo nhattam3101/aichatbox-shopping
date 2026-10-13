@@ -1,0 +1,266 @@
+"use client";
+
+import Image from "next/image";
+import Link from "next/link";
+import { useState } from "react";
+import type { Product } from "@/data/products";
+import { useCart } from "@/components/CartContext";
+import { useWishlist } from "@/components/WishlistContext";
+
+type Props = {
+  product: Product | null;
+  onClose: () => void;
+};
+
+export default function QuickViewModal({ product, onClose }: Props) {
+  if (!product) return null;
+
+  return <QuickViewDialog key={product.id} product={product} onClose={onClose} />;
+}
+
+function QuickViewDialog({ product, onClose }: { product: Product; onClose: () => void }) {
+  const { addToCart } = useCart();
+  const { isInWishlist, toggleWishlist } = useWishlist();
+
+  const [activeImage, setActiveImage] = useState<string>(product.image);
+  const [selectedColor, setSelectedColor] = useState<string>(product.colors[0] || "");
+  const [quantity, setQuantity] = useState<number>(1);
+  const [isAdded, setIsAdded] = useState(false);
+
+  const gallery = product.gallery && product.gallery.length > 0
+    ? product.gallery
+    : [product.image, "/products/bao2.jpg", "/products/bao3.jpg"];
+
+  const isFavorite = isInWishlist(product.id);
+
+  function handleAddToCart() {
+    addToCart({
+      id: product.id,
+      name: product.name,
+      price: product.price,
+      image: activeImage || product.image,
+      size: product.size,
+      quantity,
+      selectedColor,
+    });
+    setIsAdded(true);
+    setTimeout(() => setIsAdded(false), 2000);
+  }
+
+  const discountPercent = product.originalPrice
+    ? Math.round(((product.originalPrice - product.price) / product.originalPrice) * 100)
+    : null;
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 md:p-10">
+      {/* Backdrop */}
+      <div
+        className="fixed inset-0 bg-black/60 backdrop-blur-md transition-opacity animate-fade-in"
+        onClick={onClose}
+      />
+
+      {/* Modal Dialog */}
+      <div className="relative z-10 w-full max-w-3xl overflow-hidden rounded-3xl bg-white shadow-2xl transition-all max-h-[92vh] flex flex-col md:flex-row border border-black/5 animate-fade-in-up">
+        {/* Close Button */}
+        <button
+          onClick={onClose}
+          className="absolute right-4 top-4 z-20 flex h-9 w-9 items-center justify-center rounded-full bg-white/90 text-gray-500 shadow-md backdrop-blur-sm hover:bg-black hover:text-white transition"
+          aria-label="Đóng"
+        >
+          <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        </button>
+
+        {/* Left: Image Gallery */}
+        <div className="w-full md:w-1/2 bg-[#f6f4f0] p-6 flex flex-col justify-between">
+          <div className="relative aspect-square w-full overflow-hidden rounded-2xl bg-white shadow-inner border border-black/5">
+            <Image
+              src={activeImage || product.image}
+              alt={product.name}
+              fill
+              className="object-contain p-4 transition-all duration-300"
+            />
+            {product.badge && (
+              <span className="absolute left-3 top-3 rounded-full bg-amber-500 px-3 py-1 text-xs font-bold text-white shadow-sm">
+                {product.badge}
+              </span>
+            )}
+            {discountPercent && (
+              <span className="absolute right-3 top-3 rounded-full bg-rose-500 px-2.5 py-1 text-xs font-bold text-white shadow-sm">
+                -{discountPercent}%
+              </span>
+            )}
+          </div>
+
+          {/* Thumbnails */}
+          <div className="mt-4 flex gap-2.5 justify-center">
+            {gallery.map((img, idx) => (
+              <button
+                key={idx}
+                onClick={() => setActiveImage(img)}
+                className={`relative h-14 w-14 overflow-hidden rounded-xl border-2 bg-white transition ${
+                  activeImage === img ? "border-amber-500 shadow-sm" : "border-black/5 opacity-70 hover:opacity-100"
+                }`}
+              >
+                <Image src={img} alt="" fill className="object-cover p-1" />
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* Right: Product Info & Actions */}
+        <div className="w-full md:w-1/2 p-6 md:p-8 flex flex-col justify-between overflow-y-auto">
+          <div>
+            <div className="flex items-center justify-between gap-3">
+              <span className="inline-block rounded-full bg-amber-50 px-3 py-1 text-xs font-semibold text-amber-700">
+                {product.category}
+              </span>
+              <button
+                onClick={() => toggleWishlist(product)}
+                className={`flex h-8 w-8 items-center justify-center rounded-full transition ${
+                  isFavorite
+                    ? "bg-rose-50 text-rose-500"
+                    : "bg-gray-100 text-gray-400 hover:text-rose-500"
+                }`}
+                title="Lưu yêu thích"
+              >
+                <svg className="h-4 w-4 fill-current" viewBox="0 0 24 24">
+                  <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
+                </svg>
+              </button>
+            </div>
+
+            <h3 className="mt-3 text-2xl font-bold text-gray-900 leading-tight">
+              {product.name}
+            </h3>
+
+            {/* Rating & Sold */}
+            <div className="mt-2 flex items-center gap-2 text-xs text-gray-500">
+              <div className="flex items-center text-amber-500">
+                <span>★</span>
+                <span className="ml-1 font-bold text-gray-800">{product.rating}</span>
+              </div>
+              <span>•</span>
+              <span>Đã bán {product.sold}</span>
+              <span>•</span>
+              <span className="text-emerald-600 font-medium">Còn hàng</span>
+            </div>
+
+            {/* Price */}
+            <div className="mt-4 flex items-baseline gap-3">
+              <span className="text-2xl font-extrabold text-amber-600">
+                {product.price.toLocaleString("vi-VN")}₫
+              </span>
+              {product.originalPrice && (
+                <span className="text-sm text-gray-400 line-through">
+                  {product.originalPrice.toLocaleString("vi-VN")}₫
+                </span>
+              )}
+            </div>
+
+            <p className="mt-3 text-xs leading-relaxed text-gray-600 line-clamp-3">
+              {product.description}
+            </p>
+
+            {/* Spec Highlights */}
+            <div className="mt-4 grid grid-cols-2 gap-2 text-xs bg-gray-50 rounded-xl p-3 border border-gray-100">
+              <div>
+                <span className="text-gray-400">Kích cỡ:</span>
+                <span className="ml-1 font-semibold text-gray-800">{product.size}</span>
+              </div>
+              <div>
+                <span className="text-gray-400">Tối đa:</span>
+                <span className="ml-1 font-semibold text-gray-800">{product.maxWidth}×{product.maxHeight}cm</span>
+              </div>
+              <div>
+                <span className="text-gray-400">Chống nước:</span>
+                <span className={`ml-1 font-semibold ${product.waterproof ? "text-emerald-600" : "text-gray-600"}`}>
+                  {product.waterproof ? "Có" : "Tiêu chuẩn"}
+                </span>
+              </div>
+              <div>
+                <span className="text-gray-400">Trọng lượng:</span>
+                <span className="ml-1 font-semibold text-gray-800">{product.weight}</span>
+              </div>
+            </div>
+
+            {/* Color selection */}
+            <div className="mt-4">
+              <label className="text-xs font-semibold text-gray-700">Màu sắc:</label>
+              <div className="mt-2 flex flex-wrap gap-2">
+                {product.colors.map((color) => (
+                  <button
+                    key={color}
+                    onClick={() => setSelectedColor(color)}
+                    className={`rounded-full px-3 py-1 text-xs font-medium transition ${
+                      selectedColor === color
+                        ? "bg-black text-white shadow-sm"
+                        : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                    }`}
+                  >
+                    {color}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Quantity */}
+            <div className="mt-4 flex items-center gap-3">
+              <label className="text-xs font-semibold text-gray-700">Số lượng:</label>
+              <div className="flex items-center rounded-full border border-gray-200 bg-white">
+                <button
+                  onClick={() => setQuantity((q) => Math.max(1, q - 1))}
+                  className="px-3 py-1 text-sm font-semibold text-gray-600 hover:text-black transition"
+                >
+                  -
+                </button>
+                <span className="w-8 text-center text-xs font-bold">{quantity}</span>
+                <button
+                  onClick={() => setQuantity((q) => q + 1)}
+                  className="px-3 py-1 text-sm font-semibold text-gray-600 hover:text-black transition"
+                >
+                  +
+                </button>
+              </div>
+            </div>
+          </div>
+
+          {/* Action Buttons */}
+          <div className="mt-6 space-y-2 pt-4 border-t border-gray-100">
+            <button
+              onClick={handleAddToCart}
+              className={`w-full rounded-full py-3.5 px-6 text-sm font-semibold text-white transition flex items-center justify-center gap-2 shadow-lg ${
+                isAdded ? "bg-emerald-600" : "bg-black hover:bg-gray-800"
+              }`}
+            >
+              {isAdded ? (
+                <>
+                  <svg className="h-4 w-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                  </svg>
+                  Đã thêm vào giỏ hàng!
+                </>
+              ) : (
+                <>
+                  <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
+                  </svg>
+                  Thêm vào giỏ hàng
+                </>
+              )}
+            </button>
+
+            <Link
+              href={`/products/${product.id}`}
+              onClick={onClose}
+              className="block w-full text-center text-xs font-semibold text-gray-500 hover:text-black py-2 transition"
+            >
+              Xem trang chi tiết đầy đủ & đánh giá →
+            </Link>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}

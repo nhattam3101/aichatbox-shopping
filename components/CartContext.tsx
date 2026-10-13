@@ -46,36 +46,37 @@ type CartContextType = {
   totalPrice: number;
   toast: ToastNotification | null;
   hideToast: () => void;
+  appliedCoupon: string | null;
+  discountAmount: number;
+  applyCoupon: (code: string) => { success: boolean; message: string };
+  removeCoupon: () => void;
 };
 
 const CartContext = createContext<CartContextType | undefined>(undefined);
 
 export function CartProvider({ children }: { children: ReactNode }) {
-  const [cart, setCart] = useState<CartItem[]>([]);
-  const [isLoaded, setIsLoaded] = useState(false);
+  const [cart, setCart] = useState<CartItem[]>(() => {
+    if (typeof window === "undefined") return [];
+    try {
+      const saved = localStorage.getItem("cart");
+      return saved ? JSON.parse(saved) : [];
+    } catch {
+      return [];
+    }
+  });
+
+  const [appliedCoupon, setAppliedCoupon] = useState<string | null>(null);
+  const [discountPercent, setDiscountPercent] = useState<number>(0);
   const [toast, setToast] = useState<ToastNotification | null>(null);
 
-  // Đọc cart từ localStorage khi app load
+  // Sync cart to localStorage whenever cart changes
   useEffect(() => {
-    const savedCart = localStorage.getItem("cart");
-
-    if (savedCart) {
-      try {
-        setCart(JSON.parse(savedCart));
-      } catch {
-        localStorage.removeItem("cart");
-      }
+    try {
+      localStorage.setItem("cart", JSON.stringify(cart));
+    } catch {
+      // ignore
     }
-
-    setIsLoaded(true);
-  }, []);
-
-  // Chỉ lưu sau khi đã đọc localStorage xong
-  useEffect(() => {
-    if (!isLoaded) return;
-
-    localStorage.setItem("cart", JSON.stringify(cart));
-  }, [cart, isLoaded]);
+  }, [cart]);
 
   function hideToast() {
     setToast(null);
@@ -180,15 +181,49 @@ export function CartProvider({ children }: { children: ReactNode }) {
 
   function clearCart() {
     setCart([]);
-    localStorage.removeItem("cart");
+    setAppliedCoupon(null);
+    setDiscountPercent(0);
+    try {
+      localStorage.removeItem("cart");
+    } catch {
+      // ignore
+    }
+  }
+
+  function applyCoupon(code: string): { success: boolean; message: string } {
+    const formatted = code.trim().toUpperCase();
+    if (formatted === "CASEUP10") {
+      setAppliedCoupon("CASEUP10");
+      setDiscountPercent(0.1); // 10%
+      return { success: true, message: "Đã áp dụng mã giảm giá 10%!" };
+    }
+    if (formatted === "VIP20") {
+      setAppliedCoupon("VIP20");
+      setDiscountPercent(0.2); // 20%
+      return { success: true, message: "Đã áp dụng mã VIP giảm 20%!" };
+    }
+    if (formatted === "FREESHIP") {
+      setAppliedCoupon("FREESHIP");
+      setDiscountPercent(0); // freeship
+      return { success: true, message: "Đã áp dụng miễn phí vận chuyển!" };
+    }
+    return { success: false, message: "Mã giảm giá không hợp lệ hoặc đã hết hạn." };
+  }
+
+  function removeCoupon() {
+    setAppliedCoupon(null);
+    setDiscountPercent(0);
   }
 
   const totalItems = cart.reduce((total, item) => total + item.quantity, 0);
 
-  const totalPrice = cart.reduce(
+  const rawTotalPrice = cart.reduce(
     (total, item) => total + item.price * item.quantity,
     0
   );
+
+  const discountAmount = Math.round(rawTotalPrice * discountPercent);
+  const totalPrice = Math.max(0, rawTotalPrice - discountAmount);
 
   return (
     <CartContext.Provider
@@ -203,6 +238,10 @@ export function CartProvider({ children }: { children: ReactNode }) {
         totalPrice,
         toast,
         hideToast,
+        appliedCoupon,
+        discountAmount,
+        applyCoupon,
+        removeCoupon,
       }}
     >
       {children}

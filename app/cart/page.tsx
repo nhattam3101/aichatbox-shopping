@@ -18,9 +18,10 @@ type Order = {
   note: string;
   paymentMethod: "cod" | "banking";
   createdAt: string;
+  discountAmount?: number;
 };
 
-const COUNTDOWN_SECONDS = 25; // Thời gian mô phỏng đơn hàng tự động mất đi
+const COUNTDOWN_SECONDS = 30; // Thời gian mô phỏng đơn hàng tự động hoàn tất
 
 export default function CartPage() {
   const {
@@ -31,6 +32,10 @@ export default function CartPage() {
     clearCart,
     totalItems,
     totalPrice,
+    appliedCoupon,
+    discountAmount,
+    applyCoupon,
+    removeCoupon,
   } = useCart();
 
   // Checkout modal state
@@ -41,16 +46,18 @@ export default function CartPage() {
   const [note, setNote] = useState("Giao giờ hành chính, gọi trước khi đến");
   const [paymentMethod, setPaymentMethod] = useState<"cod" | "banking">("cod");
 
+  // Coupon input state
+  const [couponCode, setCouponCode] = useState("");
+  const [couponFeedback, setCouponFeedback] = useState<{ success: boolean; message: string } | null>(null);
+
   // Simulated Order state
   const [placedOrder, setPlacedOrder] = useState<Order | null>(null);
   const [timeLeft, setTimeLeft] = useState(COUNTDOWN_SECONDS);
   const [justReset, setJustReset] = useState(false);
 
-  // Countdown effect when order is placed
+  // Countdown timer for simulated order
   useEffect(() => {
     if (!placedOrder) return;
-
-    setTimeLeft(COUNTDOWN_SECONDS);
 
     const timer = setInterval(() => {
       setTimeLeft((prev) => {
@@ -72,6 +79,21 @@ export default function CartPage() {
     setIsCheckoutOpen(true);
   }
 
+  function handleApplyCoupon(e?: React.FormEvent) {
+    if (e) e.preventDefault();
+    if (!couponCode.trim()) return;
+    const res = applyCoupon(couponCode);
+    setCouponFeedback(res);
+    if (res.success) {
+      setCouponCode("");
+    }
+  }
+
+  function handleQuickCoupon(code: string) {
+    const res = applyCoupon(code);
+    setCouponFeedback(res);
+  }
+
   function handleConfirmOrder(e: React.FormEvent) {
     e.preventDefault();
 
@@ -85,270 +107,216 @@ export default function CartPage() {
       address: address.trim() || "Địa chỉ mẫu",
       note: note.trim(),
       paymentMethod,
+      discountAmount,
       createdAt: new Date().toLocaleTimeString("vi-VN", {
         hour: "2-digit",
         minute: "2-digit",
-        second: "2-digit",
       }),
     };
 
+    setTimeLeft(COUNTDOWN_SECONDS);
     setPlacedOrder(newOrder);
     clearCart();
     setIsCheckoutOpen(false);
-    setJustReset(false);
   }
 
-  function handleResetOrderNow() {
-    setPlacedOrder(null);
-    setJustReset(true);
-  }
+  // Freeship threshold: 300,000₫
+  const FREESHIP_THRESHOLD = 300000;
+  const rawSubtotal = cart.reduce((acc, i) => acc + i.price * i.quantity, 0);
+  const remainingForFreeship = Math.max(0, FREESHIP_THRESHOLD - rawSubtotal);
+  const freeshipProgress = Math.min(100, Math.round((rawSubtotal / FREESHIP_THRESHOLD) * 100));
 
   return (
-    <main className="min-h-screen bg-[#fafaf8] text-[#1a1a1a]">
-      {/* Header */}
+    <main className="min-h-screen bg-[#faf9f6] text-[#1a1a1a]">
       <Navbar />
 
       <section className="mx-auto max-w-7xl px-6 py-10 md:px-12 lg:px-20">
-        <p className="text-xs uppercase tracking-[0.2em] font-bold text-amber-600">
-          Shopping Cart
-        </p>
-        <h1 className="mt-1 text-3xl font-bold tracking-tight md:text-4xl">
-          Giỏ hàng của bạn
+        <h1 className="text-3xl md:text-4xl font-extrabold tracking-tight text-gray-900">
+          Giỏ Hàng Của Bạn
         </h1>
+        <p className="mt-1 text-sm text-gray-500">
+          Quản lý sản phẩm, nhập mã voucher và tiến hành thanh toán COD tiện lợi.
+        </p>
 
-        {/* ───── TRƯỜNG HỢP 1: ĐÃ ĐẶT ĐƠN HÀNG THÀNH CÔNG (MÔ PHỎNG COD & ĐẾM LÙI) ───── */}
+        {/* Freeship Progress Bar */}
+        {cart.length > 0 && !placedOrder && (
+          <div className="mt-6 rounded-2xl border border-amber-200/60 bg-amber-50/60 p-4">
+            <div className="flex items-center justify-between text-xs font-semibold text-amber-900">
+              <span className="flex items-center gap-1.5">
+                🚚
+                {remainingForFreeship === 0 ? (
+                  <span>Chúc mừng! Bạn đã nhận được <strong>Miễn phí giao hàng toàn quốc</strong> 🎉</span>
+                ) : (
+                  <span>Mua thêm <strong>{remainingForFreeship.toLocaleString("vi-VN")}₫</strong> để được <strong>FREESHIP toàn quốc!</strong></span>
+                )}
+              </span>
+              <span className="font-bold">{freeshipProgress}%</span>
+            </div>
+            <div className="mt-2.5 h-2 w-full overflow-hidden rounded-full bg-amber-200/50">
+              <div
+                className="h-full rounded-full bg-gradient-to-r from-amber-500 to-emerald-500 transition-all duration-500"
+                style={{ width: `${freeshipProgress}%` }}
+              />
+            </div>
+          </div>
+        )}
+
+        {/* ───── TRƯỜNG HỢP 1: ĐÃ ĐẶT HÀNG (MÔ PHỎNG ORDER THÀNH CÔNG) ───── */}
         {placedOrder ? (
-          <div className="mt-8 space-y-8 animate-toast-in">
-            {/* Banner Thông báo đếm lùi tự động mất đơn */}
-            <div className="relative overflow-hidden rounded-3xl border border-amber-300 bg-gradient-to-r from-amber-50 via-orange-50 to-amber-50 p-6 shadow-sm">
-              <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-                <div className="flex items-start gap-3.5">
-                  <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-amber-500 text-white shadow-md">
-                    <span className="text-xl">⏱️</span>
+          <div className="mt-8 space-y-8 animate-fade-in-up">
+            {/* Banner chúc mừng */}
+            <div className="relative overflow-hidden rounded-3xl border border-emerald-500/20 bg-gradient-to-br from-emerald-50 via-white to-amber-50 p-6 md:p-10 shadow-lg">
+              <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
+                <div className="flex items-start gap-4">
+                  <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-emerald-500 text-white text-2xl shadow-lg shadow-emerald-500/30">
+                    ✓
                   </div>
                   <div>
                     <div className="flex items-center gap-2">
-                      <span className="inline-flex items-center gap-1.5 rounded-full bg-amber-500/10 px-2.5 py-0.5 text-xs font-bold text-amber-700">
-                        Chế độ demo thử nghiệm
+                      <span className="rounded-full bg-emerald-100 px-3 py-0.5 text-xs font-bold text-emerald-800">
+                        Đặt hàng thành công
                       </span>
-                      <span className="text-xs font-semibold text-gray-500">
-                        Mã đơn: <strong className="text-gray-900">{placedOrder.orderId}</strong>
-                      </span>
+                      <span className="text-xs text-gray-500">Mã đơn: {placedOrder.orderId}</span>
                     </div>
-                    <p className="mt-1 text-sm font-medium text-gray-800">
-                      Đơn hàng đã được ghi nhận. Đơn này sẽ{" "}
-                      <span className="font-bold text-amber-700">
-                        tự động hết hạn và làm trống giỏ hàng sau {timeLeft}s
-                      </span>
-                      .
+                    <h2 className="mt-2 text-2xl md:text-3xl font-extrabold text-gray-900">
+                      Cảm ơn bạn, {placedOrder.customerName}!
+                    </h2>
+                    <p className="mt-1 text-sm text-gray-600 max-w-lg">
+                      Đơn hàng đã được tiếp nhận vào lúc {placedOrder.createdAt}. Nhân viên CaseUp sẽ đóng gói và bàn giao bưu tá giao tận tay bạn.
                     </p>
                   </div>
                 </div>
 
-                <div className="flex items-center gap-3">
-                  <div className="flex items-center gap-2 rounded-2xl bg-white px-4 py-2 border border-amber-200 shadow-sm">
-                    <span className="text-xs text-gray-500">Đếm ngược:</span>
-                    <span className="font-mono text-lg font-extrabold text-amber-600">
-                      {timeLeft < 10 ? `0${timeLeft}` : timeLeft}s
-                    </span>
-                  </div>
+                {/* Hộp đếm ngược tự reset demo */}
+                <div className="rounded-2xl border border-black/10 bg-white/90 p-4 shadow-sm backdrop-blur-md text-center shrink-0 min-w-[200px]">
+                  <p className="text-[11px] font-semibold text-gray-400 uppercase tracking-wider">
+                    Tự động làm mới sau
+                  </p>
+                  <p className="text-3xl font-extrabold text-amber-600 font-mono my-1">
+                    00:{timeLeft < 10 ? `0${timeLeft}` : timeLeft}
+                  </p>
+                  <p className="text-[10px] text-gray-400">để bạn có thể trải nghiệm lại</p>
                   <button
-                    type="button"
-                    onClick={handleResetOrderNow}
-                    className="rounded-full bg-gray-900 px-4 py-2 text-xs font-semibold text-white transition hover:bg-black"
+                    onClick={() => {
+                      setPlacedOrder(null);
+                      setJustReset(true);
+                    }}
+                    className="mt-2 text-xs font-semibold text-gray-600 hover:text-black underline"
                   >
-                    Làm mới giỏ ngay
+                    Bỏ qua đếm ngược
                   </button>
                 </div>
               </div>
 
-              {/* Progress bar đếm ngược */}
-              <div className="mt-4 h-1.5 w-full overflow-hidden rounded-full bg-amber-200/60">
-                <div
-                  className="h-full bg-amber-500 transition-all duration-1000 ease-linear"
-                  style={{ width: `${(timeLeft / COUNTDOWN_SECONDS) * 100}%` }}
-                />
+              {/* Progress Steps */}
+              <div className="mt-8 border-t border-black/5 pt-6">
+                <div className="grid grid-cols-4 gap-2 text-center text-xs">
+                  <div className="space-y-1.5">
+                    <div className="mx-auto flex h-8 w-8 items-center justify-center rounded-full bg-emerald-500 text-white font-bold">
+                      ✓
+                    </div>
+                    <p className="font-bold text-emerald-700">Đã nhận đơn</p>
+                  </div>
+                  <div className="space-y-1.5">
+                    <div className="mx-auto flex h-8 w-8 items-center justify-center rounded-full bg-amber-500 text-white font-bold animate-pulse">
+                      📦
+                    </div>
+                    <p className="font-bold text-amber-700">Đang đóng gói</p>
+                  </div>
+                  <div className="space-y-1.5">
+                    <div className="mx-auto flex h-8 w-8 items-center justify-center rounded-full bg-gray-100 text-gray-400 font-bold">
+                      🚚
+                    </div>
+                    <p className="text-gray-400">Đang vận chuyển</p>
+                  </div>
+                  <div className="space-y-1.5">
+                    <div className="mx-auto flex h-8 w-8 items-center justify-center rounded-full bg-gray-100 text-gray-400 font-bold">
+                      💵
+                    </div>
+                    <p className="text-gray-400">Thanh toán COD</p>
+                  </div>
+                </div>
               </div>
             </div>
 
-            {/* Chi tiết đơn hàng */}
-            <div className="grid gap-8 lg:grid-cols-[1fr_380px]">
-              {/* Cột trái: Trạng thái & Danh sách sản phẩm */}
-              <div className="space-y-6">
-                {/* Stepper trạng thái */}
-                <div className="rounded-3xl border border-black/5 bg-white p-6 shadow-sm">
-                  <div className="flex items-center gap-3">
-                    <div className="flex h-10 w-10 items-center justify-center rounded-full bg-emerald-100 text-emerald-600">
-                      <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
-                      </svg>
+            {/* Chi tiết đơn */}
+            <div className="grid gap-6 md:grid-cols-2">
+              <div className="rounded-3xl border border-black/5 bg-white p-6 shadow-sm">
+                <h3 className="font-bold text-gray-900 mb-4">Sản phẩm ({placedOrder.totalQuantity})</h3>
+                <div className="divide-y divide-gray-100">
+                  {placedOrder.items.map((item, idx) => (
+                    <div key={idx} className="flex items-center gap-3 py-3">
+                      <div className="relative h-14 w-14 shrink-0 overflow-hidden rounded-xl bg-gray-50 border border-gray-100">
+                        <Image src={item.image} alt={item.name} fill className="object-contain p-1" />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <h4 className="font-bold text-xs text-gray-900 truncate">{item.name}</h4>
+                        <p className="text-[11px] text-gray-400">{item.size} • Số lượng: {item.quantity}</p>
+                      </div>
+                      <span className="font-bold text-xs text-amber-600">
+                        {(item.price * item.quantity).toLocaleString("vi-VN")}₫
+                      </span>
                     </div>
-                    <div>
-                      <h2 className="text-lg font-bold text-gray-900">
-                        Đặt hàng thành công!
-                      </h2>
-                      <p className="text-xs text-gray-500">
-                        Cảm ơn bạn, CaseUp đã tiếp nhận đơn hàng lúc {placedOrder.createdAt}
-                      </p>
-                    </div>
-                  </div>
-
-                  {/* Tiến trình giao hàng */}
-                  <div className="mt-6 border-t border-gray-100 pt-6">
-                    <div className="grid grid-cols-4 gap-2 text-center text-xs">
-                      <div className="space-y-2">
-                        <div className="mx-auto flex h-8 w-8 items-center justify-center rounded-full bg-emerald-500 text-white text-xs font-bold shadow-sm">
-                          ✓
-                        </div>
-                        <p className="font-semibold text-emerald-600">Đã đặt đơn</p>
-                      </div>
-                      <div className="space-y-2">
-                        <div className="mx-auto flex h-8 w-8 items-center justify-center rounded-full bg-amber-500 text-white text-xs font-bold shadow-sm animate-pulse">
-                          📦
-                        </div>
-                        <p className="font-semibold text-amber-600">Chuẩn bị hàng</p>
-                      </div>
-                      <div className="space-y-2">
-                        <div className="mx-auto flex h-8 w-8 items-center justify-center rounded-full bg-gray-100 text-gray-400 text-xs font-bold">
-                          🚚
-                        </div>
-                        <p className="text-gray-400">Đang giao</p>
-                      </div>
-                      <div className="space-y-2">
-                        <div className="mx-auto flex h-8 w-8 items-center justify-center rounded-full bg-gray-100 text-gray-400 text-xs font-bold">
-                          💵
-                        </div>
-                        <p className="text-gray-400">Thu COD</p>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Danh sách món hàng đã đặt */}
-                <div className="rounded-3xl border border-black/5 bg-white p-6 shadow-sm">
-                  <h3 className="font-bold text-gray-900">
-                    Sản phẩm trong đơn ({placedOrder.totalQuantity})
-                  </h3>
-                  <div className="mt-4 divide-y divide-gray-100">
-                    {placedOrder.items.map((item, idx) => (
-                      <div key={idx} className="flex items-center gap-4 py-3">
-                        <div className="relative h-16 w-16 shrink-0 overflow-hidden rounded-xl border border-black/5 bg-[#f5f1eb]">
-                          <Image
-                            src={item.image}
-                            alt={item.name}
-                            fill
-                            className="object-contain p-1.5"
-                          />
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <h4 className="truncate font-semibold text-sm text-gray-900">
-                            {item.name}
-                          </h4>
-                          <p className="text-xs text-gray-500">
-                            {item.size}
-                            {item.selectedColor ? ` • Màu: ${item.selectedColor}` : ""}
-                          </p>
-                          <p className="text-xs text-gray-500">Số lượng: {item.quantity}</p>
-                        </div>
-                        <div className="text-right">
-                          <p className="text-sm font-bold text-amber-600">
-                            {(item.price * item.quantity).toLocaleString("vi-VN")}₫
-                          </p>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
+                  ))}
                 </div>
               </div>
 
-              {/* Cột phải: Thông tin nhận hàng & Thanh toán */}
-              <div className="space-y-6">
-                <div className="rounded-3xl border border-black/5 bg-white p-6 shadow-sm">
-                  <h3 className="font-bold text-gray-900">Thông tin nhận hàng</h3>
-                  <div className="mt-4 space-y-3 text-sm">
-                    <div>
-                      <p className="text-xs text-gray-400">Người nhận</p>
-                      <p className="font-semibold text-gray-900">
-                        {placedOrder.customerName} ({placedOrder.phone})
-                      </p>
-                    </div>
-                    <div>
-                      <p className="text-xs text-gray-400">Địa chỉ giao hàng</p>
-                      <p className="text-gray-700">{placedOrder.address}</p>
-                    </div>
-                    {placedOrder.note && (
-                      <div>
-                        <p className="text-xs text-gray-400">Ghi chú</p>
-                        <p className="text-gray-600 italic">"{placedOrder.note}"</p>
-                      </div>
-                    )}
-                    <div className="border-t border-gray-100 pt-3">
-                      <p className="text-xs text-gray-400">Phương thức thanh toán</p>
-                      <div className="mt-1 flex items-center gap-2">
-                        <span className="rounded-md bg-emerald-50 px-2 py-0.5 text-xs font-bold text-emerald-700 border border-emerald-200">
-                          {placedOrder.paymentMethod === "cod"
-                            ? "💵 Thanh toán khi nhận hàng (COD)"
-                            : "📲 Chuyển khoản QR ngân hàng"}
-                        </span>
-                      </div>
-                      <p className="mt-1 text-[11px] text-gray-500">
-                        Shipper sẽ mang bưu phẩm đến và thu đúng số tiền trên hóa đơn.
-                      </p>
-                    </div>
+              <div className="rounded-3xl border border-black/5 bg-white p-6 shadow-sm space-y-3 text-xs">
+                <h3 className="font-bold text-gray-900 text-sm mb-3">Thông tin nhận hàng</h3>
+                <div>
+                  <span className="text-gray-400">Khách hàng:</span>
+                  <span className="ml-2 font-bold text-gray-800">{placedOrder.customerName} ({placedOrder.phone})</span>
+                </div>
+                <div>
+                  <span className="text-gray-400">Địa chỉ:</span>
+                  <span className="ml-2 text-gray-700">{placedOrder.address}</span>
+                </div>
+                {placedOrder.note && (
+                  <div>
+                    <span className="text-gray-400">Ghi chú:</span>
+                    <span className="ml-2 italic text-gray-600">&ldquo;{placedOrder.note}&rdquo;</span>
                   </div>
-
-                  <div className="mt-6 border-t border-gray-100 pt-4">
-                    <div className="flex justify-between text-sm">
-                      <span className="text-gray-500">Tổng thanh toán:</span>
-                      <span className="text-xl font-extrabold text-amber-600">
-                        {placedOrder.total.toLocaleString("vi-VN")}₫
-                      </span>
-                    </div>
-                  </div>
-
-                  <div className="mt-6">
-                    <Link
-                      href="/products"
-                      className="block w-full rounded-full border border-gray-200 py-3 text-center text-xs font-semibold text-gray-700 transition hover:bg-gray-100"
-                    >
-                      Tiếp tục xem sản phẩm khác
-                    </Link>
-                  </div>
+                )}
+                <div>
+                  <span className="text-gray-400">Thanh toán:</span>
+                  <span className="ml-2 font-bold text-emerald-600">
+                    {placedOrder.paymentMethod === "cod" ? "Tiền mặt khi nhận hàng (COD)" : "Chuyển khoản VietQR"}
+                  </span>
+                </div>
+                <div className="pt-3 border-t border-gray-100 flex justify-between items-baseline text-sm font-bold">
+                  <span>Tổng thanh toán:</span>
+                  <span className="text-xl text-amber-600 font-extrabold">{placedOrder.total.toLocaleString("vi-VN")}₫</span>
                 </div>
               </div>
             </div>
           </div>
         ) : cart.length === 0 ? (
-          /* ───── TRƯỜNG HỢP 2: GIỎ HÀNG ĐANG TRỐNG ───── */
-          <div className="mt-8 rounded-3xl border border-black/5 bg-white p-12 text-center shadow-sm max-w-xl mx-auto">
-            {justReset ? (
-              <div className="mb-4 inline-flex items-center gap-2 rounded-full bg-emerald-50 px-3.5 py-1 text-xs font-semibold text-emerald-700 border border-emerald-200">
-                <span>✓</span> Đơn hàng demo trước đó đã kết thúc và làm mới giỏ hàng.
+          /* ───── TRƯỜNG HỢP 2: GIỎ TRỐNG ───── */
+          <div className="mt-12 rounded-3xl border border-black/5 bg-white p-12 text-center shadow-sm max-w-xl mx-auto">
+            {justReset && (
+              <div className="mb-4 inline-flex items-center gap-1.5 rounded-full bg-emerald-50 px-3 py-1 text-xs font-semibold text-emerald-700">
+                ✓ Đơn hàng trước đã hoàn thành và hệ thống đã làm mới giỏ hàng.
               </div>
-            ) : null}
-            <div className="mx-auto flex h-20 w-20 items-center justify-center rounded-full bg-[#fafaf8] text-4xl shadow-inner">
+            )}
+            <div className="mx-auto flex h-20 w-20 items-center justify-center rounded-full bg-amber-50 text-4xl shadow-inner">
               🛍️
             </div>
-            <h2 className="mt-4 text-xl font-bold text-gray-900">
-              Giỏ hàng của bạn đang trống
-            </h2>
-            <p className="mt-2 text-sm text-gray-500 max-w-sm mx-auto">
-              Chưa có sản phẩm nào được chọn. Hãy khám phá ngay bộ sưu tập bao laptop chất lượng cao từ CaseUp!
+            <h2 className="mt-4 text-xl font-bold text-gray-900">Giỏ hàng của bạn đang trống</h2>
+            <p className="mt-2 text-xs md:text-sm text-gray-500 max-w-sm mx-auto">
+              Chưa có sản phẩm nào được chọn. Hãy khám phá bộ sưu tập 24 mẫu bao laptop cao cấp ngay hôm nay!
             </p>
-            <div className="mt-6">
-              <Link
-                href="/products"
-                className="inline-flex items-center gap-2 rounded-full bg-black px-7 py-3.5 text-sm font-semibold text-white shadow-md transition-all hover:bg-gray-800 hover:shadow-lg"
-              >
-                <span>Khám phá sản phẩm ngay</span>
-                <span>→</span>
-              </Link>
-            </div>
+            <Link
+              href="/products"
+              className="mt-6 inline-flex items-center gap-2 rounded-full bg-black px-7 py-3.5 text-xs md:text-sm font-semibold text-white shadow-md hover:bg-gray-800 transition"
+            >
+              <span>Khám phá sản phẩm ngay</span>
+              <span>→</span>
+            </Link>
           </div>
         ) : (
-          /* ───── TRƯỜNG HỢP 3: CÓ SẢN PHẨM TRONG GIỎ HÀNG ───── */
+          /* ───── TRƯỜNG HỢP 3: CÓ SẢN PHẨM ───── */
           <div className="mt-8 grid gap-8 lg:grid-cols-[1fr_380px]">
-            {/* Danh sách sản phẩm */}
+            {/* Cột trái: Danh sách mặt hàng */}
             <div className="space-y-4">
               {cart.map((item) => (
                 <div
@@ -360,7 +328,6 @@ export default function CartPage() {
                       src={item.image}
                       alt={item.name}
                       fill
-                      sizes="112px"
                       className="object-contain p-2"
                     />
                   </div>
@@ -368,13 +335,16 @@ export default function CartPage() {
                   <div className="flex flex-1 flex-col justify-between">
                     <div>
                       <div className="flex items-start justify-between gap-2">
-                        <h2 className="text-base font-bold text-gray-900 sm:text-lg">
+                        <Link
+                          href={`/products/${item.id}`}
+                          className="text-base font-bold text-gray-900 hover:text-amber-600 transition"
+                        >
                           {item.name}
-                        </h2>
+                        </Link>
                         <button
                           type="button"
                           onClick={() => removeFromCart(item.id, item.selectedColor)}
-                          className="text-xs font-medium text-red-500 hover:text-red-700 hover:underline transition"
+                          className="text-xs font-semibold text-rose-500 hover:text-rose-700 transition"
                         >
                           Xóa
                         </button>
@@ -391,7 +361,7 @@ export default function CartPage() {
                         )}
                       </div>
 
-                      <p className="mt-2 font-bold text-amber-600 sm:text-base">
+                      <p className="mt-2 font-bold text-amber-600 text-sm sm:text-base">
                         {item.price.toLocaleString("vi-VN")}₫
                       </p>
                     </div>
@@ -401,19 +371,17 @@ export default function CartPage() {
                         <button
                           type="button"
                           onClick={() => decreaseQuantity(item.id, item.selectedColor)}
-                          className="flex h-8 w-8 items-center justify-center rounded-full border border-gray-300 text-gray-600 transition hover:bg-gray-100"
-                          aria-label="Giảm"
+                          className="flex h-7 w-7 items-center justify-center rounded-full border border-gray-300 text-gray-600 transition hover:bg-gray-100"
                         >
                           −
                         </button>
-                        <span className="w-8 text-center text-sm font-semibold">
+                        <span className="w-6 text-center text-xs font-bold">
                           {item.quantity}
                         </span>
                         <button
                           type="button"
                           onClick={() => increaseQuantity(item.id, item.selectedColor)}
-                          className="flex h-8 w-8 items-center justify-center rounded-full border border-gray-300 text-gray-600 transition hover:bg-gray-100"
-                          aria-label="Tăng"
+                          className="flex h-7 w-7 items-center justify-center rounded-full border border-gray-300 text-gray-600 transition hover:bg-gray-100"
                         >
                           +
                         </button>
@@ -431,46 +399,125 @@ export default function CartPage() {
               ))}
             </div>
 
-            {/* Tóm tắt & Nút thanh toán */}
-            <div className="h-fit rounded-3xl border border-black/5 bg-white p-6 shadow-sm">
-              <h2 className="text-lg font-bold text-gray-900">Tóm tắt đơn hàng</h2>
+            {/* Cột phải: Voucher & Tóm tắt thanh toán */}
+            <div className="space-y-4">
+              {/* Voucher Box */}
+              <div className="rounded-3xl border border-black/5 bg-white p-6 shadow-sm">
+                <h3 className="text-sm font-bold text-gray-900 mb-3 flex items-center gap-1.5">
+                  🎟️ Mã giảm giá / Voucher
+                </h3>
 
-              <div className="mt-4 space-y-3 border-b border-gray-100 pb-4 text-sm">
-                <div className="flex justify-between text-gray-600">
-                  <span>Số lượng sản phẩm:</span>
-                  <span className="font-medium text-gray-900">{totalItems} món</span>
+                {appliedCoupon ? (
+                  <div className="flex items-center justify-between rounded-2xl bg-emerald-50 p-3 border border-emerald-200 text-xs">
+                    <div>
+                      <p className="font-bold text-emerald-800">
+                        Đang áp dụng: {appliedCoupon}
+                      </p>
+                      <p className="text-[11px] text-emerald-600">
+                        Giảm {discountAmount.toLocaleString("vi-VN")}₫
+                      </p>
+                    </div>
+                    <button
+                      onClick={removeCoupon}
+                      className="text-xs font-bold text-rose-500 hover:text-rose-700"
+                    >
+                      Bỏ mã
+                    </button>
+                  </div>
+                ) : (
+                  <div>
+                    <form onSubmit={handleApplyCoupon} className="flex gap-2">
+                      <input
+                        type="text"
+                        value={couponCode}
+                        onChange={(e) => setCouponCode(e.target.value)}
+                        placeholder="Nhập mã (CASEUP10, VIP20)"
+                        className="flex-1 rounded-2xl border border-gray-200 bg-[#f9f8f6] px-3.5 py-2 text-xs uppercase font-bold outline-none focus:border-black"
+                      />
+                      <button
+                        type="submit"
+                        className="rounded-2xl bg-black px-4 py-2 text-xs font-semibold text-white hover:bg-gray-800 transition"
+                      >
+                        Áp dụng
+                      </button>
+                    </form>
+
+                    {couponFeedback && (
+                      <p className={`mt-2 text-xs font-medium ${couponFeedback.success ? "text-emerald-600" : "text-rose-600"}`}>
+                        {couponFeedback.message}
+                      </p>
+                    )}
+
+                    {/* Quick Voucher Chips */}
+                    <div className="mt-3 flex flex-wrap gap-1.5">
+                      <button
+                        type="button"
+                        onClick={() => handleQuickCoupon("CASEUP10")}
+                        className="rounded-full bg-amber-50 px-2.5 py-1 text-[10px] font-bold text-amber-800 border border-amber-200 hover:bg-amber-100 transition"
+                      >
+                        ⚡ CASEUP10 (-10%)
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => handleQuickCoupon("VIP20")}
+                        className="rounded-full bg-purple-50 px-2.5 py-1 text-[10px] font-bold text-purple-800 border border-purple-200 hover:bg-purple-100 transition"
+                      >
+                        👑 VIP20 (-20%)
+                      </button>
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              {/* Order Summary Box */}
+              <div className="rounded-3xl border border-black/5 bg-white p-6 shadow-sm">
+                <h2 className="text-base font-bold text-gray-900">Tóm tắt đơn hàng</h2>
+
+                <div className="mt-4 space-y-2.5 border-b border-gray-100 pb-4 text-xs sm:text-sm">
+                  <div className="flex justify-between text-gray-600">
+                    <span>Số lượng:</span>
+                    <span className="font-semibold text-gray-900">{totalItems} món</span>
+                  </div>
+                  <div className="flex justify-between text-gray-600">
+                    <span>Tạm tính:</span>
+                    <span className="font-semibold text-gray-900">
+                      {rawSubtotal.toLocaleString("vi-VN")}₫
+                    </span>
+                  </div>
+                  {discountAmount > 0 && (
+                    <div className="flex justify-between text-emerald-600">
+                      <span>Giảm giá ({appliedCoupon}):</span>
+                      <span className="font-bold">
+                        -{discountAmount.toLocaleString("vi-VN")}₫
+                      </span>
+                    </div>
+                  )}
+                  <div className="flex justify-between text-gray-600">
+                    <span>Phí vận chuyển:</span>
+                    <span className="font-semibold text-emerald-600">
+                      {remainingForFreeship === 0 ? "0₫ (Freeship)" : "Miễn phí toàn quốc"}
+                    </span>
+                  </div>
                 </div>
-                <div className="flex justify-between text-gray-600">
-                  <span>Tạm tính:</span>
-                  <span className="font-semibold text-gray-900">
+
+                <div className="mt-4 flex items-baseline justify-between">
+                  <span className="text-sm font-bold text-gray-900">Tổng thanh toán:</span>
+                  <span className="text-2xl font-extrabold text-amber-600">
                     {totalPrice.toLocaleString("vi-VN")}₫
                   </span>
                 </div>
-                <div className="flex justify-between text-gray-600">
-                  <span>Phí vận chuyển:</span>
-                  <span className="font-semibold text-emerald-600">Miễn phí toàn quốc</span>
-                </div>
-              </div>
 
-              <div className="mt-4 flex items-baseline justify-between">
-                <span className="text-base font-bold text-gray-900">Tổng thanh toán:</span>
-                <span className="text-2xl font-extrabold text-amber-600">
-                  {totalPrice.toLocaleString("vi-VN")}₫
-                </span>
-              </div>
+                {/* Checkout Trigger */}
+                <button
+                  type="button"
+                  onClick={handleOpenCheckout}
+                  className="mt-6 flex w-full items-center justify-center gap-2 rounded-full bg-black py-4 text-sm font-bold text-white shadow-md transition-all hover:bg-gray-800 hover:shadow-xl active:scale-98"
+                >
+                  <span>📦 Đặt Hàng Nhận COD</span>
+                </button>
 
-              {/* Nút mở modal thanh toán */}
-              <button
-                type="button"
-                onClick={handleOpenCheckout}
-                className="mt-6 flex w-full items-center justify-center gap-2 rounded-full bg-black py-4 font-semibold text-white shadow-md transition-all hover:bg-gray-800 hover:shadow-lg"
-              >
-                <span>📦 Thanh toán khi nhận hàng (COD)</span>
-              </button>
-
-              <div className="mt-4 rounded-2xl bg-[#fafaf8] p-3 text-center border border-black/5">
-                <p className="text-xs text-gray-500">
-                  🛡️ Hỗ trợ kiểm tra hàng thoải mái trước khi nhận và trả tiền cho shipper.
+                <p className="mt-3 text-center text-[11px] text-gray-400">
+                  🛡️ Miễn phí kiểm tra hàng trước khi thanh toán.
                 </p>
               </div>
             </div>
@@ -478,7 +525,7 @@ export default function CartPage() {
         )}
       </section>
 
-      {/* ───── MODAL THANH TOÁN (COD / CHUYỂN KHOẢN) ───── */}
+      {/* ───── MODAL THANH TOÁN COD ───── */}
       {isCheckoutOpen && (
         <div
           role="dialog"
@@ -486,15 +533,10 @@ export default function CartPage() {
           className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-fade-in-up"
         >
           <div className="relative w-full max-w-lg rounded-3xl bg-white p-6 sm:p-8 shadow-2xl max-h-[90vh] overflow-y-auto">
-            {/* Header modal */}
             <div className="flex items-center justify-between border-b border-gray-100 pb-4">
               <div>
-                <h3 className="text-xl font-bold text-gray-900">
-                  Xác nhận đặt hàng
-                </h3>
-                <p className="text-xs text-gray-500">
-                  Mô phỏng thanh toán khi nhận hàng (COD)
-                </p>
+                <h3 className="text-xl font-bold text-gray-900">Xác nhận thông tin giao hàng</h3>
+                <p className="text-xs text-gray-500">Thanh toán khi nhận hàng (COD)</p>
               </div>
               <button
                 type="button"
@@ -505,10 +547,9 @@ export default function CartPage() {
               </button>
             </div>
 
-            <form onSubmit={handleConfirmOrder} className="mt-5 space-y-4">
-              {/* Họ tên */}
+            <form onSubmit={handleConfirmOrder} className="mt-5 space-y-4 text-xs">
               <div>
-                <label className="block text-xs font-semibold text-gray-700 mb-1">
+                <label className="block font-semibold text-gray-700 mb-1">
                   Họ và tên người nhận <span className="text-red-500">*</span>
                 </label>
                 <input
@@ -516,14 +557,12 @@ export default function CartPage() {
                   required
                   value={customerName}
                   onChange={(e) => setCustomerName(e.target.value)}
-                  placeholder="Ví dụ: Nguyễn Văn Anh"
-                  className="w-full rounded-xl border border-gray-300 px-4 py-2.5 text-sm outline-none focus:border-black"
+                  className="w-full rounded-xl border border-gray-300 p-2.5 text-sm outline-none focus:border-black"
                 />
               </div>
 
-              {/* Số điện thoại */}
               <div>
-                <label className="block text-xs font-semibold text-gray-700 mb-1">
+                <label className="block font-semibold text-gray-700 mb-1">
                   Số điện thoại <span className="text-red-500">*</span>
                 </label>
                 <input
@@ -531,135 +570,90 @@ export default function CartPage() {
                   required
                   value={phone}
                   onChange={(e) => setPhone(e.target.value)}
-                  placeholder="Ví dụ: 0988 123 456"
-                  className="w-full rounded-xl border border-gray-300 px-4 py-2.5 text-sm outline-none focus:border-black"
+                  className="w-full rounded-xl border border-gray-300 p-2.5 text-sm outline-none focus:border-black"
                 />
               </div>
 
-              {/* Địa chỉ nhận hàng */}
               <div>
-                <label className="block text-xs font-semibold text-gray-700 mb-1">
-                  Địa chỉ giao hàng chi tiết <span className="text-red-500">*</span>
+                <label className="block font-semibold text-gray-700 mb-1">
+                  Địa chỉ giao hàng <span className="text-red-500">*</span>
                 </label>
                 <input
                   type="text"
                   required
                   value={address}
                   onChange={(e) => setAddress(e.target.value)}
-                  placeholder="Ví dụ: 123 Đường Cầu Giấy, Quận Cầu Giấy, Hà Nội"
-                  className="w-full rounded-xl border border-gray-300 px-4 py-2.5 text-sm outline-none focus:border-black"
+                  className="w-full rounded-xl border border-gray-300 p-2.5 text-sm outline-none focus:border-black"
                 />
               </div>
 
-              {/* Ghi chú */}
               <div>
-                <label className="block text-xs font-semibold text-gray-700 mb-1">
-                  Ghi chú cho shipper (tuỳ chọn)
+                <label className="block font-semibold text-gray-700 mb-1">
+                  Ghi chú cho shipper (tùy chọn)
                 </label>
                 <input
                   type="text"
                   value={note}
                   onChange={(e) => setNote(e.target.value)}
-                  placeholder="Ví dụ: Giao giờ hành chính, gọi trước khi đến"
-                  className="w-full rounded-xl border border-gray-300 px-4 py-2.5 text-sm outline-none focus:border-black"
+                  className="w-full rounded-xl border border-gray-300 p-2.5 text-sm outline-none focus:border-black"
                 />
               </div>
 
-              {/* Phương thức thanh toán */}
-              <div className="pt-2">
-                <label className="block text-xs font-semibold text-gray-700 mb-2">
-                  Phương thức thanh toán
+              <div>
+                <label className="block font-semibold text-gray-700 mb-1.5">
+                  Hình thức thanh toán
                 </label>
-                <div className="space-y-2.5">
-                  {/* COD */}
-                  <label
-                    className={`flex items-start gap-3 rounded-2xl border p-3.5 cursor-pointer transition ${
-                      paymentMethod === "cod"
-                        ? "border-amber-500 bg-amber-50/50 ring-1 ring-amber-500"
-                        : "border-gray-200 hover:border-gray-300"
-                    }`}
-                  >
+                <div className="space-y-2">
+                  <label className="flex items-center gap-3 rounded-2xl border p-3 cursor-pointer border-amber-500 bg-amber-50/50">
                     <input
                       type="radio"
                       name="paymentMethod"
                       value="cod"
                       checked={paymentMethod === "cod"}
                       onChange={() => setPaymentMethod("cod")}
-                      className="mt-1 accent-amber-600"
+                      className="accent-amber-600"
                     />
-                    <div className="flex-1">
-                      <div className="flex items-center gap-2">
-                        <span className="font-bold text-sm text-gray-900">
-                          💵 Thanh toán khi nhận hàng (COD)
-                        </span>
-                        <span className="rounded-full bg-emerald-100 px-2 py-0.5 text-[10px] font-bold text-emerald-700">
-                          Khuyên dùng
-                        </span>
-                      </div>
-                      <p className="mt-0.5 text-xs text-gray-500">
-                        Kiểm tra hàng thoải mái trước khi trả tiền cho shipper. An tâm 100%.
-                      </p>
-                    </div>
-                  </label>
-
-                  {/* Chuyển khoản QR */}
-                  <label
-                    className={`flex items-start gap-3 rounded-2xl border p-3.5 cursor-pointer transition ${
-                      paymentMethod === "banking"
-                        ? "border-amber-500 bg-amber-50/50 ring-1 ring-amber-500"
-                        : "border-gray-200 hover:border-gray-300"
-                    }`}
-                  >
-                    <input
-                      type="radio"
-                      name="paymentMethod"
-                      value="banking"
-                      checked={paymentMethod === "banking"}
-                      onChange={() => setPaymentMethod("banking")}
-                      className="mt-1 accent-amber-600"
-                    />
-                    <div className="flex-1">
-                      <span className="font-bold text-sm text-gray-900">
-                        📲 Chuyển khoản VietQR
-                      </span>
-                      <p className="mt-0.5 text-xs text-gray-500">
-                        Quét mã QR qua app ngân hàng hoặc ví điện tử.
-                      </p>
+                    <div>
+                      <span className="font-bold text-gray-900 text-sm">💵 Thanh toán khi nhận hàng (COD)</span>
+                      <p className="text-[11px] text-gray-500">Kiểm tra bao laptop vừa vặn trước khi trả tiền</p>
                     </div>
                   </label>
                 </div>
               </div>
 
-              {/* Tóm tắt số tiền */}
-              <div className="rounded-2xl bg-gray-50 p-4 border border-gray-100">
-                <div className="flex justify-between text-xs text-gray-600">
-                  <span>Tổng tiền hàng ({totalItems} sản phẩm):</span>
-                  <span>{totalPrice.toLocaleString("vi-VN")}₫</span>
+              {/* Tóm tắt tiền */}
+              <div className="rounded-2xl bg-gray-50 p-4 border border-gray-100 space-y-1">
+                <div className="flex justify-between text-gray-600">
+                  <span>Tổng tiền hàng ({totalItems} món):</span>
+                  <span>{rawSubtotal.toLocaleString("vi-VN")}₫</span>
                 </div>
-                <div className="mt-1 flex justify-between text-xs text-gray-600">
+                {discountAmount > 0 && (
+                  <div className="flex justify-between text-emerald-600 font-semibold">
+                    <span>Mã giảm giá ({appliedCoupon}):</span>
+                    <span>-{discountAmount.toLocaleString("vi-VN")}₫</span>
+                  </div>
+                )}
+                <div className="flex justify-between text-gray-600">
                   <span>Phí ship:</span>
-                  <span className="font-semibold text-emerald-600">0₫ (Freeship)</span>
+                  <span className="text-emerald-600 font-bold">0₫ (Freeship)</span>
                 </div>
-                <div className="mt-2 flex justify-between border-t border-gray-200 pt-2 text-sm font-bold text-gray-900">
-                  <span>Cần thanh toán:</span>
-                  <span className="text-base text-amber-600 font-extrabold">
-                    {totalPrice.toLocaleString("vi-VN")}₫
-                  </span>
+                <div className="pt-2 border-t border-gray-200 flex justify-between font-bold text-sm text-gray-900">
+                  <span>Thanh toán:</span>
+                  <span className="text-base text-amber-600 font-extrabold">{totalPrice.toLocaleString("vi-VN")}₫</span>
                 </div>
               </div>
 
-              {/* Nút hành động */}
               <div className="mt-6 flex gap-3 pt-2">
                 <button
                   type="button"
                   onClick={() => setIsCheckoutOpen(false)}
-                  className="flex-1 rounded-full border border-gray-300 py-3 text-xs font-semibold text-gray-700 transition hover:bg-gray-100"
+                  className="flex-1 rounded-full border border-gray-300 py-3 text-xs font-semibold text-gray-700 hover:bg-gray-100"
                 >
                   Hủy bỏ
                 </button>
                 <button
                   type="submit"
-                  className="flex-1 rounded-full bg-black py-3 text-xs font-semibold text-white shadow-md transition hover:bg-gray-800"
+                  className="flex-1 rounded-full bg-black py-3 text-xs font-semibold text-white shadow-md hover:bg-gray-800"
                 >
                   Xác nhận đặt hàng COD
                 </button>
@@ -669,7 +663,6 @@ export default function CartPage() {
         </div>
       )}
 
-      {/* Floating Chat */}
       <ChatBox />
     </main>
   );
