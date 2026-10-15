@@ -3,7 +3,9 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useState, useMemo, useEffect, useRef } from "react";
-import { products } from "@/data/products";
+import { saleProducts as products } from "@/data/products";
+
+import { matchesProduct } from "@/data/product-search";
 
 type Props = {
   isOpen: boolean;
@@ -40,16 +42,7 @@ export default function GlobalSearchModal({ isOpen, onClose }: Props) {
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
     if (!q) return [];
-    return products.filter((p) => {
-      return (
-        p.name.toLowerCase().includes(q) ||
-        p.size.toLowerCase().includes(q) ||
-        p.category.toLowerCase().includes(q) ||
-        p.material.toLowerCase().includes(q) ||
-        p.colors.some((c) => c.toLowerCase().includes(q)) ||
-        p.suitableFor.some((s) => s.toLowerCase().includes(q))
-      );
-    }).slice(0, 8);
+    return products.filter(p => matchesProduct(p, q)).slice(0, 8);
   }, [query]);
 
   const popularTags = [
@@ -133,11 +126,11 @@ export default function GlobalSearchModal({ isOpen, onClose }: Props) {
                     className="flex items-center gap-3 rounded-2xl p-2 hover:bg-gray-50 transition border border-transparent hover:border-gray-100"
                   >
                     <div className="relative h-12 w-12 shrink-0 overflow-hidden rounded-xl bg-gray-100">
-                      <Image src={p.image} alt={p.name} fill className="object-cover" />
+                      <Image src={p.image} alt={p.name} fill className="object-contain" />
                     </div>
                     <div className="min-w-0 flex-1">
                       <p className="text-xs font-bold text-gray-900 truncate">{p.name}</p>
-                      <p className="text-[11px] text-amber-600 font-semibold">{p.price.toLocaleString("vi-VN")}₫</p>
+                      <p className="price-text text-[11px] font-semibold">{p.priceConfirmed === false ? "Giá chờ xác nhận" : p.price.toLocaleString("vi-VN") + "₫"}</p>
                     </div>
                   </Link>
                 ))}
@@ -160,7 +153,7 @@ export default function GlobalSearchModal({ isOpen, onClose }: Props) {
                   key={item.id}
                   href={`/products/${item.id}`}
                   onClick={handleClose}
-                  className="group flex items-center justify-between gap-4 p-3 hover:bg-[#faf9f6] rounded-2xl transition"
+                  className="group flex items-center justify-between gap-4 p-3 hover:bg-[var(--brand-cream)] rounded-2xl transition"
                 >
                   <div className="flex items-center gap-3.5 min-w-0">
                     <div className="relative h-14 w-14 shrink-0 overflow-hidden rounded-xl bg-[#f2eee9] border border-gray-100">
@@ -181,8 +174,8 @@ export default function GlobalSearchModal({ isOpen, onClose }: Props) {
                   </div>
 
                   <div className="text-right shrink-0">
-                    <p className="text-sm font-extrabold text-amber-600">
-                      {item.price.toLocaleString("vi-VN")}₫
+                    <p className="price-text text-sm font-extrabold">
+                      {item.priceConfirmed === false ? "Giá chờ xác nhận" : item.price.toLocaleString("vi-VN") + "₫"}
                     </p>
                     {item.badge && (
                       <span className="inline-block rounded-full bg-amber-50 px-2 py-0.5 text-[10px] font-bold text-amber-700 mt-0.5">

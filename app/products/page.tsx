@@ -1,7 +1,8 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { products, type Product } from "@/data/products";
+import { saleProducts as products, type Product } from "@/data/products";
+import { matchesProduct } from "@/data/product-search";
 import Navbar from "@/components/Navbar";
 import ProductCard from "@/components/ProductCard";
 import QuickViewModal from "@/components/QuickViewModal";
@@ -18,17 +19,9 @@ export default function ProductsPage() {
   const [viewColumns, setViewColumns] = useState<4 | 2>(4);
   const [quickViewProduct, setQuickViewProduct] = useState<Product | null>(null);
 
-  const categories = [
-    "Tất cả",
-    "Tối giản",
-    "Chống sốc",
-    "Da cao cấp",
-    "Nhiều ngăn",
-    "Thời trang",
-    "Chống nước",
-  ];
+  const categories = ["Tất cả", ...new Set(products.map(p => p.category))];
 
-  const sizes = ["Tất cả", "13 inch", "14 inch", "15.6 inch", "16 inch"];
+  const sizes = ["Tất cả", ...new Set(products.map(p => p.size))];
 
   const priceRanges = [
     { label: "Tất cả", value: "Tất cả" },
@@ -41,12 +34,7 @@ export default function ProductsPage() {
     let result = products.filter((product) => {
       // Search
       const q = search.trim().toLowerCase();
-      const matchSearch =
-        !q ||
-        product.name.toLowerCase().includes(q) ||
-        product.description.toLowerCase().includes(q) ||
-        product.material.toLowerCase().includes(q) ||
-        product.suitableFor.some((s) => s.toLowerCase().includes(q));
+      const matchSearch = matchesProduct(product, q);
 
       // Category
       const matchCategory =
@@ -66,6 +54,8 @@ export default function ProductsPage() {
         matchPrice = product.price > 300000;
       }
 
+      if (selectedPriceRange !== "Tất cả" && product.priceConfirmed === false) matchPrice = false;
+
       // Features
       const matchWaterproof = !onlyWaterproof || product.waterproof;
       const matchPockets = !onlyPockets || product.hasPockets;
@@ -82,6 +72,7 @@ export default function ProductsPage() {
 
     // Sorting
     result = [...result].sort((a, b) => {
+      if (sortBy.startsWith("price") && a.priceConfirmed !== b.priceConfirmed) return a.priceConfirmed === false ? 1 : -1;
       if (sortBy === "popular") return b.sold - a.sold;
       if (sortBy === "price-asc") return a.price - b.price;
       if (sortBy === "price-desc") return b.price - a.price;
@@ -120,11 +111,11 @@ export default function ProductsPage() {
     onlyPockets;
 
   return (
-    <main className="min-h-screen bg-[#faf9f6] text-[#1a1a1a]">
+    <main className="min-h-screen bg-[var(--brand-cream)] text-[#1a1a1a]">
       <Navbar />
 
       {/* Header Banner */}
-      <section className="relative overflow-hidden border-b border-black/5 bg-white py-12 px-6 md:px-12 lg:px-20">
+      <section className="relative overflow-hidden border-b border-[var(--brand-border)] bg-white py-12 px-6 md:px-12 lg:px-20">
         <div className="absolute -right-20 -top-20 h-72 w-72 rounded-full bg-amber-100/40 blur-3xl pointer-events-none" />
         <div className="mx-auto max-w-7xl">
           <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
@@ -133,20 +124,20 @@ export default function ProductsPage() {
                 Bộ Sưu Tập 2026
               </span>
               <h1 className="mt-3 text-3xl md:text-5xl font-extrabold tracking-tight text-gray-900">
-                Tất Cả Bao Laptop
+                Bao Bảo Vệ & Phụ Kiện
               </h1>
               <p className="mt-2 text-sm md:text-base text-gray-500 max-w-xl leading-relaxed">
-                Khám phá 24 mẫu bao laptop cao cấp từ CaseUp được may đo tỉ mỉ, tích hợp đệm khí CornerArmor và lớp chống nước toàn diện.
+                Khám phá bao bảo vệ laptop, iPad và móc khóa trang trí. Giá bao và giá phụ kiện được niêm yết riêng.
               </p>
             </div>
 
             {/* Quick Stat Pill */}
-            <div className="flex items-center gap-4 bg-[#f8f6f2] rounded-2xl p-3 border border-black/5">
-              <div className="text-center px-3 border-r border-black/5">
+            <div className="flex items-center gap-4 bg-[#f8f6f2] rounded-2xl p-3 border border-[var(--brand-border)]">
+              <div className="text-center px-3 border-r border-[var(--brand-border)]">
                 <p className="text-xs text-gray-400">Tổng mẫu</p>
                 <p className="text-lg font-bold text-gray-800">{products.length}</p>
               </div>
-              <div className="text-center px-3 border-r border-black/5">
+              <div className="text-center px-3 border-r border-[var(--brand-border)]">
                 <p className="text-xs text-gray-400">Đánh giá</p>
                 <p className="text-lg font-bold text-amber-600">4.9 ★</p>
               </div>
@@ -171,7 +162,7 @@ export default function ProductsPage() {
                   onClick={() => setSelectedCategory(cat)}
                   className={`shrink-0 rounded-full px-5 py-2.5 text-xs font-bold transition-all flex items-center gap-2 ${
                     isSelected
-                      ? "bg-black text-white shadow-md"
+                      ? "bg-[var(--primary)] text-white shadow-md"
                       : "bg-[#f5f3ef] text-gray-700 hover:bg-[#eae6e0]"
                   }`}
                 >
@@ -191,7 +182,7 @@ export default function ProductsPage() {
       </section>
 
       {/* Filter and Control Bar */}
-      <section className="sticky top-[69px] z-30 border-b border-black/5 bg-white/90 backdrop-blur-md px-6 py-4 md:px-12 lg:px-20 transition-all">
+      <section className="sticky top-[69px] z-30 border-b border-[var(--brand-border)] bg-white/90 backdrop-blur-md px-6 py-4 md:px-12 lg:px-20 transition-all">
         <div className="mx-auto max-w-7xl flex flex-wrap items-center justify-between gap-4">
           {/* Search Input */}
           <div className="relative min-w-[240px] flex-1 sm:max-w-xs">
@@ -234,7 +225,7 @@ export default function ProductsPage() {
                 onClick={() => setSelectedSize(size)}
                 className={`rounded-full px-3 py-1.5 text-xs font-semibold transition ${
                   selectedSize === size
-                    ? "bg-black text-white"
+                    ? "bg-[var(--primary)] text-white"
                     : "border border-gray-200 bg-white text-gray-600 hover:bg-gray-50"
                 }`}
               >
@@ -303,7 +294,7 @@ export default function ProductsPage() {
               <button
                 onClick={() => setViewColumns(4)}
                 className={`rounded-full p-1.5 transition ${
-                  viewColumns === 4 ? "bg-black text-white" : "text-gray-400 hover:text-black"
+                  viewColumns === 4 ? "bg-[var(--primary)] text-white" : "text-gray-400 hover:text-black"
                 }`}
                 title="Xem 4 cột"
               >
@@ -314,7 +305,7 @@ export default function ProductsPage() {
               <button
                 onClick={() => setViewColumns(2)}
                 className={`rounded-full p-1.5 transition ${
-                  viewColumns === 2 ? "bg-black text-white" : "text-gray-400 hover:text-black"
+                  viewColumns === 2 ? "bg-[var(--primary)] text-white" : "text-gray-400 hover:text-black"
                 }`}
                 title="Xem 2 cột"
               >
@@ -394,7 +385,7 @@ export default function ProductsPage() {
               ))}
             </div>
           ) : (
-            <div className="py-24 text-center rounded-3xl bg-white border border-black/5 p-8 shadow-sm">
+            <div className="py-24 text-center rounded-3xl bg-white border border-[var(--brand-border)] p-8 shadow-sm">
               <div className="mx-auto flex h-20 w-20 items-center justify-center rounded-full bg-amber-50 text-3xl">
                 🔎
               </div>
@@ -406,7 +397,7 @@ export default function ProductsPage() {
               </p>
               <button
                 onClick={handleResetFilters}
-                className="mt-6 rounded-full bg-black px-6 py-2.5 text-xs font-semibold text-white shadow-md hover:bg-gray-800 transition"
+                className="mt-6 rounded-full bg-[var(--primary)] px-6 py-2.5 text-xs font-semibold text-white shadow-md hover:bg-[var(--brand-primary-hover)] transition"
               >
                 Xóa bộ lọc & Xem tất cả sản phẩm
               </button>

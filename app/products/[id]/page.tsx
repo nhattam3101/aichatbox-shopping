@@ -1,5 +1,5 @@
 import { notFound } from "next/navigation";
-import { products } from "@/data/products";
+import { allProducts as products } from "@/data/products";
 import ProductDetailClient from "@/components/ProductDetailClient";
 
 export function generateStaticParams() {
@@ -26,7 +26,7 @@ export default async function ProductDetailPage({ params }: Props) {
   const relatedProducts = products
     .filter(
       (p) =>
-        p.id !== product.id &&
+        p.id !== product.id && p.kind === product.kind &&
         (p.size === product.size ||
           (p.price >= product.price * 0.8 && p.price <= product.price * 1.2))
     )

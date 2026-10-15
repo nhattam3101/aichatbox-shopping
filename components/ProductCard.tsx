@@ -30,6 +30,7 @@ export default function ProductCard({ product, onQuickView }: Props) {
   function handleQuickAdd(e: React.MouseEvent) {
     e.preventDefault();
     e.stopPropagation();
+    if (product.priceConfirmed === false) { alert("Giá size này đang chờ xác nhận."); return; }
     addToCart({
       id: product.id,
       name: product.name,
@@ -44,9 +45,9 @@ export default function ProductCard({ product, onQuickView }: Props) {
   }
 
   return (
-    <div className="group relative flex flex-col overflow-hidden rounded-3xl border border-black/5 bg-white p-3.5 shadow-sm hover-lift transition-all duration-400 tilt-container">
+    <div className="group relative flex flex-col overflow-hidden rounded-3xl border border-[var(--brand-border)] bg-white p-3.5 shadow-sm hover-lift transition-all duration-400 tilt-container">
       {/* Image Area */}
-      <div className="relative aspect-[4/3] w-full overflow-hidden rounded-2xl bg-[#f5f3ef] hover-scale-large">
+      <div className="relative aspect-[4/3] w-full overflow-hidden rounded-2xl bg-[#faf3f5] hover-scale-large">
         <Link href={`/products/${product.id}`} className="block h-full w-full">
           <Image
             src={product.image}
@@ -61,14 +62,14 @@ export default function ProductCard({ product, onQuickView }: Props) {
         <div className="absolute left-3 top-3 flex flex-col gap-1.5 z-10 pointer-events-none">
           {product.badge && (
             <span
-              className={`rounded-full px-2.5 py-0.5 text-[10px] font-extrabold text-white shadow-sm animate-pulse-subtle ${
+              className={`rounded-full px-2.5 py-0.5 text-[10px] font-extrabold shadow-sm animate-pulse-subtle ${
                 product.badge === "Bán chạy" || product.badge === "Top 1"
-                  ? "bg-amber-500"
+                  ? "bg-[var(--brand-yellow)] text-[#69512d]"
                   : product.badge === "Mới"
-                  ? "bg-emerald-500"
+                  ? "bg-[#e7f0df] text-[#416348]"
                   : product.badge === "Premium"
-                  ? "bg-purple-600"
-                  : "bg-rose-500"
+                  ? "bg-[#ede4f4] text-[#6c517c]"
+                  : "bg-[var(--brand-pink)] text-[var(--primary)]"
               }`}
             >
               {product.badge}
@@ -131,7 +132,7 @@ export default function ProductCard({ product, onQuickView }: Props) {
                 e.stopPropagation();
                 onQuickView(product);
               }}
-              className="w-full rounded-xl bg-white/95 py-2 text-xs font-bold text-gray-800 shadow-md backdrop-blur-md transition hover:bg-black hover:text-white hover-lift"
+              className="w-full rounded-xl bg-white/95 py-2 text-xs font-bold text-gray-800 shadow-md backdrop-blur-md transition hover:bg-[var(--brand-primary-hover)] hover:text-white hover-lift"
             >
               👁️ Xem nhanh
             </button>
@@ -183,8 +184,8 @@ export default function ProductCard({ product, onQuickView }: Props) {
         <div className="mt-4 flex items-center justify-between pt-3 border-t border-gray-100">
           <div>
             <div className="flex items-baseline gap-1.5">
-              <span className="text-base font-extrabold text-amber-600 gradient-text">
-                {product.price.toLocaleString("vi-VN")}₫
+              <span className="price-text text-base font-extrabold">
+                {product.priceConfirmed === false ? "Giá chờ xác nhận" : product.price.toLocaleString("vi-VN") + "₫"}
               </span>
             </div>
             {product.originalPrice && (
@@ -200,7 +201,7 @@ export default function ProductCard({ product, onQuickView }: Props) {
             className={`flex h-10 w-10 items-center justify-center rounded-full transition-all duration-300 active:scale-95 shadow hover-lift btn-hover-premium ${
               isAdding
                 ? "bg-emerald-600 text-white"
-                : "bg-black text-white hover:bg-amber-600"
+                : "bg-[var(--primary)] text-white hover:bg-amber-600"
             }`}
           >
             {isAdding ? (

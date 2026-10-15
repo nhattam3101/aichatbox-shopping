@@ -3,11 +3,18 @@
 import Link from "next/link";
 import Image from "next/image";
 import { useState } from "react";
-import { products, type Product } from "@/data/products";
+import { products, accessories, type Product } from "@/data/products";
 import ChatBox from "@/components/ChatBox";
 import Navbar from "@/components/Navbar";
 import ProductCard from "@/components/ProductCard";
 import QuickViewModal from "@/components/QuickViewModal";
+
+const showcaseCards = [
+  { product: products.find(p => p.id === 1)!, label: "Bao bảo vệ iPad / Tablet 11 inch", tone: "bg-[#f8eee8]" },
+  { product: products.find(p => p.id === 3)!, label: "Bao bảo vệ Laptop 14 inch", tone: "bg-[#eaf1f4]" },
+  { product: accessories.find(p => p.id === 15)!, label: "Móc treo trang trí ngôi sao", tone: "bg-[#f4efdf]" },
+  { product: accessories.find(p => p.id === 16)!, label: "Móc treo trang trí hoa", tone: "bg-[#f7eaf0]" },
+];
 
 export default function Home() {
   const [activeTab, setActiveTab] = useState<"bestseller" | "new" | "leather" | "shockproof" | "pastel">("bestseller");
@@ -34,7 +41,7 @@ export default function Home() {
   const faqs = [
     {
       q: "Làm thế nào để biết bao laptop có vừa khít với máy của tôi?",
-      a: "Bạn có thể dùng công cụ 'Chọn size' thông minh trên thanh menu hoặc bấm vào nút 'AI Tư Vấn'. Chỉ cần nhập tên model máy (như MacBook Air M2, ThinkPad X1, Dell XPS...) hoặc chiều dài x rộng thực tế, hệ thống sẽ tự tính độ ôm sát chuẩn xác 100%.",
+      a: "Bạn có thể dùng công cụ 'Chọn size' thông minh trên thanh menu hoặc bấm vào nút 'AI Tư Vấn'. Chỉ cần nhập tên model máy (như MacBook Air M2, ThinkPad X1, Dell XPS...) hoặc chiều dài × rộng × độ dày thực tế. Đo máy gập kín và kiểm tra đủ ba chiều trước khi mua.",
     },
     {
       q: "Tôi có được mở hàng kiểm tra trước khi thanh toán không?",
@@ -46,12 +53,12 @@ export default function Home() {
     },
     {
       q: "Chất liệu của bao CaseUp có chống nước tốt không?",
-      a: "Các dòng Chống nước, Da cao cấp Saffiano và Chống sốc 360 đều được phủ lớp kháng nước chuyên dụng và khóa kéo chống thấm, ngăn chặn hoàn toàn tia nước mưa bắn vào làm ướt thiết bị bên trong.",
+      a: "Khả năng kháng nước khác nhau theo từng sản phẩm. Hãy xem thông tin chất liệu và kháng nước trên trang chi tiết; không mặc định bao có thể chống thấm hoàn toàn.",
     },
   ];
 
   return (
-    <main className="min-h-screen bg-[#fafaf8] text-[#1a1a1a] selection:bg-amber-100 selection:text-amber-900">
+    <main className="home-page min-h-screen bg-[var(--brand-cream)] text-[#1a1a1a] selection:bg-amber-100 selection:text-amber-900">
       <Navbar />
 
       {/* Announcement Marquee Ticker */}
@@ -82,7 +89,7 @@ export default function Home() {
         <div className="absolute -right-40 -top-40 h-[550px] w-[550px] rounded-full bg-amber-200/30 blur-[120px] pointer-events-none" />
         <div className="absolute -bottom-20 -left-20 h-[450px] w-[450px] rounded-full bg-orange-200/25 blur-[100px] pointer-events-none" />
 
-        <div className="mx-auto grid max-w-7xl items-center gap-12 px-6 md:grid-cols-2 md:px-12 lg:gap-16">
+        <div className="mx-auto grid max-w-7xl items-center gap-10 px-6 md:grid-cols-[minmax(0,2fr)_minmax(0,3fr)] md:px-8 lg:gap-12 lg:px-12">
           <div className="relative z-10 space-y-6">
             <div className="inline-flex items-center gap-2.5 rounded-full border border-amber-300/80 bg-amber-50 px-4 py-2 text-xs font-bold text-amber-800 shadow-sm animate-pulse-subtle">
               <span className="relative flex h-2.5 w-2.5">
@@ -92,22 +99,22 @@ export default function Home() {
               <span>Bao Laptop Thế Hệ Mới 2026 • Tích Hợp AI</span>
             </div>
 
-            <h1 className="text-4xl font-extrabold leading-[1.08] tracking-tight sm:text-5xl lg:text-7xl">
+            <h1 className="text-4xl font-extrabold leading-[1.08] tracking-tight sm:text-5xl lg:text-6xl">
               Bảo vệ máy yêu,
               <br />
-              <span className="bg-gradient-to-r from-amber-500 via-orange-500 to-rose-500 bg-clip-text text-transparent">
+              <span className="text-amber-600">
                 chuẩn gu tinh tế.
               </span>
             </h1>
 
             <p className="max-w-lg text-base md:text-lg leading-relaxed text-gray-600">
-              Khám phá bộ sưu tập 24 mẫu bao laptop cao cấp từ da Saffiano, đệm khí CornerArmor đến phong cách pastel Hàn Quốc. Được may đo chuẩn xác cho từng dòng máy.
+              Khám phá bộ sưu tập các mẫu bao laptop cao cấp từ da Saffiano, lựa chọn kích thước đến phong cách pastel Hàn Quốc. Được may đo chuẩn xác cho từng dòng máy.
             </p>
 
             <div className="flex flex-wrap items-center gap-4 pt-2">
               <Link
                 href="/products"
-                className="group inline-flex items-center gap-2 rounded-full bg-[#1a1a1a] px-8 py-4 text-sm font-bold text-white shadow-xl transition-all duration-300 hover:bg-black hover:-translate-y-0.5 hover:shadow-2xl"
+                className="group inline-flex items-center gap-2 rounded-full bg-black px-8 py-4 text-sm font-bold text-white shadow-md transition-[background-color,transform,box-shadow] duration-200 hover:bg-neutral-800 hover:-translate-y-0.5 hover:shadow-lg"
               >
                 <span>Khám phá 24 sản phẩm</span>
                 <svg className="h-4 w-4 transition-transform group-hover:translate-x-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
@@ -124,7 +131,7 @@ export default function Home() {
             </div>
 
             {/* Social Proof */}
-            <div className="pt-6 border-t border-black/5 flex items-center gap-5">
+            <div className="pt-6 border-t border-[var(--brand-border)] flex items-center gap-5">
               <div className="flex -space-x-3">
                 {["ĐH", "TA", "MN", "QT", "LK"].map((initials, i) => (
                   <div
@@ -155,45 +162,40 @@ export default function Home() {
 
           {/* Hero Visual Collage */}
           <div className="relative">
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-4">
-                <div className="relative h-56 overflow-hidden rounded-3xl shadow-lg border border-black/5 bg-[#f5f1eb] group">
-                  <Image src="/products/bao1.jpg" alt="CaseUp Minimal" fill className="object-cover group-hover:scale-105 transition duration-500" priority />
-                  <span className="absolute bottom-3 left-3 rounded-full bg-white/90 px-3 py-1 text-[11px] font-bold text-gray-800 shadow backdrop-blur-md">
-                    Minimal Sleeve 13
-                  </span>
+            <div className="grid grid-cols-2 items-start gap-4 sm:gap-5 lg:gap-6">
+              {[[showcaseCards[0], showcaseCards[2]], [showcaseCards[1], showcaseCards[3]]].map((column, columnIndex) => (
+                <div key={columnIndex} className={`min-w-0 space-y-4 sm:space-y-5 lg:space-y-6 ${columnIndex === 1 ? "pt-8 sm:pt-12" : ""}`}>
+                  {column.map(({ product, label, tone }, cardIndex) => (
+                    <Link
+                      key={product.id}
+                      href={`/products/${product.id}`}
+                      className={`group relative block overflow-hidden rounded-[28px] shadow-[0_8px_24px_-12px_rgba(70,50,40,0.22)] transition-[transform,box-shadow] duration-200 hover:-translate-y-0.5 hover:shadow-[0_12px_28px_-12px_rgba(70,50,40,0.3)] focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-amber-600 sm:rounded-[36px] ${tone} ${columnIndex === cardIndex ? "aspect-[4/5]" : "aspect-[1/1]"}`}
+                    >
+                      <Image
+                        src={product.image}
+                        alt={label}
+                        fill
+                        sizes="(max-width: 767px) calc((100vw - 64px) / 2), (max-width: 1279px) 27vw, 320px"
+                        className="object-cover transition-transform duration-300 group-hover:scale-[1.03]"
+                        preload={cardIndex === 0}
+                      />
+                      <span className="absolute bottom-3 left-3 right-3 w-fit max-w-[calc(100%-1.5rem)] rounded-xl bg-[#fffaf5]/90 px-3 py-2 text-[10px] font-semibold leading-snug text-black backdrop-blur-sm sm:bottom-4 sm:left-4 sm:right-4 sm:text-xs">
+                        {label}
+                      </span>
+                    </Link>
+                  ))}
                 </div>
-                <div className="relative h-64 overflow-hidden rounded-3xl shadow-lg border border-black/5 bg-[#f5f1eb] group">
-                  <Image src="/products/bao5.jpg" alt="CaseUp Pastel" fill className="object-cover group-hover:scale-105 transition duration-500" />
-                  <span className="absolute bottom-3 left-3 rounded-full bg-white/90 px-3 py-1 text-[11px] font-bold text-gray-800 shadow backdrop-blur-md">
-                    Pastel Cloud 13
-                  </span>
-                </div>
-              </div>
-              <div className="mt-8 space-y-4">
-                <div className="relative h-64 overflow-hidden rounded-3xl shadow-lg border border-black/5 bg-[#f5f1eb] group">
-                  <Image src="/products/bao7.png" alt="CaseUp ShockGuard" fill className="object-cover group-hover:scale-105 transition duration-500" />
-                  <span className="absolute bottom-3 left-3 rounded-full bg-white/90 px-3 py-1 text-[11px] font-bold text-gray-800 shadow backdrop-blur-md">
-                    ShockGuard 15.6
-                  </span>
-                </div>
-                <div className="relative h-56 overflow-hidden rounded-3xl shadow-lg border border-black/5 bg-[#f5f1eb] group">
-                  <Image src="/products/bao4.jpg" alt="CaseUp Saffiano" fill className="object-cover group-hover:scale-105 transition duration-500" />
-                  <span className="absolute bottom-3 left-3 rounded-full bg-white/90 px-3 py-1 text-[11px] font-bold text-gray-800 shadow backdrop-blur-md">
-                    Saffiano Sleeve 16
-                  </span>
-                </div>
-              </div>
+              ))}
             </div>
 
             {/* Floating feature pills */}
-            <div className="absolute -bottom-5 left-1/2 -translate-x-1/2 z-20 flex items-center gap-3 rounded-full border border-black/10 bg-white/95 px-6 py-3 shadow-2xl backdrop-blur-xl">
+            <div className="relative mx-auto mt-5 w-fit max-w-full z-20 flex items-center gap-3 rounded-full border border-black/10 bg-white/95 px-6 py-3 shadow-2xl backdrop-blur-xl">
               <div className="flex h-10 w-10 items-center justify-center rounded-full bg-amber-50 text-xl">
                 🛡️
               </div>
               <div className="text-left">
                 <p className="text-[11px] text-gray-400 leading-tight">Chống va đập 360°</p>
-                <p className="text-sm font-extrabold text-amber-600">Đệm Khí CornerArmor</p>
+                <p className="text-sm font-extrabold text-amber-600">Chọn size theo số đo</p>
               </div>
             </div>
           </div>
@@ -201,7 +203,7 @@ export default function Home() {
       </section>
 
       {/* Trust Highlights Strip */}
-      <section className="border-y border-black/5 bg-white">
+      <section className="border-y border-[var(--brand-border)] bg-white">
         <div className="mx-auto grid max-w-7xl grid-cols-2 divide-x divide-y md:divide-y-0 divide-black/5 md:grid-cols-4">
           {[
             { icon: "🚚", title: "Freeship Toàn Quốc", desc: "Áp dụng đơn từ 300.000₫" },
@@ -209,7 +211,7 @@ export default function Home() {
             { icon: "🤖", title: "AI Tư Vấn Chọn Size", desc: "Hỗ trợ 24/7 trực tuyến" },
             { icon: "💵", title: "Kiểm Tra Nhận COD", desc: "Ưng ý mới thanh toán" },
           ].map((item, i) => (
-            <div key={i} className="flex items-center gap-4 p-6 hover:bg-[#fafaf8] transition">
+            <div key={i} className="flex items-center gap-4 p-6 hover:bg-[var(--brand-cream)] transition">
               <span className="text-3xl">{item.icon}</span>
               <div>
                 <p className="text-sm font-bold text-gray-900">{item.title}</p>
@@ -221,7 +223,7 @@ export default function Home() {
       </section>
 
       {/* Quick Laptop Size Selector Bar */}
-      <section className="py-12 px-6 md:px-12 bg-[#f8f6f2] border-b border-black/5">
+      <section className="py-12 px-6 md:px-12 bg-[#f8f6f2] border-b border-[var(--brand-border)]">
         <div className="mx-auto max-w-7xl">
           <div className="flex flex-col md:flex-row items-center justify-between gap-6">
             <div>
@@ -255,7 +257,7 @@ export default function Home() {
               <Link
                 key={name}
                 href="/size-guide"
-                className="rounded-full border border-black/5 bg-white px-4 py-2 text-xs font-semibold text-gray-700 shadow-sm transition hover:border-black hover:bg-black hover:text-white"
+                className="rounded-full border border-[var(--brand-border)] bg-white px-4 py-2 text-xs font-semibold text-gray-700 shadow-sm transition hover:border-black/25 hover:bg-[#f3eeea]"
               >
                 💻 {name}
               </Link>
@@ -291,7 +293,7 @@ export default function Home() {
                   onClick={() => setActiveTab(tab.id as typeof activeTab)}
                   className={`rounded-full px-4 py-2 text-xs font-bold transition-all ${
                     activeTab === tab.id
-                      ? "bg-black text-white shadow-md scale-105"
+                      ? "bg-[var(--primary)] text-white shadow-md scale-105"
                       : "bg-white border border-gray-200 text-gray-600 hover:bg-gray-100"
                   }`}
                 >
@@ -315,7 +317,7 @@ export default function Home() {
           <div className="mt-12 text-center">
             <Link
               href="/products"
-              className="inline-flex items-center gap-2 rounded-full border-2 border-black bg-transparent px-8 py-3.5 text-sm font-bold text-black transition-all hover:bg-black hover:text-white"
+              className="inline-flex items-center gap-2 rounded-full border-2 border-black bg-transparent px-8 py-3.5 text-sm font-bold text-black transition-colors hover:bg-black/5"
             >
               Xem tất cả 24 sản phẩm & lọc nâng cao →
             </Link>
@@ -346,13 +348,13 @@ export default function Home() {
                     const btn = document.getElementById("chatbox-toggle");
                     if (btn) btn.click();
                   }}
-                  className="rounded-full bg-amber-500 px-6 py-3.5 text-xs sm:text-sm font-bold text-black shadow-lg hover:bg-amber-400 transition"
+                  className="rounded-full bg-[#f2c877] px-6 py-3.5 text-xs sm:text-sm font-bold text-black shadow-md hover:bg-[#e7bb68] transition"
                 >
                   Mở Trợ Lý AI Ngay
                 </button>
                 <Link
                   href="/size-guide"
-                  className="rounded-full border border-white/20 bg-white/5 px-6 py-3.5 text-xs sm:text-sm font-bold text-white hover:bg-white/15 transition"
+                  className="rounded-full border border-white/20 bg-white/5 px-6 py-3.5 text-xs sm:text-sm font-bold text-white hover:bg-white/10 transition"
                 >
                   Công cụ đo kích thước
                 </Link>
@@ -372,7 +374,7 @@ export default function Home() {
                     Chào bạn! MacBook Pro 14 có kích thước <strong>31.3 × 22.1 cm</strong>.
                   </p>
                   <p>
-                    Mình gợi ý mẫu <strong>Heritage Leatherette 14</strong> da sáp vintage hoặc <strong>Daily Sleeve 14 Pro</strong>. Thiết kế nắp khóa từ không làm xước máy và cực kỳ trang nhã khi đi họp! ✨
+                    Bạn hãy đo thêm độ dày máy để mình kiểm tra đủ ba chiều. Có thể tham khảo <strong>{products[2].name}</strong>; thông tin màu sắc và chất liệu nằm trong trang chi tiết sản phẩm.
                   </p>
                 </div>
               </div>
@@ -382,7 +384,7 @@ export default function Home() {
       </section>
 
       {/* Customer Reviews Section */}
-      <section className="bg-white py-20 px-6 md:px-12 border-y border-black/5">
+      <section className="bg-white py-20 px-6 md:px-12 border-y border-[var(--brand-border)]">
         <div className="mx-auto max-w-7xl">
           <div className="text-center max-w-xl mx-auto">
             <span className="text-xs font-bold uppercase tracking-wider text-amber-600">
@@ -408,7 +410,7 @@ export default function Home() {
                 role: "Content Creator",
                 laptop: "MacBook Air M2 13",
                 avatar: "👩‍🎨",
-                comment: "Màu Pastel Cloud xinh xỉu! Chần bông gợn sóng mềm như gối ôm mà lại có ngăn túi phụ đựng cáp sạc gọn gàng. Giao hàng 2 ngày là nhận được.",
+                comment: "Màu bao xinh xỉu! Chần bông gợn sóng mềm như gối ôm mà lại có ngăn túi phụ đựng cáp sạc gọn gàng. Giao hàng 2 ngày là nhận được.",
                 rating: 5,
               },
               {
@@ -420,7 +422,7 @@ export default function Home() {
                 rating: 5,
               },
             ].map((item, idx) => (
-              <div key={idx} className="rounded-3xl border border-black/5 bg-[#faf9f6] p-6 shadow-sm hover:shadow-md transition">
+              <div key={idx} className="rounded-3xl border border-[var(--brand-border)] bg-[var(--brand-cream)] p-6 shadow-sm hover:shadow-md transition">
                 <div className="flex items-center gap-3">
                   <div className="flex h-11 w-11 items-center justify-center rounded-full bg-white shadow-sm text-xl">
                     {item.avatar}
@@ -463,7 +465,7 @@ export default function Home() {
             return (
               <div
                 key={index}
-                className="overflow-hidden rounded-2xl border border-black/5 bg-white shadow-sm transition"
+                className="overflow-hidden rounded-2xl border border-[var(--brand-border)] bg-white shadow-sm transition"
               >
                 <button
                   onClick={() => setOpenFaq(isOpen ? null : index)}
@@ -506,11 +508,11 @@ export default function Home() {
           <div>
             <h4 className="text-xs font-bold uppercase tracking-wider text-gray-300 mb-3">Sản phẩm</h4>
             <ul className="space-y-2 text-xs text-gray-400">
-              <li><Link href="/products" className="hover:text-white transition">Tất cả sản phẩm (24 mẫu)</Link></li>
-              <li><Link href="/products" className="hover:text-white transition">Bao 13 inch Minimal</Link></li>
-              <li><Link href="/products" className="hover:text-white transition">Bao 14 inch Pro</Link></li>
-              <li><Link href="/products" className="hover:text-white transition">Bao 15.6 inch ShockGuard</Link></li>
-              <li><Link href="/products" className="hover:text-white transition">Bao 16 inch Executive</Link></li>
+              <li><Link href="/products" className="hover:text-white transition">Tất cả sản phẩm ({products.length} mẫu)</Link></li>
+              <li><Link href="/products" className="hover:text-white transition">{products[1].name}</Link></li>
+              <li><Link href="/products" className="hover:text-white transition">{products[2].name}</Link></li>
+              <li><Link href="/products" className="hover:text-white transition">{products[3].name}</Link></li>
+              <li><Link href="/products" className="hover:text-white transition">{products[4].name}</Link></li>
             </ul>
           </div>
 

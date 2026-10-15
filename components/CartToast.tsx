@@ -60,8 +60,8 @@ export default function CartToast({ notification, onClose }: Props) {
         </div>
 
         {/* Product card */}
-        <div className="mt-3.5 flex items-center gap-3.5 rounded-2xl border border-black/5 bg-[#fafaf8] p-3 hover-lift transition-transform duration-300">
-          <div className="relative h-14 w-14 shrink-0 overflow-hidden rounded-xl border border-black/5 bg-[#f0ece7] hover-scale">
+        <div className="mt-3.5 flex items-center gap-3.5 rounded-2xl border border-[var(--brand-border)] bg-[var(--brand-cream)] p-3 hover-lift transition-transform duration-300">
+          <div className="relative h-14 w-14 shrink-0 overflow-hidden rounded-xl border border-[var(--brand-border)] bg-[#f0ece7] hover-scale">
             <Image
               src={product.image}
               alt={product.name}
@@ -84,7 +84,7 @@ export default function CartToast({ notification, onClose }: Props) {
                 </span>
               )}
             </div>
-            <p className="mt-1 text-xs font-bold text-amber-600 gradient-text">
+            <p className="mt-1 text-xs font-bold price-text">
               {product.price.toLocaleString("vi-VN")}₫
               <span className="font-normal text-gray-500"> × {product.quantity}</span>
             </p>
@@ -96,7 +96,7 @@ export default function CartToast({ notification, onClose }: Props) {
           <Link
             href="/cart"
             onClick={onClose}
-            className="flex flex-1 items-center justify-center gap-1.5 rounded-full bg-black py-2.5 px-4 text-xs font-semibold text-white shadow-sm transition hover:bg-gray-800 hover:shadow-md hover-lift btn-hover-premium"
+            className="flex flex-1 items-center justify-center gap-1.5 rounded-full bg-[var(--primary)] py-2.5 px-4 text-xs font-semibold text-white shadow-sm transition hover:bg-[var(--brand-primary-hover)] hover:shadow-md hover-lift btn-hover-premium"
           >
             <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />

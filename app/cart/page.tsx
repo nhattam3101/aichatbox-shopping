@@ -40,9 +40,9 @@ export default function CartPage() {
 
   // Checkout modal state
   const [isCheckoutOpen, setIsCheckoutOpen] = useState(false);
-  const [customerName, setCustomerName] = useState("Nguyễn Văn Anh");
+  const [customerName, setCustomerName] = useState("Nguyễn Ngọc Phương Uyên");
   const [phone, setPhone] = useState("0988 123 456");
-  const [address, setAddress] = useState("123 Đường Cầu Giấy, Quận Cầu Giấy, Hà Nội");
+  const [address, setAddress] = useState("Cam Ranh, Khánh Hòa");
   const [note, setNote] = useState("Giao giờ hành chính, gọi trước khi đến");
   const [paymentMethod, setPaymentMethod] = useState<"cod" | "banking">("cod");
 
@@ -127,7 +127,7 @@ export default function CartPage() {
   const freeshipProgress = Math.min(100, Math.round((rawSubtotal / FREESHIP_THRESHOLD) * 100));
 
   return (
-    <main className="min-h-screen bg-[#faf9f6] text-[#1a1a1a]">
+    <main className="min-h-screen bg-[var(--brand-cream)] text-[#1a1a1a]">
       <Navbar />
 
       <section className="mx-auto max-w-7xl px-6 py-10 md:px-12 lg:px-20">
@@ -147,7 +147,7 @@ export default function CartPage() {
                 {remainingForFreeship === 0 ? (
                   <span>Chúc mừng! Bạn đã nhận được <strong>Miễn phí giao hàng toàn quốc</strong> 🎉</span>
                 ) : (
-                  <span>Mua thêm <strong>{remainingForFreeship.toLocaleString("vi-VN")}₫</strong> để được <strong>FREESHIP toàn quốc!</strong></span>
+                  <span>Mua thêm <strong className="price-text">{remainingForFreeship.toLocaleString("vi-VN")}₫</strong> để được <strong>FREESHIP toàn quốc!</strong></span>
                 )}
               </span>
               <span className="font-bold">{freeshipProgress}%</span>
@@ -165,10 +165,10 @@ export default function CartPage() {
         {placedOrder ? (
           <div className="mt-8 space-y-8 animate-fade-in-up">
             {/* Banner chúc mừng */}
-            <div className="relative overflow-hidden rounded-3xl border border-emerald-500/20 bg-gradient-to-br from-emerald-50 via-white to-amber-50 p-6 md:p-10 shadow-lg">
+            <div className="relative overflow-hidden rounded-3xl border border-emerald-200/60 bg-[#f5f8f2] p-6 md:p-10 shadow-lg">
               <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
                 <div className="flex items-start gap-4">
-                  <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-emerald-500 text-white text-2xl shadow-lg shadow-emerald-500/30">
+                  <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-emerald-100 text-emerald-800 text-2xl">
                     ✓
                   </div>
                   <div>
@@ -192,7 +192,7 @@ export default function CartPage() {
                   <p className="text-[11px] font-semibold text-gray-400 uppercase tracking-wider">
                     Tự động làm mới sau
                   </p>
-                  <p className="text-3xl font-extrabold text-amber-600 font-mono my-1">
+                  <p className="text-3xl font-extrabold text-stone-700 font-mono my-1">
                     00:{timeLeft < 10 ? `0${timeLeft}` : timeLeft}
                   </p>
                   <p className="text-[10px] text-gray-400">để bạn có thể trải nghiệm lại</p>
@@ -209,19 +209,19 @@ export default function CartPage() {
               </div>
 
               {/* Progress Steps */}
-              <div className="mt-8 border-t border-black/5 pt-6">
+              <div className="mt-8 border-t border-[var(--brand-border)] pt-6">
                 <div className="grid grid-cols-4 gap-2 text-center text-xs">
                   <div className="space-y-1.5">
-                    <div className="mx-auto flex h-8 w-8 items-center justify-center rounded-full bg-emerald-500 text-white font-bold">
+                    <div className="mx-auto flex h-8 w-8 items-center justify-center rounded-full bg-emerald-100 text-emerald-800 font-bold">
                       ✓
                     </div>
                     <p className="font-bold text-emerald-700">Đã nhận đơn</p>
                   </div>
                   <div className="space-y-1.5">
-                    <div className="mx-auto flex h-8 w-8 items-center justify-center rounded-full bg-amber-500 text-white font-bold animate-pulse">
+                    <div className="mx-auto flex h-8 w-8 items-center justify-center rounded-full bg-[#efe4d6] text-[#70543c] font-bold">
                       📦
                     </div>
-                    <p className="font-bold text-amber-700">Đang đóng gói</p>
+                    <p className="font-bold text-[#70543c]">Đang đóng gói</p>
                   </div>
                   <div className="space-y-1.5">
                     <div className="mx-auto flex h-8 w-8 items-center justify-center rounded-full bg-gray-100 text-gray-400 font-bold">
@@ -241,7 +241,7 @@ export default function CartPage() {
 
             {/* Chi tiết đơn */}
             <div className="grid gap-6 md:grid-cols-2">
-              <div className="rounded-3xl border border-black/5 bg-white p-6 shadow-sm">
+              <div className="rounded-3xl border border-[var(--brand-border)] bg-white p-6 shadow-sm">
                 <h3 className="font-bold text-gray-900 mb-4">Sản phẩm ({placedOrder.totalQuantity})</h3>
                 <div className="divide-y divide-gray-100">
                   {placedOrder.items.map((item, idx) => (
@@ -253,7 +253,7 @@ export default function CartPage() {
                         <h4 className="font-bold text-xs text-gray-900 truncate">{item.name}</h4>
                         <p className="text-[11px] text-gray-400">{item.size} • Số lượng: {item.quantity}</p>
                       </div>
-                      <span className="font-bold text-xs text-amber-600">
+                      <span className="price-text font-bold text-xs">
                         {(item.price * item.quantity).toLocaleString("vi-VN")}₫
                       </span>
                     </div>
@@ -261,38 +261,38 @@ export default function CartPage() {
                 </div>
               </div>
 
-              <div className="rounded-3xl border border-black/5 bg-white p-6 shadow-sm space-y-3 text-xs">
+              <div className="rounded-3xl border border-[var(--brand-border)] bg-white p-6 shadow-sm space-y-4 text-sm leading-relaxed">
                 <h3 className="font-bold text-gray-900 text-sm mb-3">Thông tin nhận hàng</h3>
                 <div>
-                  <span className="text-gray-400">Khách hàng:</span>
+                  <span className="text-gray-600">Khách hàng:</span>
                   <span className="ml-2 font-bold text-gray-800">{placedOrder.customerName} ({placedOrder.phone})</span>
                 </div>
                 <div>
-                  <span className="text-gray-400">Địa chỉ:</span>
+                  <span className="text-gray-600">Địa chỉ:</span>
                   <span className="ml-2 text-gray-700">{placedOrder.address}</span>
                 </div>
                 {placedOrder.note && (
                   <div>
-                    <span className="text-gray-400">Ghi chú:</span>
+                    <span className="text-gray-600">Ghi chú:</span>
                     <span className="ml-2 italic text-gray-600">&ldquo;{placedOrder.note}&rdquo;</span>
                   </div>
                 )}
                 <div>
-                  <span className="text-gray-400">Thanh toán:</span>
-                  <span className="ml-2 font-bold text-emerald-600">
+                  <span className="text-gray-600">Thanh toán:</span>
+                  <span className="ml-2 font-semibold text-gray-800">
                     {placedOrder.paymentMethod === "cod" ? "Tiền mặt khi nhận hàng (COD)" : "Chuyển khoản VietQR"}
                   </span>
                 </div>
-                <div className="pt-3 border-t border-gray-100 flex justify-between items-baseline text-sm font-bold">
+                <div className="pt-4 border-t border-gray-200 flex flex-wrap justify-between items-baseline gap-2 text-sm font-bold">
                   <span>Tổng thanh toán:</span>
-                  <span className="text-xl text-amber-600 font-extrabold">{placedOrder.total.toLocaleString("vi-VN")}₫</span>
+                  <span className="price-text text-xl font-extrabold">{placedOrder.total.toLocaleString("vi-VN")}₫</span>
                 </div>
               </div>
             </div>
           </div>
         ) : cart.length === 0 ? (
           /* ───── TRƯỜNG HỢP 2: GIỎ TRỐNG ───── */
-          <div className="mt-12 rounded-3xl border border-black/5 bg-white p-12 text-center shadow-sm max-w-xl mx-auto">
+          <div className="mt-12 rounded-3xl border border-[var(--brand-border)] bg-white p-12 text-center shadow-sm max-w-xl mx-auto">
             {justReset && (
               <div className="mb-4 inline-flex items-center gap-1.5 rounded-full bg-emerald-50 px-3 py-1 text-xs font-semibold text-emerald-700">
                 ✓ Đơn hàng trước đã hoàn thành và hệ thống đã làm mới giỏ hàng.
@@ -303,11 +303,11 @@ export default function CartPage() {
             </div>
             <h2 className="mt-4 text-xl font-bold text-gray-900">Giỏ hàng của bạn đang trống</h2>
             <p className="mt-2 text-xs md:text-sm text-gray-500 max-w-sm mx-auto">
-              Chưa có sản phẩm nào được chọn. Hãy khám phá bộ sưu tập 24 mẫu bao laptop cao cấp ngay hôm nay!
+              Chưa có sản phẩm nào được chọn. Hãy khám phá bộ sưu tập các mẫu bao laptop cao cấp ngay hôm nay!
             </p>
             <Link
               href="/products"
-              className="mt-6 inline-flex items-center gap-2 rounded-full bg-black px-7 py-3.5 text-xs md:text-sm font-semibold text-white shadow-md hover:bg-gray-800 transition"
+              className="mt-6 inline-flex items-center gap-2 rounded-full bg-[var(--primary)] px-7 py-3.5 text-xs md:text-sm font-semibold text-white shadow-md hover:bg-[var(--brand-primary-hover)] transition"
             >
               <span>Khám phá sản phẩm ngay</span>
               <span>→</span>
@@ -321,9 +321,9 @@ export default function CartPage() {
               {cart.map((item) => (
                 <div
                   key={`${item.id}-${item.selectedColor || "default"}`}
-                  className="flex gap-4 sm:gap-6 rounded-3xl border border-black/5 bg-white p-4 sm:p-6 shadow-sm transition hover:shadow-md"
+                  className="flex gap-4 sm:gap-6 rounded-3xl border border-[var(--brand-border)] bg-white p-4 sm:p-6 shadow-sm transition hover:shadow-md"
                 >
-                  <div className="relative h-28 w-28 shrink-0 overflow-hidden rounded-2xl bg-[#f2eee9] border border-black/5">
+                  <div className="relative h-28 w-28 shrink-0 overflow-hidden rounded-2xl bg-[#f2eee9] border border-[var(--brand-border)]">
                     <Image
                       src={item.image}
                       alt={item.name}
@@ -361,7 +361,7 @@ export default function CartPage() {
                         )}
                       </div>
 
-                      <p className="mt-2 font-bold text-amber-600 text-sm sm:text-base">
+                      <p className="price-text mt-2 font-bold text-sm sm:text-base">
                         {item.price.toLocaleString("vi-VN")}₫
                       </p>
                     </div>
@@ -389,7 +389,7 @@ export default function CartPage() {
 
                       <span className="text-xs font-semibold text-gray-700">
                         Thành tiền:{" "}
-                        <strong className="text-gray-900">
+                        <strong className="price-text">
                           {(item.price * item.quantity).toLocaleString("vi-VN")}₫
                         </strong>
                       </span>
@@ -402,7 +402,7 @@ export default function CartPage() {
             {/* Cột phải: Voucher & Tóm tắt thanh toán */}
             <div className="space-y-4">
               {/* Voucher Box */}
-              <div className="rounded-3xl border border-black/5 bg-white p-6 shadow-sm">
+              <div className="rounded-3xl border border-[var(--brand-border)] bg-white p-6 shadow-sm">
                 <h3 className="text-sm font-bold text-gray-900 mb-3 flex items-center gap-1.5">
                   🎟️ Mã giảm giá / Voucher
                 </h3>
@@ -413,7 +413,7 @@ export default function CartPage() {
                       <p className="font-bold text-emerald-800">
                         Đang áp dụng: {appliedCoupon}
                       </p>
-                      <p className="text-[11px] text-emerald-600">
+                      <p className="price-text text-[11px]">
                         Giảm {discountAmount.toLocaleString("vi-VN")}₫
                       </p>
                     </div>
@@ -436,7 +436,7 @@ export default function CartPage() {
                       />
                       <button
                         type="submit"
-                        className="rounded-2xl bg-black px-4 py-2 text-xs font-semibold text-white hover:bg-gray-800 transition"
+                        className="rounded-2xl bg-[var(--primary)] px-4 py-2 text-xs font-semibold text-white hover:bg-[var(--brand-primary-hover)] transition"
                       >
                         Áp dụng
                       </button>
@@ -470,7 +470,7 @@ export default function CartPage() {
               </div>
 
               {/* Order Summary Box */}
-              <div className="rounded-3xl border border-black/5 bg-white p-6 shadow-sm">
+              <div className="rounded-3xl border border-[var(--brand-border)] bg-white p-6 shadow-sm">
                 <h2 className="text-base font-bold text-gray-900">Tóm tắt đơn hàng</h2>
 
                 <div className="mt-4 space-y-2.5 border-b border-gray-100 pb-4 text-xs sm:text-sm">
@@ -480,21 +480,21 @@ export default function CartPage() {
                   </div>
                   <div className="flex justify-between text-gray-600">
                     <span>Tạm tính:</span>
-                    <span className="font-semibold text-gray-900">
+                    <span className="price-text font-semibold">
                       {rawSubtotal.toLocaleString("vi-VN")}₫
                     </span>
                   </div>
                   {discountAmount > 0 && (
                     <div className="flex justify-between text-emerald-600">
                       <span>Giảm giá ({appliedCoupon}):</span>
-                      <span className="font-bold">
+                      <span className="price-text font-bold">
                         -{discountAmount.toLocaleString("vi-VN")}₫
                       </span>
                     </div>
                   )}
                   <div className="flex justify-between text-gray-600">
                     <span>Phí vận chuyển:</span>
-                    <span className="font-semibold text-emerald-600">
+                    <span className="price-text font-semibold">
                       {remainingForFreeship === 0 ? "0₫ (Freeship)" : "Miễn phí toàn quốc"}
                     </span>
                   </div>
@@ -502,7 +502,7 @@ export default function CartPage() {
 
                 <div className="mt-4 flex items-baseline justify-between">
                   <span className="text-sm font-bold text-gray-900">Tổng thanh toán:</span>
-                  <span className="text-2xl font-extrabold text-amber-600">
+                  <span className="price-text text-2xl font-extrabold">
                     {totalPrice.toLocaleString("vi-VN")}₫
                   </span>
                 </div>
@@ -511,7 +511,7 @@ export default function CartPage() {
                 <button
                   type="button"
                   onClick={handleOpenCheckout}
-                  className="mt-6 flex w-full items-center justify-center gap-2 rounded-full bg-black py-4 text-sm font-bold text-white shadow-md transition-all hover:bg-gray-800 hover:shadow-xl active:scale-98"
+                  className="mt-6 flex w-full items-center justify-center gap-2 rounded-full bg-[var(--primary)] py-4 text-sm font-bold text-white shadow-md transition-all hover:bg-[var(--brand-primary-hover)] hover:shadow-xl active:scale-98"
                 >
                   <span>📦 Đặt Hàng Nhận COD</span>
                 </button>
@@ -625,21 +625,21 @@ export default function CartPage() {
               <div className="rounded-2xl bg-gray-50 p-4 border border-gray-100 space-y-1">
                 <div className="flex justify-between text-gray-600">
                   <span>Tổng tiền hàng ({totalItems} món):</span>
-                  <span>{rawSubtotal.toLocaleString("vi-VN")}₫</span>
+                  <span className="price-text">{rawSubtotal.toLocaleString("vi-VN")}₫</span>
                 </div>
                 {discountAmount > 0 && (
                   <div className="flex justify-between text-emerald-600 font-semibold">
                     <span>Mã giảm giá ({appliedCoupon}):</span>
-                    <span>-{discountAmount.toLocaleString("vi-VN")}₫</span>
+                    <span className="price-text">-{discountAmount.toLocaleString("vi-VN")}₫</span>
                   </div>
                 )}
                 <div className="flex justify-between text-gray-600">
                   <span>Phí ship:</span>
-                  <span className="text-emerald-600 font-bold">0₫ (Freeship)</span>
+                  <span className="price-text font-bold">0₫ (Freeship)</span>
                 </div>
                 <div className="pt-2 border-t border-gray-200 flex justify-between font-bold text-sm text-gray-900">
                   <span>Thanh toán:</span>
-                  <span className="text-base text-amber-600 font-extrabold">{totalPrice.toLocaleString("vi-VN")}₫</span>
+                  <span className="price-text text-base font-extrabold">{totalPrice.toLocaleString("vi-VN")}₫</span>
                 </div>
               </div>
 
@@ -653,7 +653,7 @@ export default function CartPage() {
                 </button>
                 <button
                   type="submit"
-                  className="flex-1 rounded-full bg-black py-3 text-xs font-semibold text-white shadow-md hover:bg-gray-800"
+                  className="flex-1 rounded-full bg-[var(--primary)] py-3 text-xs font-semibold text-white shadow-md hover:bg-[var(--brand-primary-hover)]"
                 >
                   Xác nhận đặt hàng COD
                 </button>

@@ -7,7 +7,7 @@ import {
   useState,
   ReactNode,
 } from "react";
-import type { Product } from "@/data/products";
+import { allProducts, type Product } from "@/data/products";
 
 type WishlistContextType = {
   wishlist: Product[];
@@ -23,25 +23,37 @@ type WishlistContextType = {
 const WishlistContext = createContext<WishlistContextType | undefined>(undefined);
 
 export function WishlistProvider({ children }: { children: ReactNode }) {
-  const [wishlist, setWishlist] = useState<Product[]>(() => {
-    if (typeof window === "undefined") return [];
+  const [wishlist, setWishlist] = useState<Product[]>([]);
+  const [storageReady, setStorageReady] = useState(false);
+  useEffect(() => {
+    let active = true;
+    queueMicrotask(() => {
+      if (!active) return;
+      const readSaved = (): Product[] => {
     try {
       const saved = localStorage.getItem("caseup_wishlist");
-      return saved ? JSON.parse(saved) : [];
+      const parsed: unknown = saved ? JSON.parse(saved) : [];
+      return Array.isArray(parsed) ? allProducts.filter(p => parsed.some(item => item?.id === p.id)) : [];
     } catch {
       return [];
     }
-  });
+      };
+      setWishlist(readSaved());
+      setStorageReady(true);
+    });
+    return () => { active = false; };
+  }, []);
 
   const [isWishlistOpen, setIsWishlistOpen] = useState(false);
 
   useEffect(() => {
     try {
+      if (!storageReady) return;
       localStorage.setItem("caseup_wishlist", JSON.stringify(wishlist));
     } catch {
       // ignore
     }
-  }, [wishlist]);
+  }, [wishlist, storageReady]);
 
   function toggleWishlist(product: Product) {
     setWishlist((prev) => {

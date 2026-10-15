@@ -3,7 +3,7 @@
 import { useState, useRef, useEffect } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { products, type Product } from "@/data/products";
+import { allProducts as products, type Product } from "@/data/products";
 import { useCart } from "@/components/CartContext";
 
 type Message = {
@@ -160,7 +160,7 @@ export default function ChatBox() {
           <button
             id="chatbox-toggle"
             onClick={() => setIsOpen(true)}
-            className="group relative flex items-center gap-2.5 rounded-full bg-[#1a1a1a] px-5 py-3.5 text-white shadow-[0_10px_25px_-5px_rgba(0,0,0,0.3)] transition-all hover:bg-black hover:scale-105 active:scale-95"
+            className="group relative flex items-center gap-2.5 rounded-full bg-[var(--primary)] px-5 py-3.5 text-white shadow-[0_10px_25px_-5px_rgba(0,0,0,0.3)] transition-all hover:bg-[var(--brand-primary-hover)] hover:scale-105 active:scale-95"
             aria-label="Mở trợ lý AI"
           >
             <div className="relative flex h-3 w-3">
@@ -179,7 +179,7 @@ export default function ChatBox() {
       {isOpen && (
         <div className="fixed bottom-5 right-4 sm:right-6 z-50 flex h-[620px] max-h-[88vh] w-[calc(100vw-2rem)] sm:w-[420px] flex-col overflow-hidden rounded-3xl border border-black/10 bg-white shadow-[0_25px_60px_-15px_rgba(0,0,0,0.3)] backdrop-blur-xl animate-fade-in-up">
           {/* Header */}
-          <div className="flex items-center justify-between border-b border-gray-100 bg-[#1a1a1a] px-5 py-4 text-white">
+          <div className="flex items-center justify-between border-b border-gray-100 bg-[var(--primary)] px-5 py-4 text-white">
             <div className="flex items-center gap-3">
               <div className="relative flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-amber-500 text-white font-bold shadow-md shadow-amber-500/30">
                 🤖
@@ -233,14 +233,14 @@ export default function ChatBox() {
           </div>
 
           {/* Messages Body */}
-          <div className="flex-1 space-y-4 overflow-y-auto bg-[#faf8f5] p-4 text-sm">
+          <div className="flex-1 space-y-4 overflow-y-auto bg-[var(--brand-cream)] p-4 text-sm">
             {messages.map((item, index) => (
               <div key={index} className="space-y-2">
                 <div
                   className={
                     item.role === "user"
-                      ? "ml-auto max-w-[85%] whitespace-pre-wrap break-words rounded-2xl rounded-tr-sm bg-black px-4 py-3 text-white shadow-sm"
-                      : "mr-auto max-w-[90%] whitespace-pre-wrap break-words rounded-2xl rounded-tl-sm bg-white px-4 py-3 text-gray-800 shadow-sm border border-black/5"
+                      ? "ml-auto max-w-[85%] whitespace-pre-wrap break-words rounded-2xl rounded-tr-sm bg-[var(--primary)] px-4 py-3 text-white shadow-sm"
+                      : "mr-auto max-w-[90%] whitespace-pre-wrap break-words rounded-2xl rounded-tl-sm bg-white px-4 py-3 text-gray-800 shadow-sm border border-[var(--brand-border)]"
                   }
                 >
                   {item.content}
@@ -269,8 +269,8 @@ export default function ChatBox() {
                             <p className="text-[11px] text-gray-400">
                               {prod.size} • {prod.category}
                             </p>
-                            <p className="text-xs font-extrabold text-amber-600 mt-0.5">
-                              {prod.price.toLocaleString("vi-VN")}₫
+                            <p className="price-text text-xs font-extrabold mt-0.5">
+                              {prod.priceConfirmed === false ? "Giá chờ xác nhận" : prod.price.toLocaleString("vi-VN") + "₫"}
                             </p>
                           </div>
 
@@ -293,7 +293,7 @@ export default function ChatBox() {
                                   selectedColor: prod.colors[0],
                                 });
                               }}
-                              className="rounded-full bg-black px-2.5 py-1 text-[10px] font-bold text-white hover:bg-gray-800 transition"
+                              className="rounded-full bg-[var(--primary)] px-2.5 py-1 text-[10px] font-bold text-white hover:bg-[var(--brand-primary-hover)] transition"
                             >
                               + Giỏ
                             </button>
@@ -308,7 +308,7 @@ export default function ChatBox() {
 
             {/* Loading Indicator */}
             {isLoading && (
-              <div className="mr-auto flex items-center gap-2 rounded-2xl rounded-tl-sm bg-white px-4 py-3 text-xs text-gray-500 shadow-sm border border-black/5">
+              <div className="mr-auto flex items-center gap-2 rounded-2xl rounded-tl-sm bg-white px-4 py-3 text-xs text-gray-500 shadow-sm border border-[var(--brand-border)]">
                 <span className="font-medium">AI đang tìm kiếm mẫu phù hợp nhất</span>
                 <span className="flex gap-1">
                   <span className="h-1.5 w-1.5 rounded-full bg-amber-500 animate-bounce" style={{ animationDelay: "0ms" }} />
@@ -336,7 +336,7 @@ export default function ChatBox() {
               <button
                 onClick={() => handleSend()}
                 disabled={isLoading || !message.trim()}
-                className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-black text-white transition hover:bg-gray-800 disabled:opacity-40"
+                className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[var(--primary)] text-white transition hover:bg-[var(--brand-primary-hover)] disabled:opacity-40"
                 aria-label="Gửi tin nhắn"
               >
                 <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>

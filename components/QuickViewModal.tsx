@@ -22,23 +22,24 @@ function QuickViewDialog({ product, onClose }: { product: Product; onClose: () =
   const { addToCart } = useCart();
   const { isInWishlist, toggleWishlist } = useWishlist();
 
-  const [activeImage, setActiveImage] = useState<string>(product.image);
+  const [activeImage, setActiveImage] = useState<string>(product.gallery?.[0] || product.image);
   const [selectedColor, setSelectedColor] = useState<string>(product.colors[0] || "");
   const [quantity, setQuantity] = useState<number>(1);
   const [isAdded, setIsAdded] = useState(false);
 
-  const gallery = product.gallery && product.gallery.length > 0
+    const gallery = product.gallery && product.gallery.length > 0
     ? product.gallery
-    : [product.image, "/products/bao2.jpg", "/products/bao3.jpg"];
+    : [product.image];
 
   const isFavorite = isInWishlist(product.id);
 
   function handleAddToCart() {
+    if (product.priceConfirmed === false) return;
     addToCart({
       id: product.id,
       name: product.name,
       price: product.price,
-      image: activeImage || product.image,
+      image: product.image,
       size: product.size,
       quantity,
       selectedColor,
@@ -60,11 +61,11 @@ function QuickViewDialog({ product, onClose }: { product: Product; onClose: () =
       />
 
       {/* Modal Dialog */}
-      <div className="relative z-10 w-full max-w-3xl overflow-hidden rounded-3xl bg-white shadow-2xl transition-all max-h-[92vh] flex flex-col md:flex-row border border-black/5 animate-fade-in-up">
+      <div className="relative z-10 w-full max-w-3xl overflow-y-auto rounded-3xl bg-white shadow-2xl transition-all max-h-[92vh] flex flex-col md:flex-row border border-[var(--brand-border)] animate-fade-in-up">
         {/* Close Button */}
         <button
           onClick={onClose}
-          className="absolute right-4 top-4 z-20 flex h-9 w-9 items-center justify-center rounded-full bg-white/90 text-gray-500 shadow-md backdrop-blur-sm hover:bg-black hover:text-white transition"
+          className="absolute right-4 top-4 z-20 flex h-9 w-9 items-center justify-center rounded-full bg-white/90 text-gray-500 shadow-md backdrop-blur-sm hover:bg-[var(--brand-primary-hover)] hover:text-white transition"
           aria-label="Đóng"
         >
           <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -74,7 +75,7 @@ function QuickViewDialog({ product, onClose }: { product: Product; onClose: () =
 
         {/* Left: Image Gallery */}
         <div className="w-full md:w-1/2 bg-[#f6f4f0] p-6 flex flex-col justify-between">
-          <div className="relative aspect-square w-full overflow-hidden rounded-2xl bg-white shadow-inner border border-black/5">
+          <div className="relative aspect-square w-full overflow-hidden rounded-2xl bg-white shadow-inner border border-[var(--brand-border)]">
             <Image
               src={activeImage || product.image}
               alt={product.name}
@@ -100,10 +101,10 @@ function QuickViewDialog({ product, onClose }: { product: Product; onClose: () =
                 key={idx}
                 onClick={() => setActiveImage(img)}
                 className={`relative h-14 w-14 overflow-hidden rounded-xl border-2 bg-white transition ${
-                  activeImage === img ? "border-amber-500 shadow-sm" : "border-black/5 opacity-70 hover:opacity-100"
+                  activeImage === img ? "border-amber-500 shadow-sm" : "border-[var(--brand-border)] opacity-70 hover:opacity-100"
                 }`}
               >
-                <Image src={img} alt="" fill className="object-cover p-1" />
+                <Image src={img} alt="" fill className="object-contain p-1" />
               </button>
             ))}
           </div>
@@ -149,8 +150,8 @@ function QuickViewDialog({ product, onClose }: { product: Product; onClose: () =
 
             {/* Price */}
             <div className="mt-4 flex items-baseline gap-3">
-              <span className="text-2xl font-extrabold text-amber-600">
-                {product.price.toLocaleString("vi-VN")}₫
+              <span className="price-text text-2xl font-extrabold">
+                {product.priceConfirmed === false ? "Giá chờ xác nhận" : product.price.toLocaleString("vi-VN") + "₫"}
               </span>
               {product.originalPrice && (
                 <span className="text-sm text-gray-400 line-through">
@@ -171,7 +172,7 @@ function QuickViewDialog({ product, onClose }: { product: Product; onClose: () =
               </div>
               <div>
                 <span className="text-gray-400">Tối đa:</span>
-                <span className="ml-1 font-semibold text-gray-800">{product.maxWidth}×{product.maxHeight}cm</span>
+                <span className="ml-1 font-semibold text-gray-800">{product.kind === "sleeve" ? `${product.maxWidth} × ${product.maxHeight} × ${product.maxThickness ?? "—"} cm` : "Không áp dụng"}</span>
               </div>
               <div>
                 <span className="text-gray-400">Chống nước:</span>
@@ -195,7 +196,7 @@ function QuickViewDialog({ product, onClose }: { product: Product; onClose: () =
                     onClick={() => setSelectedColor(color)}
                     className={`rounded-full px-3 py-1 text-xs font-medium transition ${
                       selectedColor === color
-                        ? "bg-black text-white shadow-sm"
+                        ? "bg-[var(--primary)] text-white shadow-sm"
                         : "bg-gray-100 text-gray-700 hover:bg-gray-200"
                     }`}
                   >
@@ -231,7 +232,7 @@ function QuickViewDialog({ product, onClose }: { product: Product; onClose: () =
             <button
               onClick={handleAddToCart}
               className={`w-full rounded-full py-3.5 px-6 text-sm font-semibold text-white transition flex items-center justify-center gap-2 shadow-lg ${
-                isAdded ? "bg-emerald-600" : "bg-black hover:bg-gray-800"
+                isAdded ? "bg-emerald-600" : "bg-[var(--primary)] hover:bg-[var(--brand-primary-hover)]"
               }`}
             >
               {isAdded ? (

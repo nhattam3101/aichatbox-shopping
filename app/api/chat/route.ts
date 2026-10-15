@@ -1,9 +1,8 @@
 import { GoogleGenAI } from "@google/genai";
-import { products } from "@/data/products";
+import { allProducts as products, accessories } from "@/data/products";
+import { recommendSizes } from "@/data/size-rules";
 
-const ai = new GoogleGenAI({
-  apiKey: process.env.GEMINI_API_KEY,
-});
+
 
 type ChatMessage = {
   role: "user" | "assistant";
@@ -14,7 +13,7 @@ export async function POST(request: Request) {
   try {
     const { messages } = await request.json();
 
-    if (!Array.isArray(messages) || messages.length === 0) {
+    if (!Array.isArray(messages) || messages.length === 0 || messages.length > 50 || messages.some((m: ChatMessage) => !m || !["user", "assistant"].includes(m.role) || typeof m.content !== "string" || m.content.length > 8000)) {
       return Response.json(
         {
           error: "Messages are required",
@@ -25,14 +24,37 @@ export async function POST(request: Request) {
       );
     }
 
+    const latestUser = [...messages].reverse().find((m: ChatMessage) => m.role === "user")?.content ?? "";
+    const dimensionsPattern = /(\d+(?:[.,]\d+)?)\s*(?:cm)?\s*[x×*]\s*(\d+(?:[.,]\d+)?)\s*(?:cm)?(?:\s*[x×*]\s*(\d+(?:[.,]\d+)?))?/i;
+    const dimensionMessage = [...messages].reverse().find((m: ChatMessage) => m.role === "user" && dimensionsPattern.test(m.content));
+    const measurements = dimensionMessage?.content.match(dimensionsPattern);
+    const thicknessFollowup = latestUser.match(/(?:độ\s*)?dày\s*(?:là\s*|:)?\s*(\d+(?:[.,]\d+)?)\s*(?:cm)?/i);
+    const thickness = measurements?.[3] ? Number(measurements[3].replace(",", ".")) : undefined;
+    const effectiveThickness = thicknessFollowup ? Number(thicknessFollowup[1].replace(",", ".")) : thickness;
+    const fitting = measurements ? recommendSizes(Number(measurements[1].replace(",", ".")), Number(measurements[2].replace(",", ".")), effectiveThickness) : null;
+    if (dimensionsPattern.test(latestUser) || (thicknessFollowup && measurements)) {
+      const best = fitting?.[0];
+      const warning = effectiveThickness === undefined ? " Đây là gợi ý sơ bộ; bạn cần cung cấp độ dày để xác nhận. Size 25 × 36 × 2 chỉ dành cho máy ≤ 2 cm." : "";
+      const reply = best ? `Theo số đo bạn cung cấp, size nhỏ nhất vừa máy là ${best.name}: ${best.maxWidth} × ${best.maxHeight} × ${best.maxThickness} cm. ${best.priceConfirmed === false ? "Giá size này đang chờ xác nhận." : `Giá ${best.price.toLocaleString("vi-VN")}₫.`}${warning} [RECOMMEND:${best.id}]` : "Catalog hiện chưa có size vừa đủ cả các số đo bạn cung cấp. Bạn vui lòng kiểm tra lại số đo; mình không thể cam kết mẫu nhỏ hơn sẽ vừa.";
+      return Response.json({ reply, recommendedProductIds: best ? [best.id] : [] });
+    }
+    if (/thêu\s*(tên)?/i.test(latestUser)) {
+      const service = products.find(p => p.id === 7)!;
+      return Response.json({ reply: `Có, dịch vụ ${service.name.toLowerCase()} cộng thêm ${service.price.toLocaleString("vi-VN")}₫ mỗi bao. Catalog chưa có quy định tiền cọc, bạn vui lòng xác nhận với cửa hàng. [RECOMMEND:${service.id}]`, recommendedProductIds: [service.id] });
+    }
+    if (/phụ kiện|mua kèm|móc|tag/i.test(latestUser) && !/ngân sách|dưới|màu/i.test(latestUser)) {
+      const accessory = accessories[0];
+      return Response.json({ reply: `Bạn có thể mua kèm ${accessory.name}, giá ${accessory.price.toLocaleString("vi-VN")}₫. [RECOMMEND:${accessory.id}]`, recommendedProductIds: [accessory.id] });
+    }
     const productData = products
       .map(
         (product) => `
 ID: ${product.id}
 Tên: ${product.name}
-Giá: ${product.price.toLocaleString("vi-VN")}đ
+Giá: ${product.priceConfirmed === false ? "Chưa xác nhận, không báo giá và không nhận đặt mua" : product.price.toLocaleString("vi-VN") + "đ"}
 Size: ${product.size}
-Kích thước tối đa: ${product.maxWidth} x ${product.maxHeight} cm
+Kích thước tối đa: ${product.kind === "sleeve" ? `${product.maxWidth} x ${product.maxHeight} x ${product.maxThickness} cm` : "Không áp dụng: đây không phải bao cho thiết bị"}
+Nhóm: ${product.kind === "accessory" ? "Móc khóa / phụ kiện, giá tính riêng" : product.kind === "service" ? "Dịch vụ cộng thêm" : "Bao bảo vệ laptop / iPad"}
 Phân loại: ${product.category}
 Chất liệu: ${product.material}
 Kháng nước: ${product.waterproof ? "Có" : "Không"}
@@ -56,14 +78,19 @@ Bạn là CaseUp Assistant, chuyên gia AI tư vấn phong cách & chọn bao la
 
 Nhiệm vụ của bạn:
 1. Luôn xưng là "CaseUp Assistant" hoặc "mình" và gọi khách là "bạn" hoặc "quý khách".
-2. Hỗ trợ khách tìm đúng size bao vừa khít cho laptop của họ. Hãy hỏi chiều dài, chiều rộng của máy nếu khách chưa cung cấp hoặc khách nói tên máy (như MacBook Air M2, ThinkPad X1, Dell XPS 15,...).
-3. Đề xuất sản phẩm phù hợp theo phong cách (Tối giản, Chống sốc chuẩn quân đội, Da cao cấp doanh nhân, Pastel thời trang Hàn Quốc, hoặc Nhiều ngăn tiện lợi).
+2. Hỗ trợ khách tìm đúng size bao vừa khít cho laptop của họ. Hãy hỏi chiều dài, chiều rộng và độ dày của máy nếu khách chưa cung cấp hoặc khách nói tên máy (như MacBook Air M2, ThinkPad X1, Dell XPS 15,...).
+3. Đề xuất sản phẩm phù hợp theo phong cách (Tối giản, Chống sốc, Da cao cấp doanh nhân, Pastel thời trang Hàn Quốc, hoặc Nhiều ngăn tiện lợi).
 4. ĐẶC BIỆT: Khi bạn nhắc đến hoặc gợi ý một sản phẩm cụ thể từ danh sách bên dưới, hãy chèn thẻ mã định danh dạng [RECOMMEND:ID] (Ví dụ: [RECOMMEND:1], [RECOMMEND:7]) ở cuối đoạn văn để hệ thống hiển thị thẻ sản phẩm tương tác cho khách hàng. Mỗi câu trả lời có thể gợi ý 1 đến 3 sản phẩm phù hợp nhất.
 5. Chỉ gợi ý sản phẩm có trong danh sách bên dưới. Tuyệt đối không tự bịa sản phẩm.
 6. Luôn thân thiện, giải thích rõ lý do tại sao sản phẩm đó phù hợp (ví dụ: máy kích thước X thì bao này kích thước tối đa Y nên vừa thoải mái/khít đẹp).
 7. Trả lời bằng tiếng Việt gãy gọn, có định dạng gạch đầu dòng dễ nhìn.
 
-Danh sách 24 sản phẩm của CaseUp:
+Quy tắc bắt buộc: không thêm bất kỳ tính năng, chính sách, giá, giảm giá hoặc thông số nào ngoài catalog.
+Kiểm tra cả chiều dài, rộng và dày; ưu tiên size nhỏ nhất vừa máy, không bao giờ chọn size nhỏ hơn máy. Có thể xoay chiều dài/rộng.
+Size 25 x 36 x 2 chỉ cho máy thân mỏng <= 2 cm. Nếu thiếu độ dày, chỉ gợi ý sơ bộ, cảnh báo và hỏi độ dày (đặc biệt 15.6 inch).
+Máy 34 x 23 x 1.8 cm vừa ${products.find(p => p.id === 3)!.name}. Máy 36 x 25 x 2.4 cm cần size 38 x 26 x 2.5, tuyệt đối không chọn Ultrabook 36 x 25 x 2.
+Thêu tên là dịch vụ cộng thêm theo catalog, không phải giá bao bảo vệ laptop. Tag/móc thuộc nhóm accessory, giá tính riêng theo catalog. Không dùng giá accessory để báo giá bao. Không khẳng định cọc 50% vì catalog chưa có quy tắc cọc.
+Danh sách sản phẩm của CaseUp:
 ${productData}
 
 Lịch sử hội thoại:
@@ -84,6 +111,7 @@ Hãy đưa ra câu trả lời tư vấn xuất sắc cho khách hàng dựa tr�
       );
     }
 
+    const ai = new GoogleGenAI({ apiKey });
     const CANDIDATE_MODELS = [
       "gemini-flash-lite-latest",
       "gemini-3.5-flash-lite",
@@ -116,9 +144,15 @@ Hãy đưa ra câu trả lời tư vấn xuất sắc cho khách hàng dựa tr�
       throw lastError || new Error("Không thể tạo nội dung từ AI");
     }
 
-    return Response.json({
-      reply: responseText,
+    const recommendedProductIds: number[] = [];
+    responseText = responseText.replace(/\[RECOMMEND:(\d+)\]/g, (tag, rawId) => {
+      const id = Number(rawId);
+      const p = products.find(p => p.id === id);
+      if (!p || (p.supportsEmbroidery && fitting && !fitting.some(f => f.id === id)) || recommendedProductIds.length >= 3) return "";
+      if (!recommendedProductIds.includes(id)) recommendedProductIds.push(id);
+      return tag;
     });
+    return Response.json({ reply: responseText, recommendedProductIds });
   } catch (error) {
     console.error("Gemini error:", error);
 

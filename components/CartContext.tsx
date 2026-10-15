@@ -7,6 +7,7 @@ import {
   useState,
   ReactNode,
 } from "react";
+import { allProducts } from "@/data/products";
 import CartToast from "@/components/CartToast";
 
 export type CartItem = {
@@ -55,15 +56,31 @@ type CartContextType = {
 const CartContext = createContext<CartContextType | undefined>(undefined);
 
 export function CartProvider({ children }: { children: ReactNode }) {
-  const [cart, setCart] = useState<CartItem[]>(() => {
-    if (typeof window === "undefined") return [];
+  const [cart, setCart] = useState<CartItem[]>([]);
+  const [storageReady, setStorageReady] = useState(false);
+  useEffect(() => {
+    let active = true;
+    queueMicrotask(() => {
+      if (!active) return;
+      const readSaved = (): CartItem[] => {
     try {
       const saved = localStorage.getItem("cart");
-      return saved ? JSON.parse(saved) : [];
+      const parsed: unknown = saved ? JSON.parse(saved) : [];
+      if (!Array.isArray(parsed)) return [];
+      return parsed.flatMap(item => {
+        const product = allProducts.find(p => p.id === item?.id);
+        if (!product || product.priceConfirmed === false || !Number.isSafeInteger(item.quantity) || item.quantity <= 0) return [];
+        return [{ id: product.id, name: product.name, price: product.price, image: product.image, size: product.size, quantity: item.quantity, selectedColor: product.colors.includes(item.selectedColor) ? item.selectedColor : product.colors[0] ?? "" }];
+      });
     } catch {
       return [];
     }
-  });
+      };
+      setCart(readSaved());
+      setStorageReady(true);
+    });
+    return () => { active = false; };
+  }, []);
 
   const [appliedCoupon, setAppliedCoupon] = useState<string | null>(null);
   const [discountPercent, setDiscountPercent] = useState<number>(0);
@@ -72,11 +89,12 @@ export function CartProvider({ children }: { children: ReactNode }) {
   // Sync cart to localStorage whenever cart changes
   useEffect(() => {
     try {
+      if (!storageReady) return;
       localStorage.setItem("cart", JSON.stringify(cart));
     } catch {
       // ignore
     }
-  }, [cart]);
+  }, [cart, storageReady]);
 
   function hideToast() {
     setToast(null);
@@ -86,7 +104,11 @@ export function CartProvider({ children }: { children: ReactNode }) {
     item: Omit<CartItem, "quantity"> & { quantity?: number },
     showToast = true
   ) {
-    const qtyToAdd = item.quantity && item.quantity > 0 ? item.quantity : 1;
+    const product = allProducts.find(p => p.id === item.id);
+    if (!product) return;
+    if (product.priceConfirmed === false) { alert("Giá size này đang chờ xác nhận. Vui lòng liên hệ trước khi mua."); return; }
+    item = { ...item, name: product.name, price: product.price, image: product.image, size: product.size, selectedColor: product.colors.includes(item.selectedColor ?? "") ? item.selectedColor : product.colors[0] ?? "" };
+    const qtyToAdd = Number.isSafeInteger(item.quantity) && item.quantity! > 0 ? item.quantity! : 1;
 
     setCart((prev) => {
       const existingItem = prev.find(
@@ -134,9 +156,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
   function removeFromCart(id: number, selectedColor?: string) {
     setCart((prev) =>
       prev.filter((item) =>
-        selectedColor !== undefined
-          ? !(item.id === id && item.selectedColor === selectedColor)
-          : item.id !== id
+        !(item.id === id && item.selectedColor === selectedColor)
       )
     );
   }
@@ -145,9 +165,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
     setCart((prev) =>
       prev.map((item) => {
         const matches =
-          selectedColor !== undefined
-            ? item.id === id && item.selectedColor === selectedColor
-            : item.id === id;
+          item.id === id && item.selectedColor === selectedColor;
 
         return matches
           ? {
@@ -164,9 +182,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
       prev
         .map((item) => {
           const matches =
-            selectedColor !== undefined
-              ? item.id === id && item.selectedColor === selectedColor
-              : item.id === id;
+            item.id === id && item.selectedColor === selectedColor;
 
           return matches
             ? {

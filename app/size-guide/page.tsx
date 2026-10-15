@@ -1,7 +1,9 @@
 "use client";
 
+import Image from "next/image";
 import { useMemo, useState } from "react";
 import { products, type Product } from "@/data/products";
+import { recommendSizes } from "@/data/size-rules";
 import Navbar from "@/components/Navbar";
 import ProductCard from "@/components/ProductCard";
 import QuickViewModal from "@/components/QuickViewModal";
@@ -29,12 +31,14 @@ const POPULAR_LAPTOPS: LaptopPreset[] = [
 ];
 
 export default function SizeGuidePage() {
+  const [thickness, setThickness] = useState("");
   const [width, setWidth] = useState("");
   const [height, setHeight] = useState("");
   const [selectedPreset, setSelectedPreset] = useState<string>("");
   const [quickViewProduct, setQuickViewProduct] = useState<Product | null>(null);
 
   function applyPreset(preset: LaptopPreset) {
+    setThickness("");
     setWidth(preset.width.toString());
     setHeight(preset.height.toString());
     setSelectedPreset(preset.name);
@@ -48,38 +52,32 @@ export default function SizeGuidePage() {
       return [];
     }
 
-    return products
-      .filter((p) => p.maxWidth >= numWidth && p.maxHeight >= numHeight)
-      .sort((a, b) => {
-        // rank closer fit first
-        const slackA = a.maxWidth - numWidth + (a.maxHeight - numHeight);
-        const slackB = b.maxWidth - numWidth + (b.maxHeight - numHeight);
-        return slackA - slackB;
-      });
-  }, [numWidth, numHeight]);
+    return recommendSizes(numWidth, numHeight, thickness === "" ? undefined : Number(thickness));
+  }, [numWidth, numHeight, thickness]);
 
   function handleReset() {
+    setThickness("");
     setWidth("");
     setHeight("");
     setSelectedPreset("");
   }
 
   return (
-    <main className="min-h-screen bg-[#faf9f6] text-[#1a1a1a]">
+    <main className="min-h-screen bg-[var(--brand-cream)] text-[#1a1a1a]">
       <Navbar />
 
       {/* Hero Header */}
-      <section className="relative overflow-hidden border-b border-black/5 bg-white py-14 px-6 md:px-12 lg:px-20">
+      <section className="relative overflow-hidden border-b border-[var(--brand-border)] bg-white py-14 px-6 md:px-12 lg:px-20">
         <div className="absolute -left-20 -top-20 h-72 w-72 rounded-full bg-orange-100/40 blur-3xl pointer-events-none" />
         <div className="mx-auto max-w-4xl text-center">
           <span className="inline-flex items-center gap-2 rounded-full bg-amber-50 px-4 py-1 text-xs font-bold uppercase tracking-wider text-amber-700">
             Công Cụ Chọn Size Thông Minh 2.0
           </span>
           <h1 className="mt-4 text-3xl md:text-5xl font-extrabold tracking-tight text-gray-900">
-            Tìm Bao Laptop Vừa Khít 100%
+            Tìm Bao Laptop Phù Hợp Với Máy
           </h1>
           <p className="mt-3 text-sm md:text-base text-gray-500 max-w-2xl mx-auto leading-relaxed">
-            Chọn model máy có sẵn của bạn hoặc nhập chiều Dài × Rộng (cm). Hệ thống sẽ tự động tính toán độ ôm sát hoàn hảo và đề xuất các mẫu tương thích.
+            Nhập chiều dài × chiều rộng × độ dày thực tế (cm). Thông số chọn nhanh chỉ để tham khảo; hãy đo máy trước khi mua.
           </p>
         </div>
       </section>
@@ -91,7 +89,7 @@ export default function SizeGuidePage() {
             {/* Left Column: Preset Selector & Custom Inputs */}
             <div className="lg:col-span-5 space-y-6">
               {/* Presets Box */}
-              <div className="rounded-3xl border border-black/5 bg-white p-6 md:p-8 shadow-sm">
+              <div className="rounded-3xl border border-[var(--brand-border)] bg-white p-6 md:p-8 shadow-sm">
                 <div className="flex items-center justify-between mb-4">
                   <h2 className="text-base font-bold text-gray-900 flex items-center gap-2">
                     ⚡ Chọn nhanh theo dòng máy:
@@ -105,7 +103,7 @@ export default function SizeGuidePage() {
                       onClick={() => applyPreset(laptop)}
                       className={`flex items-center justify-between rounded-2xl px-4 py-3 text-left transition text-xs ${
                         selectedPreset === laptop.name
-                          ? "bg-black text-white font-bold shadow-md"
+                          ? "bg-[var(--primary)] text-white font-bold shadow-md"
                           : "bg-[#f8f6f2] text-gray-700 hover:bg-[#ece8e1]"
                       }`}
                     >
@@ -124,7 +122,7 @@ export default function SizeGuidePage() {
               </div>
 
               {/* Custom Input Box */}
-              <div className="rounded-3xl border border-black/5 bg-white p-6 md:p-8 shadow-sm">
+              <div className="rounded-3xl border border-[var(--brand-border)] bg-white p-6 md:p-8 shadow-sm">
                 <h3 className="text-sm font-bold text-gray-900 mb-4 flex items-center gap-2">
                   📏 Hoặc nhập kích thước đo thực tế:
                 </h3>
@@ -164,6 +162,10 @@ export default function SizeGuidePage() {
                   </div>
                 </div>
 
+                <label className="mt-4 block text-xs font-semibold">Độ dày máy (cm, không bắt buộc)
+                  <input type="number" min="0.1" step="0.1" value={thickness} onChange={e => setThickness(e.target.value)} className="mt-2 w-full rounded-2xl border border-gray-200 p-3" />
+                </label>
+                {thickness === "" && <p className="mt-3 text-xs text-amber-800">Gợi ý sơ bộ: cần đo độ dày trước khi mua. Size 25 × 36 × 2 chỉ dành cho máy thân mỏng ≤ 2 cm, kể cả laptop 15.6 inch.</p>}
                 {numWidth > 0 && numHeight > 0 && (
                   <div className="mt-4 flex items-center justify-between text-xs">
                     <span className="text-gray-500">
@@ -192,7 +194,7 @@ export default function SizeGuidePage() {
                   <div className="mb-6 flex items-center justify-between">
                     <div>
                       <h2 className="text-xl font-extrabold text-gray-900">
-                        {matchedProducts.length} Mẫu Bao Phù Hợp Hoàn Hảo
+                        {matchedProducts.length} Mẫu Bao Phù Hợp Theo Số Đo
                       </h2>
                       <p className="text-xs text-gray-500 mt-1">
                         Sắp xếp theo độ vừa vặn ôm sát từ cao đến thấp
@@ -203,8 +205,8 @@ export default function SizeGuidePage() {
                   {matchedProducts.length > 0 ? (
                     <div className="grid gap-6 sm:grid-cols-2">
                       {matchedProducts.map((product) => {
-                        const slackW = (product.maxWidth - numWidth).toFixed(1);
-                        const slackH = (product.maxHeight - numHeight).toFixed(1);
+                        const slackW = (product.maxWidth - Math.max(numWidth, numHeight)).toFixed(1);
+                        const slackH = (product.maxHeight - Math.min(numWidth, numHeight)).toFixed(1);
                         const isSnugFit = parseFloat(slackW) <= 1.5 && parseFloat(slackH) <= 1.5;
 
                         return (
@@ -218,7 +220,7 @@ export default function SizeGuidePage() {
                                     : "bg-blue-100 text-blue-800"
                                 }`}
                               >
-                                {isSnugFit ? "✓ Vừa ôm khít tuyệt đối" : "✓ Vừa vặn thoải mái"}
+                                {isSnugFit ? "✓ Gợi ý ôm sát" : "✓ Vừa vặn thoải mái"}
                               </span>
                               <span className="text-gray-400 font-mono">
                                 Dư +{slackW}cm / +{slackH}cm
@@ -233,7 +235,7 @@ export default function SizeGuidePage() {
                       })}
                     </div>
                   ) : (
-                    <div className="py-20 text-center rounded-3xl bg-white border border-black/5 p-8 shadow-sm">
+                    <div className="py-20 text-center rounded-3xl bg-white border border-[var(--brand-border)] p-8 shadow-sm">
                       <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-amber-50 text-2xl">
                         ⚠️
                       </div>
@@ -263,7 +265,7 @@ export default function SizeGuidePage() {
                       <button
                         key={lp.name}
                         onClick={() => applyPreset(lp)}
-                        className="rounded-full bg-[#f6f4f0] px-3.5 py-1.5 text-xs font-semibold text-gray-700 hover:bg-black hover:text-white transition"
+                        className="rounded-full bg-[#f6f4f0] px-3.5 py-1.5 text-xs font-semibold text-gray-700 hover:bg-[var(--brand-primary-hover)] hover:text-white transition"
                       >
                         {lp.name.split(" ")[0]} {lp.screenSize}
                       </button>
@@ -272,6 +274,41 @@ export default function SizeGuidePage() {
                 </div>
               )}
             </div>
+          </div>
+        </div>
+      </section>
+
+      <section aria-labelledby="reference-heading" className="border-t border-[var(--brand-border)] bg-[var(--brand-cream)] px-6 py-12 md:px-12 lg:px-20">
+        <div className="mx-auto max-w-7xl">
+          <div className="mb-8 max-w-2xl">
+            <span className="rounded-full bg-[var(--brand-blue)] px-3 py-1 text-xs font-semibold text-[var(--brand-ink)]">Chọn size · chọn màu · chọn nút</span>
+            <h2 id="reference-heading" className="mt-4 text-2xl font-bold md:text-3xl">Một chiếc bao, theo màu bạn thích</h2>
+            <p className="mt-3 text-sm leading-relaxed text-gray-600">Đối chiếu số đo máy trước, sau đó tham khảo bảng màu vải và màu nút. Màu trên màn hình có thể chênh lệch nhẹ; tùy chọn từng mẫu nằm ở trang sản phẩm.</p>
+          </div>
+          <article className="rounded-3xl border border-[var(--brand-border)] bg-white p-5 shadow-sm md:p-8">
+            <span className="text-xs font-semibold uppercase tracking-wider text-[var(--primary)]">01 · Kích thước</span>
+            <h3 className="mt-2 text-xl font-bold">Bảng size tham khảo</h3>
+            <p className="mt-2 text-sm text-gray-600">Đo máy khi gập kín, tính cả chiều dài, chiều rộng và độ dày. Size 25 × 36 × 2 cm chỉ dành cho máy thân mỏng ≤ 2 cm.</p>
+            <a href="/products/size_table.jpg" target="_blank" rel="noreferrer" className="mt-5 block overflow-hidden rounded-2xl border border-[var(--brand-border)] bg-white" aria-label="Mở bảng size đầy đủ">
+              <div className="relative aspect-[5/2]"><Image src="/products/size_table.jpg" alt="Bảng 6 size bao CaseUp và thiết bị tương thích" fill sizes="(max-width: 768px) 100vw, 1100px" className="object-cover object-center" /></div>
+            </a>
+            <div className="mt-5 grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
+              {products.slice(0, 6).map(p => <div key={p.id} className="rounded-2xl bg-[var(--brand-cream)] p-3 text-sm"><p className="font-bold">{p.maxHeight} × {p.maxWidth} × {p.maxThickness} cm</p><p className="mt-1 text-xs leading-relaxed text-gray-600">{p.name}</p></div>)}
+            </div>
+          </article>
+          <div className="mt-6 grid gap-6 md:grid-cols-2">
+            {[
+              { title: "Bảng màu vải", number: "02 · Màu vải", image: "/products/bang_mau.jpg", description: "Tham khảo baby blue, tím baby, green baby, be kem, hồng phấn cùng các tông màu trong bảng vải thực tế.", background: "bg-[var(--brand-pink)]" },
+              { title: "Bảng màu nút", number: "03 · Màu nút", image: "/products/bang_mau_nut.jpg", description: "Phối nút baby blue, vàng, xanh bích, hồng, kem hoặc đỏ để hoàn thiện chiếc bao theo sở thích.", background: "bg-[var(--brand-blue)]" },
+            ].map(card => <article key={card.image} className="rounded-3xl border border-[var(--brand-border)] bg-white p-5 shadow-sm md:p-8">
+              <span className="text-xs font-semibold uppercase tracking-wider text-[var(--primary)]">{card.number}</span>
+              <h3 className="mt-2 text-xl font-bold">{card.title}</h3>
+              <p className="mt-2 min-h-12 text-sm leading-relaxed text-gray-600">{card.description}</p>
+              <a href={card.image} target="_blank" rel="noreferrer" aria-label={`Mở ${card.title.toLowerCase()} đầy đủ`} className={`mt-5 block rounded-2xl p-2 sm:p-4 ${card.background}`}>
+                <Image src={card.image} alt={card.title + " CaseUp thực tế"} width={1280} height={1280} sizes="(max-width: 768px) 100vw, 550px" className="h-auto w-full rounded-xl object-contain" />
+              </a>
+              <p className="mt-3 text-xs text-gray-500">Nhấn vào ảnh để xem bảng đầy đủ.</p>
+            </article>)}
           </div>
         </div>
       </section>

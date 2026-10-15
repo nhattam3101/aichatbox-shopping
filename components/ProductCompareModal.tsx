@@ -82,8 +82,8 @@ function CompareFloatingBar() {
   if (compareList.length === 0) return null;
 
   return (
-    <div className="fixed bottom-6 left-1/2 z-40 -translate-x-1/2 animate-fade-in-up">
-      <div className="flex items-center gap-4 rounded-full border border-black/10 bg-white/95 px-5 py-3 shadow-2xl backdrop-blur-xl">
+    <div className="fixed bottom-6 left-1/2 max-w-[calc(100vw-24px)] z-40 -translate-x-1/2 animate-fade-in-up">
+      <div className="flex items-center gap-2 sm:gap-4 rounded-full border border-black/10 bg-white/95 px-5 py-3 shadow-2xl backdrop-blur-xl">
         <div className="flex items-center gap-2">
           <span className="flex h-6 w-6 items-center justify-center rounded-full bg-amber-500 text-xs font-bold text-white">
             {compareList.length}
@@ -101,7 +101,7 @@ function CompareFloatingBar() {
               className="group relative h-9 w-9 overflow-hidden rounded-full border-2 border-white bg-gray-100 shadow-sm"
               title={item.name}
             >
-              <Image src={item.image} alt={item.name} fill className="object-cover" />
+              <Image src={item.image} alt={item.name} fill className="object-contain" />
               <button
                 onClick={(e) => {
                   e.stopPropagation();
@@ -117,7 +117,7 @@ function CompareFloatingBar() {
 
         <button
           onClick={() => setIsCompareModalOpen(true)}
-          className="rounded-full bg-black px-4 py-2 text-xs font-semibold text-white shadow hover:bg-gray-800 transition"
+          className="rounded-full bg-[var(--primary)] px-4 py-2 text-xs font-semibold text-white shadow hover:bg-[var(--brand-primary-hover)] transition"
         >
           So sánh ngay ({compareList.length}/3)
         </button>
@@ -198,8 +198,8 @@ function CompareModal() {
                       >
                         {product.name}
                       </Link>
-                      <span className="text-base font-extrabold text-amber-600 mt-1">
-                        {product.price.toLocaleString("vi-VN")}₫
+                      <span className="price-text text-base font-extrabold mt-1">
+                        {product.priceConfirmed === false ? "Giá chờ xác nhận" : product.price.toLocaleString("vi-VN") + "₫"}
                       </span>
                       <button
                         onClick={() => {
@@ -213,7 +213,7 @@ function CompareModal() {
                             selectedColor: product.colors[0],
                           });
                         }}
-                        className="mt-3 rounded-full bg-black px-4 py-1.5 text-xs font-semibold text-white hover:bg-gray-800 transition"
+                        className="mt-3 rounded-full bg-[var(--primary)] px-4 py-1.5 text-xs font-semibold text-white hover:bg-[var(--brand-primary-hover)] transition"
                       >
                         + Thêm vào giỏ
                       </button>
@@ -245,7 +245,7 @@ function CompareModal() {
                 <td className="py-3 font-semibold text-gray-500">Kích thước máy tối đa</td>
                 {compareList.map((p) => (
                   <td key={p.id} className="py-3 px-3 text-center text-gray-700">
-                    {p.maxWidth} × {p.maxHeight} cm
+                    {p.kind === "sleeve" ? `${p.maxWidth} × ${p.maxHeight} × ${p.maxThickness ?? "—"} cm` : "Không áp dụng"}
                   </td>
                 ))}
               </tr>
@@ -281,6 +281,7 @@ function CompareModal() {
                   </td>
                 ))}
               </tr>
+              <tr><td className="py-3 font-semibold text-gray-500">Phù hợp</td>{compareList.map(p => <td key={p.id} className="px-3 py-3 text-center text-sm">{p.suitableFor.join(", ")}</td>)}</tr>
               <tr>
                 <td className="py-3 font-semibold text-gray-500">Trọng lượng</td>
                 {compareList.map((p) => (

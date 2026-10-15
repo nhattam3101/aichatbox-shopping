@@ -57,7 +57,7 @@ export default function WishlistDrawer() {
                 </p>
                 <button
                   onClick={() => setIsWishlistOpen(false)}
-                  className="mt-6 rounded-full bg-black px-6 py-2.5 text-sm font-medium text-white transition hover:bg-gray-800"
+                  className="mt-6 rounded-full bg-[var(--primary)] px-6 py-2.5 text-sm font-medium text-white transition hover:bg-[var(--brand-primary-hover)]"
                 >
                   Khám phá sản phẩm ngay
                 </button>
@@ -101,8 +101,8 @@ export default function WishlistDrawer() {
                     </div>
 
                     <div className="flex items-center justify-between mt-2">
-                      <span className="font-bold text-sm text-amber-600">
-                        {item.price.toLocaleString("vi-VN")}₫
+                      <span className="price-text font-bold text-sm">
+                        {item.priceConfirmed === false ? "Giá chờ xác nhận" : item.price.toLocaleString("vi-VN") + "₫"}
                       </span>
                       <button
                         onClick={() => {
@@ -116,7 +116,7 @@ export default function WishlistDrawer() {
                             selectedColor: item.colors[0],
                           });
                         }}
-                        className="inline-flex items-center gap-1 rounded-full bg-black px-3 py-1.5 text-xs font-medium text-white hover:bg-gray-800 transition"
+                        className="inline-flex items-center gap-1 rounded-full bg-[var(--primary)] px-3 py-1.5 text-xs font-medium text-white hover:bg-[var(--brand-primary-hover)] transition"
                       >
                         <svg className="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                           <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
@@ -152,7 +152,7 @@ export default function WishlistDrawer() {
                   clearWishlist();
                   setIsWishlistOpen(false);
                 }}
-                className="w-full rounded-full bg-black py-3.5 text-sm font-semibold text-white shadow-md hover:bg-gray-800 transition flex items-center justify-center gap-2"
+                className="w-full rounded-full bg-[var(--primary)] py-3.5 text-sm font-semibold text-white shadow-md hover:bg-[var(--brand-primary-hover)] transition flex items-center justify-center gap-2"
               >
                 <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                   <path strokeLinecap="round" strokeLinejoin="round" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />

@@ -4,8 +4,8 @@ import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
-import type { Product } from "@/data/products";
-import AddToCartButton from "@/components/AddToCartButton";
+import { services, accessories, type Product } from "@/data/products";
+
 import Navbar from "@/components/Navbar";
 import ChatBox from "@/components/ChatBox";
 import OpenChatButton from "@/components/OpenChatButton";
@@ -24,8 +24,11 @@ export default function ProductDetailClient({ product, relatedProducts }: Props)
   const { isInWishlist, toggleWishlist } = useWishlist();
   const { isInCompare, toggleCompare } = useCompare();
 
-  const [selectedImage, setSelectedImage] = useState(product.image);
+  const [selectedImage, setSelectedImage] = useState(product.gallery?.[0] || product.image);
   const [selectedColor, setSelectedColor] = useState(product.colors[0] || "");
+  const [embroidery, setEmbroidery] = useState(false);
+  const embroideryService = services.find(p => p.id === 7)!;
+  const accessory = accessories[0];
   const [quantity, setQuantity] = useState(1);
   const [activeTab, setActiveTab] = useState<"description" | "details" | "reviews">("description");
 
@@ -35,24 +38,27 @@ export default function ProductDetailClient({ product, relatedProducts }: Props)
   // Gallery images (main product image + alternate views)
   const galleryImages = product.gallery && product.gallery.length > 0
     ? product.gallery
-    : [
-        product.image,
-        "/products/bao2.jpg",
-        "/products/bao3.jpg",
-        "/products/bao4.jpg",
-      ];
+    : [product.image];
 
   const discountPercent = product.originalPrice
     ? Math.round(((product.originalPrice - product.price) / product.originalPrice) * 100)
     : null;
 
+  function handleAdd() {
+    if (product.priceConfirmed === false) return;
+    addToCart({ ...product, quantity, selectedColor });
+    if (embroidery && product.supportsEmbroidery) addToCart({ ...embroideryService, quantity }, false);
+  }
+
   function handleBuyNow() {
+    if (product.priceConfirmed === false) return;
+    if (embroidery && product.supportsEmbroidery) addToCart({ ...embroideryService, quantity }, false);
     addToCart(
       {
         id: product.id,
         name: product.name,
         price: product.price,
-        image: selectedImage || product.image,
+        image: product.image,
         size: product.size,
         quantity,
         selectedColor,
@@ -70,7 +76,7 @@ export default function ProductDetailClient({ product, relatedProducts }: Props)
   ];
 
   return (
-    <main className="min-h-screen bg-[#fafaf8] text-[#1a1a1a]">
+    <main className="min-h-screen bg-[var(--brand-cream)] text-[#1a1a1a]">
       {/* Navigation */}
       <Navbar />
 
@@ -94,7 +100,7 @@ export default function ProductDetailClient({ product, relatedProducts }: Props)
             {/* Left: Gallery */}
             <div className="space-y-4">
               {/* Main Image */}
-              <div className="relative aspect-square w-full overflow-hidden rounded-3xl bg-[#f2eee9] shadow-sm border border-black/5">
+              <div className="relative aspect-square w-full overflow-hidden rounded-3xl bg-[#f2eee9] shadow-sm border border-[var(--brand-border)]">
                 <Image
                   src={selectedImage}
                   alt={product.name}
@@ -204,8 +210,8 @@ export default function ProductDetailClient({ product, relatedProducts }: Props)
 
                 {/* Price */}
                 <div className="mt-4 flex items-baseline gap-3">
-                  <span className="text-3xl font-extrabold text-amber-600 md:text-4xl">
-                    {product.price.toLocaleString("vi-VN")}₫
+                  <span className="price-text text-3xl font-extrabold md:text-4xl">
+                    {product.priceConfirmed === false ? "Giá chờ xác nhận" : product.price.toLocaleString("vi-VN") + "₫"}
                   </span>
                   {product.originalPrice && (
                     <span className="text-lg text-gray-400 line-through">
@@ -225,10 +231,10 @@ export default function ProductDetailClient({ product, relatedProducts }: Props)
                 </p>
 
                 {/* Quick Spec Pills */}
-                <div className="mt-5 grid grid-cols-2 gap-2 text-xs bg-[#f8f6f2] p-3.5 rounded-2xl border border-black/5">
+                <div className="mt-5 grid grid-cols-2 gap-2 text-xs bg-[#f8f6f2] p-3.5 rounded-2xl border border-[var(--brand-border)]">
                   <div>
                     <span className="text-gray-400">Máy tối đa:</span>
-                    <span className="ml-1.5 font-bold text-gray-800">{product.maxWidth} × {product.maxHeight} cm</span>
+                    <span className="ml-1.5 font-bold text-gray-800">{product.kind === "sleeve" ? `${product.maxWidth} × ${product.maxHeight} × ${product.maxThickness ?? "—"} cm` : "Không áp dụng"}</span>
                   </div>
                   <div>
                     <span className="text-gray-400">Chất liệu:</span>
@@ -248,7 +254,7 @@ export default function ProductDetailClient({ product, relatedProducts }: Props)
 
                 {/* Color Selection */}
                 {product.colors && product.colors.length > 0 && (
-                  <div className="mt-6 border-t border-black/5 pt-5">
+                  <div className="mt-6 border-t border-[var(--brand-border)] pt-5">
                     <span className="text-sm font-semibold text-gray-800">
                       Màu sắc: <span className="font-normal text-gray-600">{selectedColor}</span>
                     </span>
@@ -274,8 +280,11 @@ export default function ProductDetailClient({ product, relatedProducts }: Props)
                   </div>
                 )}
 
+                {product.supportsEmbroidery && <label className="mt-5 flex gap-2 text-sm"><input type="checkbox" checked={embroidery} onChange={e => setEmbroidery(e.target.checked)} />Thêu tên +{embroideryService.price.toLocaleString("vi-VN")}₫ / bao (thêm thành dòng dịch vụ trong giỏ)</label>}
+                {product.priceConfirmed === false && <p className="mt-3 text-sm text-amber-800">Giá size này chưa được xác nhận. Vui lòng liên hệ trước khi mua.</p>}
+                {product.supportsEmbroidery && <p className="mt-4 text-sm">Gợi ý mua kèm: <Link className="underline" href={`/products/${accessory.id}`}>{accessory.name} · {accessory.price.toLocaleString("vi-VN")}₫</Link></p>}
                 {/* Quantity Selector */}
-                <div className="mt-6 border-t border-black/5 pt-5">
+                <div className="mt-6 border-t border-[var(--brand-border)] pt-5">
                   <span className="text-sm font-semibold text-gray-800">Số lượng:</span>
                   <div className="mt-3 flex items-center gap-4">
                     <div className="flex items-center rounded-full border border-gray-300 bg-white p-1 shadow-sm">
@@ -307,28 +316,21 @@ export default function ProductDetailClient({ product, relatedProducts }: Props)
                 {/* Add to Cart and Buy Now */}
                 <div className="mt-8 flex flex-col gap-3 sm:flex-row">
                   <div className="flex-1">
-                    <AddToCartButton
-                      product={{
-                        ...product,
-                        quantity,
-                        selectedColor,
-                      }}
-                      className="w-full rounded-full bg-black px-6 py-4 font-semibold text-white transition-all hover:bg-gray-800 hover:shadow-lg flex items-center justify-center gap-2"
-                    />
+                    <button onClick={handleAdd} disabled={product.priceConfirmed === false} className="w-full rounded-full bg-[var(--primary)] px-6 py-4 font-semibold text-white disabled:opacity-40">Thêm vào giỏ hàng</button>
                   </div>
                   <button
                     type="button"
                     onClick={handleBuyNow}
-                    className="flex-1 rounded-full bg-amber-500 px-6 py-4 font-semibold text-white transition-all hover:bg-amber-600 hover:shadow-lg flex items-center justify-center gap-2"
+                    className="flex-1 rounded-full bg-[var(--brand-blue)] px-6 py-4 font-semibold text-[#36556a] transition-all hover:bg-[#d3e6f1] hover:shadow-lg flex items-center justify-center gap-2"
                   >
                     <span>⚡ Mua ngay COD</span>
                   </button>
                 </div>
 
                 {/* Guarantees */}
-                <div className="mt-8 grid grid-cols-2 gap-3 border-t border-black/5 pt-6 sm:grid-cols-4">
+                <div className="mt-8 grid grid-cols-2 gap-3 border-t border-[var(--brand-border)] pt-6 sm:grid-cols-4">
                   {guarantees.map((item, idx) => (
-                    <div key={idx} className="flex flex-col items-center rounded-2xl bg-white p-3 text-center border border-black/5 shadow-sm">
+                    <div key={idx} className="flex flex-col items-center rounded-2xl bg-white p-3 text-center border border-[var(--brand-border)] shadow-sm">
                       <span className="text-2xl">{item.icon}</span>
                       <span className="mt-1 text-xs font-semibold text-gray-800">{item.title}</span>
                       <span className="text-[11px] text-gray-500">{item.desc}</span>
@@ -340,7 +342,7 @@ export default function ProductDetailClient({ product, relatedProducts }: Props)
           </div>
 
           {/* Details / Reviews Tabs */}
-          <div className="mt-16 rounded-3xl bg-white p-6 md:p-10 shadow-sm border border-black/5">
+          <div className="mt-16 rounded-3xl bg-white p-6 md:p-10 shadow-sm border border-[var(--brand-border)]">
             <div className="flex border-b border-gray-200">
               <button
                 type="button"
@@ -410,7 +412,7 @@ export default function ProductDetailClient({ product, relatedProducts }: Props)
                   <div className="flex justify-between border-b border-gray-100 py-2.5 text-sm">
                     <span className="text-gray-500">Kích thước máy tối đa</span>
                     <span className="font-semibold text-gray-900">
-                      {product.maxWidth} × {product.maxHeight} cm
+                      {product.kind === "sleeve" ? `${product.maxWidth} × ${product.maxHeight} × ${product.maxThickness ?? "—"} cm` : "Không áp dụng"}
                     </span>
                   </div>
                   <div className="flex justify-between border-b border-gray-100 py-2.5 text-sm">
@@ -453,7 +455,7 @@ export default function ProductDetailClient({ product, relatedProducts }: Props)
                   </div>
 
                   <div className="space-y-4 pt-4 border-t border-gray-100">
-                    <div className="rounded-2xl bg-[#fafaf8] p-4 border border-black/5">
+                    <div className="rounded-2xl bg-[var(--brand-cream)] p-4 border border-[var(--brand-border)]">
                       <div className="flex items-center justify-between">
                         <span className="font-bold text-sm">Trần Hoàng Long</span>
                         <span className="text-xs text-gray-400">1 ngày trước</span>
@@ -463,7 +465,7 @@ export default function ProductDetailClient({ product, relatedProducts }: Props)
                         Bao vừa khít máy, lớp lót nhung bên trong sờ êm tay cực kỳ. Màu sắc đẹp đúng như ảnh, đóng gói kỹ!
                       </p>
                     </div>
-                    <div className="rounded-2xl bg-[#fafaf8] p-4 border border-black/5">
+                    <div className="rounded-2xl bg-[var(--brand-cream)] p-4 border border-[var(--brand-border)]">
                       <div className="flex items-center justify-between">
                         <span className="font-bold text-sm">Nguyễn Mai Phương</span>
                         <span className="text-xs text-gray-400">3 ngày trước</span>
@@ -483,7 +485,7 @@ export default function ProductDetailClient({ product, relatedProducts }: Props)
 
       {/* Related Products */}
       {relatedProducts.length > 0 && (
-        <section className="bg-white py-14 border-t border-black/5">
+        <section className="bg-white py-14 border-t border-[var(--brand-border)]">
           <div className="mx-auto max-w-7xl px-6 md:px-12 lg:px-20">
             <div className="mb-8 flex items-end justify-between">
               <div>
@@ -498,7 +500,7 @@ export default function ProductDetailClient({ product, relatedProducts }: Props)
                 href="/products"
                 className="text-sm font-semibold text-amber-600 hover:text-amber-700 transition"
               >
-                Xem tất cả 24 mẫu →
+                Xem tất cả các mẫu →
               </Link>
             </div>
 
@@ -507,7 +509,7 @@ export default function ProductDetailClient({ product, relatedProducts }: Props)
                 <Link
                   key={item.id}
                   href={`/products/${item.id}`}
-                  className="group block rounded-3xl bg-[#fafaf8] p-4 transition-all hover:-translate-y-1 hover:shadow-lg border border-black/5"
+                  className="group block rounded-3xl bg-[var(--brand-cream)] p-4 transition-all hover:-translate-y-1 hover:shadow-lg border border-[var(--brand-border)]"
                 >
                   <div className="relative aspect-square w-full overflow-hidden rounded-2xl bg-[#f2eee9]">
                     <Image
@@ -531,8 +533,8 @@ export default function ProductDetailClient({ product, relatedProducts }: Props)
                     <h3 className="mt-1 text-sm font-bold text-gray-900 line-clamp-1 group-hover:text-amber-600 transition-colors">
                       {item.name}
                     </h3>
-                    <p className="mt-1 text-sm font-extrabold text-amber-600">
-                      {item.price.toLocaleString("vi-VN")}₫
+                    <p className="price-text mt-1 text-sm font-extrabold">
+                      {item.priceConfirmed === false ? "Giá chờ xác nhận" : item.price.toLocaleString("vi-VN") + "₫"}
                     </p>
                   </div>
                 </Link>

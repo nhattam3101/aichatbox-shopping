@@ -4,7 +4,7 @@ import ChatBox from "@/components/ChatBox";
 
 export default function AboutPage() {
   return (
-    <main className="min-h-screen bg-[#fafaf8] text-[#1a1a1a]">
+    <main className="min-h-screen bg-[var(--brand-cream)] text-[#1a1a1a]">
       <Navbar />
 
       <section className="px-6 py-20 md:px-12 lg:px-20">
@@ -31,7 +31,7 @@ export default function AboutPage() {
 
           {/* Core Values 3 Columns */}
           <div className="mt-14 grid gap-6 md:grid-cols-3">
-            <div className="rounded-3xl border border-black/5 bg-white p-8 shadow-sm hover:shadow-md transition">
+            <div className="rounded-3xl border border-[var(--brand-border)] bg-white p-8 shadow-sm hover:shadow-md transition">
               <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-amber-50 text-2xl mb-4">
                 📏
               </div>
@@ -41,7 +41,7 @@ export default function AboutPage() {
               </p>
             </div>
 
-            <div className="rounded-3xl border border-black/5 bg-white p-8 shadow-sm hover:shadow-md transition">
+            <div className="rounded-3xl border border-[var(--brand-border)] bg-white p-8 shadow-sm hover:shadow-md transition">
               <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-amber-50 text-2xl mb-4">
                 🤖
               </div>
@@ -51,7 +51,7 @@ export default function AboutPage() {
               </p>
             </div>
 
-            <div className="rounded-3xl border border-black/5 bg-white p-8 shadow-sm hover:shadow-md transition">
+            <div className="rounded-3xl border border-[var(--brand-border)] bg-white p-8 shadow-sm hover:shadow-md transition">
               <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-amber-50 text-2xl mb-4">
                 🛡️
               </div>
@@ -87,7 +87,7 @@ export default function AboutPage() {
           <div className="mt-12 flex flex-wrap gap-4 items-center">
             <Link
               href="/products"
-              className="rounded-full bg-black px-8 py-4 text-sm font-bold text-white shadow-md hover:bg-gray-800 transition"
+              className="rounded-full bg-[var(--primary)] px-8 py-4 text-sm font-bold text-white shadow-md hover:bg-[var(--brand-primary-hover)] transition"
             >
               Khám phá sản phẩm ngay →
             </Link>
