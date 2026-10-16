@@ -111,7 +111,7 @@ export default function ProductsPage() {
     onlyPockets;
 
   return (
-    <main className="min-h-screen bg-[var(--brand-cream)] text-[#1a1a1a]">
+    <main className="min-h-screen bg-[var(--brand-cream)] text-[var(--text-primary)]">
       <Navbar />
 
       {/* Header Banner */}
@@ -132,7 +132,7 @@ export default function ProductsPage() {
             </div>
 
             {/* Quick Stat Pill */}
-            <div className="flex items-center gap-4 bg-[#f8f6f2] rounded-2xl p-3 border border-[var(--brand-border)]">
+            <div className="flex items-center gap-4 bg-[var(--surface-muted)] rounded-2xl p-3 border border-[var(--brand-border)]">
               <div className="text-center px-3 border-r border-[var(--brand-border)]">
                 <p className="text-xs text-gray-400">Tổng mẫu</p>
                 <p className="text-lg font-bold text-gray-800">{products.length}</p>
@@ -143,7 +143,7 @@ export default function ProductsPage() {
               </div>
               <div className="text-center px-3">
                 <p className="text-xs text-gray-400">Bảo hành</p>
-                <p className="text-lg font-bold text-emerald-600">12T</p>
+                <p className="text-lg font-bold text-[var(--secondary-ink)]">12T</p>
               </div>
             </div>
           </div>
@@ -162,8 +162,8 @@ export default function ProductsPage() {
                   onClick={() => setSelectedCategory(cat)}
                   className={`shrink-0 rounded-full px-5 py-2.5 text-xs font-bold transition-all flex items-center gap-2 ${
                     isSelected
-                      ? "bg-[var(--primary)] text-white shadow-md"
-                      : "bg-[#f5f3ef] text-gray-700 hover:bg-[#eae6e0]"
+                      ? "bg-[var(--primary)] text-[var(--on-primary)] shadow-md"
+                      : "bg-[var(--surface-muted)] text-gray-700 hover:bg-[var(--soft-blue)]"
                   }`}
                 >
                   <span>{cat}</span>
@@ -204,12 +204,12 @@ export default function ProductsPage() {
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               placeholder="Tìm theo tên máy, chất liệu..."
-              className="w-full rounded-full border border-gray-200 bg-[#f7f5f1] py-2 pl-9 pr-8 text-xs font-medium outline-none transition focus:border-black focus:bg-white"
+              className="w-full rounded-full border border-gray-200 bg-[var(--surface-muted)] py-2 pl-9 pr-8 text-xs font-medium outline-none transition focus:border-black focus:bg-white"
             />
             {search && (
               <button
                 onClick={() => setSearch("")}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-gray-400 hover:text-black"
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-gray-400 hover:text-[var(--text-primary)]"
               >
                 ×
               </button>
@@ -225,7 +225,7 @@ export default function ProductsPage() {
                 onClick={() => setSelectedSize(size)}
                 className={`rounded-full px-3 py-1.5 text-xs font-semibold transition ${
                   selectedSize === size
-                    ? "bg-[var(--primary)] text-white"
+                    ? "bg-[var(--primary)] text-[var(--on-primary)]"
                     : "border border-gray-200 bg-white text-gray-600 hover:bg-gray-50"
                 }`}
               >
@@ -243,7 +243,7 @@ export default function ProductsPage() {
                 onClick={() => setSelectedPriceRange(r.value)}
                 className={`rounded-full px-3 py-1.5 text-xs font-semibold transition ${
                   selectedPriceRange === r.value
-                    ? "bg-amber-600 text-white"
+                    ? "bg-[var(--primary)] text-[var(--on-primary)]"
                     : "border border-gray-200 bg-white text-gray-600 hover:bg-gray-50"
                 }`}
               >
@@ -259,7 +259,7 @@ export default function ProductsPage() {
                 type="checkbox"
                 checked={onlyWaterproof}
                 onChange={(e) => setOnlyWaterproof(e.target.checked)}
-                className="rounded border-gray-300 text-black focus:ring-black"
+                className="rounded border-gray-300 text-[var(--text-primary)] focus:ring-black"
               />
               <span>Chống nước</span>
             </label>
@@ -269,7 +269,7 @@ export default function ProductsPage() {
                 type="checkbox"
                 checked={onlyPockets}
                 onChange={(e) => setOnlyPockets(e.target.checked)}
-                className="rounded border-gray-300 text-black focus:ring-black"
+                className="rounded border-gray-300 text-[var(--text-primary)] focus:ring-black"
               />
               <span>Có ngăn phụ</span>
             </label>
@@ -294,7 +294,7 @@ export default function ProductsPage() {
               <button
                 onClick={() => setViewColumns(4)}
                 className={`rounded-full p-1.5 transition ${
-                  viewColumns === 4 ? "bg-[var(--primary)] text-white" : "text-gray-400 hover:text-black"
+                  viewColumns === 4 ? "bg-[var(--primary)] text-[var(--on-primary)]" : "text-gray-400 hover:text-[var(--text-primary)]"
                 }`}
                 title="Xem 4 cột"
               >
@@ -305,7 +305,7 @@ export default function ProductsPage() {
               <button
                 onClick={() => setViewColumns(2)}
                 className={`rounded-full p-1.5 transition ${
-                  viewColumns === 2 ? "bg-[var(--primary)] text-white" : "text-gray-400 hover:text-black"
+                  viewColumns === 2 ? "bg-[var(--primary)] text-[var(--on-primary)]" : "text-gray-400 hover:text-[var(--text-primary)]"
                 }`}
                 title="Xem 2 cột"
               >
@@ -343,7 +343,7 @@ export default function ProductsPage() {
                 </span>
               )}
               {onlyPockets && (
-                <span className="rounded-full bg-purple-100 text-purple-800 px-2.5 py-0.5 font-medium">
+                <span className="rounded-full bg-[var(--surface-muted)] text-[var(--primary-ink)] px-2.5 py-0.5 font-medium">
                   Có ngăn phụ
                 </span>
               )}
@@ -397,7 +397,7 @@ export default function ProductsPage() {
               </p>
               <button
                 onClick={handleResetFilters}
-                className="mt-6 rounded-full bg-[var(--primary)] px-6 py-2.5 text-xs font-semibold text-white shadow-md hover:bg-[var(--brand-primary-hover)] transition"
+                className="mt-6 rounded-full bg-[var(--primary)] px-6 py-2.5 text-xs font-semibold text-[var(--on-primary)] shadow-md hover:bg-[var(--brand-primary-hover)] transition"
               >
                 Xóa bộ lọc & Xem tất cả sản phẩm
               </button>

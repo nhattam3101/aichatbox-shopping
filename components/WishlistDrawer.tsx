@@ -4,10 +4,12 @@ import Image from "next/image";
 import Link from "next/link";
 import { useWishlist } from "@/components/WishlistContext";
 import { useCart } from "@/components/CartContext";
+import { useDialogFocus } from "@/components/useDialogFocus";
 
 export default function WishlistDrawer() {
   const { wishlist, isWishlistOpen, setIsWishlistOpen, removeFromWishlist, clearWishlist } = useWishlist();
   const { addToCart } = useCart();
+  const dialogRef = useDialogFocus(isWishlistOpen, () => setIsWishlistOpen(false));
 
   if (!isWishlistOpen) return null;
 
@@ -20,7 +22,7 @@ export default function WishlistDrawer() {
       />
 
       <div className="fixed inset-y-0 right-0 flex max-w-full pl-10">
-        <div className="w-screen max-w-md transform bg-white shadow-2xl transition ease-in-out duration-300 flex flex-col">
+        <div ref={dialogRef} role="dialog" aria-modal="true" aria-label="Danh sách yêu thích" tabIndex={-1} className="w-screen max-w-md transform bg-white shadow-2xl transition ease-in-out duration-300 flex flex-col">
           {/* Header */}
           <div className="flex items-center justify-between border-b border-gray-100 px-6 py-5">
             <div className="flex items-center gap-2">
@@ -57,7 +59,7 @@ export default function WishlistDrawer() {
                 </p>
                 <button
                   onClick={() => setIsWishlistOpen(false)}
-                  className="mt-6 rounded-full bg-[var(--primary)] px-6 py-2.5 text-sm font-medium text-white transition hover:bg-[var(--brand-primary-hover)]"
+                  className="mt-6 rounded-full bg-[var(--primary)] px-6 py-2.5 text-sm font-medium text-[var(--on-primary)] transition hover:bg-[var(--brand-primary-hover)]"
                 >
                   Khám phá sản phẩm ngay
                 </button>
@@ -89,7 +91,7 @@ export default function WishlistDrawer() {
                         </Link>
                         <button
                           onClick={() => removeFromWishlist(item.id)}
-                          className="text-gray-300 hover:text-rose-500 transition shrink-0"
+                          className="text-gray-300 hover:text-[var(--text-primary)] transition shrink-0"
                           title="Xóa khỏi yêu thích"
                         >
                           <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -116,7 +118,7 @@ export default function WishlistDrawer() {
                             selectedColor: item.colors[0],
                           });
                         }}
-                        className="inline-flex items-center gap-1 rounded-full bg-[var(--primary)] px-3 py-1.5 text-xs font-medium text-white hover:bg-[var(--brand-primary-hover)] transition"
+                        className="inline-flex items-center gap-1 rounded-full bg-[var(--primary)] px-3 py-1.5 text-xs font-medium text-[var(--on-primary)] hover:bg-[var(--brand-primary-hover)] transition"
                       >
                         <svg className="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                           <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
@@ -152,7 +154,7 @@ export default function WishlistDrawer() {
                   clearWishlist();
                   setIsWishlistOpen(false);
                 }}
-                className="w-full rounded-full bg-[var(--primary)] py-3.5 text-sm font-semibold text-white shadow-md hover:bg-[var(--brand-primary-hover)] transition flex items-center justify-center gap-2"
+                className="w-full rounded-full bg-[var(--primary)] py-3.5 text-sm font-semibold text-[var(--on-primary)] shadow-md hover:bg-[var(--brand-primary-hover)] transition flex items-center justify-center gap-2"
               >
                 <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                   <path strokeLinecap="round" strokeLinejoin="round" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />

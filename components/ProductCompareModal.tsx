@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useState, createContext, useContext, ReactNode } from "react";
 import type { Product } from "@/data/products";
 import { useCart } from "@/components/CartContext";
+import { useDialogFocus } from "@/components/useDialogFocus";
 
 type CompareContextType = {
   compareList: Product[];
@@ -85,7 +86,7 @@ function CompareFloatingBar() {
     <div className="fixed bottom-6 left-1/2 max-w-[calc(100vw-24px)] z-40 -translate-x-1/2 animate-fade-in-up">
       <div className="flex items-center gap-2 sm:gap-4 rounded-full border border-black/10 bg-white/95 px-5 py-3 shadow-2xl backdrop-blur-xl">
         <div className="flex items-center gap-2">
-          <span className="flex h-6 w-6 items-center justify-center rounded-full bg-amber-500 text-xs font-bold text-white">
+          <span className="flex h-6 w-6 items-center justify-center rounded-full bg-amber-500 text-xs font-bold text-[var(--on-primary)]">
             {compareList.length}
           </span>
           <span className="text-xs font-bold text-gray-800 hidden sm:inline">
@@ -117,7 +118,7 @@ function CompareFloatingBar() {
 
         <button
           onClick={() => setIsCompareModalOpen(true)}
-          className="rounded-full bg-[var(--primary)] px-4 py-2 text-xs font-semibold text-white shadow hover:bg-[var(--brand-primary-hover)] transition"
+          className="rounded-full bg-[var(--primary)] px-4 py-2 text-xs font-semibold text-[var(--on-primary)] shadow hover:bg-[var(--brand-primary-hover)] transition"
         >
           So sánh ngay ({compareList.length}/3)
         </button>
@@ -138,6 +139,7 @@ function CompareFloatingBar() {
 function CompareModal() {
   const { compareList, isCompareModalOpen, setIsCompareModalOpen, removeFromCompare, clearCompare } = useCompare();
   const { addToCart } = useCart();
+  const dialogRef = useDialogFocus(isCompareModalOpen && compareList.length > 0, () => setIsCompareModalOpen(false));
 
   if (!isCompareModalOpen || compareList.length === 0) return null;
 
@@ -148,7 +150,7 @@ function CompareModal() {
         onClick={() => setIsCompareModalOpen(false)}
       />
 
-      <div className="relative z-10 w-full max-w-5xl rounded-3xl bg-white p-6 md:p-8 shadow-2xl max-h-[90vh] overflow-y-auto">
+      <div ref={dialogRef} role="dialog" aria-modal="true" aria-label="So sánh sản phẩm" tabIndex={-1} className="relative z-10 w-full max-w-5xl rounded-3xl bg-white p-6 md:p-8 shadow-2xl max-h-[90vh] overflow-y-auto">
         <div className="flex items-center justify-between border-b border-gray-100 pb-4">
           <div>
             <h2 className="text-2xl font-bold text-gray-900">So sánh thông số sản phẩm</h2>
@@ -163,7 +165,8 @@ function CompareModal() {
             </button>
             <button
               onClick={() => setIsCompareModalOpen(false)}
-              className="rounded-full p-2 text-gray-400 hover:bg-gray-100 hover:text-black transition"
+              aria-label="Đóng so sánh"
+              className="rounded-full p-2 text-gray-400 hover:bg-gray-100 hover:text-[var(--text-primary)] transition"
             >
               <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -188,7 +191,7 @@ function CompareModal() {
                       >
                         ×
                       </button>
-                      <div className="relative h-24 w-24 overflow-hidden rounded-2xl bg-[#f6f4f0] p-2">
+                      <div className="relative h-24 w-24 overflow-hidden rounded-2xl bg-[var(--surface-muted)] p-2">
                         <Image src={product.image} alt={product.name} fill className="object-contain" />
                       </div>
                       <Link
@@ -213,7 +216,7 @@ function CompareModal() {
                             selectedColor: product.colors[0],
                           });
                         }}
-                        className="mt-3 rounded-full bg-[var(--primary)] px-4 py-1.5 text-xs font-semibold text-white hover:bg-[var(--brand-primary-hover)] transition"
+                        className="mt-3 rounded-full bg-[var(--primary)] px-4 py-1.5 text-xs font-semibold text-[var(--on-primary)] hover:bg-[var(--brand-primary-hover)] transition"
                       >
                         + Thêm vào giỏ
                       </button>
@@ -262,7 +265,7 @@ function CompareModal() {
                 {compareList.map((p) => (
                   <td key={p.id} className="py-3 px-3 text-center">
                     {p.waterproof ? (
-                      <span className="font-bold text-emerald-600">✓ Có (Kháng nước cao cấp)</span>
+                      <span className="font-bold text-[var(--secondary-ink)]">✓ Có (Kháng nước cao cấp)</span>
                     ) : (
                       <span className="text-gray-400">Tiêu chuẩn kháng bụi nhẹ</span>
                     )}

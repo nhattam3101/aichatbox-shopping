@@ -1,11 +1,14 @@
 "use client";
 
+import ButtonSelector from "@/components/ButtonSelector";
+import { productGallery, type ButtonName } from "@/data/customization";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { services, accessories, type Product } from "@/data/products";
 
+import BenefitIcon from "@/components/BenefitIcon";
 import Navbar from "@/components/Navbar";
 import ChatBox from "@/components/ChatBox";
 import OpenChatButton from "@/components/OpenChatButton";
@@ -29,6 +32,7 @@ export default function ProductDetailClient({ product, relatedProducts }: Props)
   const [embroidery, setEmbroidery] = useState(false);
   const embroideryService = services.find(p => p.id === 7)!;
   const accessory = accessories[0];
+  const [selectedButton, setSelectedButton] = useState<ButtonName>("Baby Blue");
   const [quantity, setQuantity] = useState(1);
   const [activeTab, setActiveTab] = useState<"description" | "details" | "reviews">("description");
 
@@ -36,9 +40,7 @@ export default function ProductDetailClient({ product, relatedProducts }: Props)
   const isCompared = isInCompare(product.id);
 
   // Gallery images (main product image + alternate views)
-  const galleryImages = product.gallery && product.gallery.length > 0
-    ? product.gallery
-    : [product.image];
+  const galleryImages = productGallery(product);
 
   const discountPercent = product.originalPrice
     ? Math.round(((product.originalPrice - product.price) / product.originalPrice) * 100)
@@ -46,7 +48,7 @@ export default function ProductDetailClient({ product, relatedProducts }: Props)
 
   function handleAdd() {
     if (product.priceConfirmed === false) return;
-    addToCart({ ...product, quantity, selectedColor });
+    addToCart({ ...product, quantity, selectedColor, selectedButton, embroidery });
     if (embroidery && product.supportsEmbroidery) addToCart({ ...embroideryService, quantity }, false);
   }
 
@@ -62,6 +64,8 @@ export default function ProductDetailClient({ product, relatedProducts }: Props)
         size: product.size,
         quantity,
         selectedColor,
+        selectedButton,
+        embroidery,
       },
       false
     );
@@ -70,13 +74,13 @@ export default function ProductDetailClient({ product, relatedProducts }: Props)
 
   const guarantees = [
     { icon: "🚚", title: "Freeship toàn quốc", desc: "Đơn từ 300k" },
-    { icon: "🔄", title: "Đổi trả 7 ngày", desc: "Không vừa size đổi ngay" },
+    { icon: "🔄", title: "Đổi Trả 3 Ngày", desc: "Không vừa size đổi ngay" },
     { icon: "🛡️", title: "Chống va đập", desc: "Đệm khí an tâm" },
     { icon: "🤖", title: "AI tư vấn 24/7", desc: "Hỗ trợ chọn size chuẩn" },
   ];
 
   return (
-    <main className="min-h-screen bg-[var(--brand-cream)] text-[#1a1a1a]">
+    <main className="min-h-screen bg-[var(--brand-cream)] text-[var(--text-primary)]">
       {/* Navigation */}
       <Navbar />
 
@@ -100,10 +104,11 @@ export default function ProductDetailClient({ product, relatedProducts }: Props)
             {/* Left: Gallery */}
             <div className="space-y-4">
               {/* Main Image */}
-              <div className="relative aspect-square w-full overflow-hidden rounded-3xl bg-[#f2eee9] shadow-sm border border-[var(--brand-border)]">
+              <div className="relative aspect-square w-full overflow-hidden rounded-3xl bg-[var(--surface-muted)] shadow-sm border border-[var(--brand-border)]">
                 <Image
                   src={selectedImage}
-                  alt={product.name}
+                  alt={selectedImage.includes("bang_mau_nut") ? "Bảng màu nút CaseUp" : selectedImage.includes("bang_mau") ? "Bảng màu vải CaseUp" : product.name}
+                  sizes="(max-width: 1023px) 100vw, 50vw"
                   fill
                   priority
                   className="object-contain p-6 transition-all duration-300"
@@ -112,12 +117,12 @@ export default function ProductDetailClient({ product, relatedProducts }: Props)
                 {/* Badges */}
                 <div className="absolute left-4 top-4 flex flex-col gap-2">
                   {product.badge && (
-                    <span className="rounded-full bg-amber-500 px-3.5 py-1 text-xs font-bold text-white shadow-sm">
+                    <span className={`rounded-full px-3.5 py-1 text-xs font-bold text-[var(--text-primary)] shadow-sm ${product.badge === "Mới" ? "bg-[var(--soft-blue)]" : product.badge === "Hot" ? "bg-[var(--primary)]" : "bg-[var(--yellow)]"}`}>
                       {product.badge}
                     </span>
                   )}
                   {discountPercent && (
-                    <span className="rounded-full bg-rose-500 px-3 py-1 text-xs font-bold text-white shadow-sm">
+                    <span className="rounded-full bg-[var(--yellow)] px-3 py-1 text-xs font-bold text-[var(--text-primary)] shadow-sm">
                       -{discountPercent}%
                     </span>
                   )}
@@ -127,10 +132,10 @@ export default function ProductDetailClient({ product, relatedProducts }: Props)
                 <div className="absolute right-4 top-4 flex flex-col gap-2 z-10">
                   <button
                     onClick={() => toggleWishlist(product)}
-                    className={`flex h-10 w-10 items-center justify-center rounded-full shadow-md backdrop-blur-md transition hover:scale-110 ${
+                    className={`flex h-11 w-11 items-center justify-center rounded-full border border-[var(--border)] shadow-sm transition hover:scale-[1.02] ${
                       isFavorite
-                        ? "bg-white text-rose-500"
-                        : "bg-white/90 text-gray-400 hover:text-rose-500"
+                        ? "bg-white text-[var(--primary-ink)] hover:bg-[var(--soft-blue)]"
+                        : "bg-white text-gray-600 hover:bg-[var(--soft-blue)] hover:text-[var(--text-primary)]"
                     }`}
                     title={isFavorite ? "Bỏ yêu thích" : "Lưu vào yêu thích"}
                   >
@@ -141,10 +146,10 @@ export default function ProductDetailClient({ product, relatedProducts }: Props)
 
                   <button
                     onClick={() => toggleCompare(product)}
-                    className={`flex h-10 w-10 items-center justify-center rounded-full shadow-md backdrop-blur-md transition hover:scale-110 ${
+                    className={`flex h-11 w-11 items-center justify-center rounded-full border border-[var(--border)] shadow-sm transition hover:scale-[1.02] ${
                       isCompared
-                        ? "bg-amber-500 text-white"
-                        : "bg-white/90 text-gray-500 hover:text-amber-600"
+                        ? "bg-[var(--primary)] text-[var(--on-primary)]"
+                        : "bg-white text-gray-600 hover:bg-[var(--soft-blue)] hover:text-amber-600"
                     }`}
                     title="So sánh với sản phẩm khác"
                   >
@@ -155,6 +160,7 @@ export default function ProductDetailClient({ product, relatedProducts }: Props)
                 </div>
               </div>
 
+              <a href={selectedImage} target="_blank" rel="noreferrer" className="inline-block min-h-10 text-sm font-medium text-[var(--primary-ink)] underline underline-offset-4">Mở ảnh đầy đủ để xem chi tiết</a>
               {/* Thumbnails */}
               <div className="grid grid-cols-4 gap-3">
                 {galleryImages.map((img, idx) => {
@@ -164,9 +170,11 @@ export default function ProductDetailClient({ product, relatedProducts }: Props)
                       key={idx}
                       type="button"
                       onClick={() => setSelectedImage(img)}
-                      className={`relative aspect-square overflow-hidden rounded-xl border-2 bg-[#f2eee9] transition-all ${
+                      aria-pressed={isSelected}
+                      aria-label={`Xem ${img.includes("bang_mau_nut") ? "bảng màu nút" : img.includes("bang_mau") ? "bảng màu vải" : `ảnh ${idx + 1}`}`}
+                      className={`relative aspect-square overflow-hidden rounded-xl border-2 bg-[var(--surface-muted)] transition-all ${
                         isSelected
-                          ? "border-amber-500 ring-2 ring-amber-500/30 scale-105"
+                          ? "border-[var(--secondary)] ring-2 ring-[var(--secondary-soft)]"
                           : "border-black/10 hover:border-black/30"
                       }`}
                     >
@@ -185,24 +193,6 @@ export default function ProductDetailClient({ product, relatedProducts }: Props)
             {/* Right: Info & Actions */}
             <div className="flex flex-col justify-between space-y-6">
               <div>
-                {/* Rating & Sold count */}
-                <div className="flex items-center gap-3">
-                  <div className="flex items-center gap-1 rounded-full bg-amber-50 px-2.5 py-1 border border-amber-200">
-                    <span className="text-sm font-bold text-amber-700">★ {product.rating}</span>
-                  </div>
-                  <span className="text-sm text-gray-500">
-                    Đã bán <strong className="text-gray-800">{product.sold}</strong>
-                  </span>
-                  <span className="text-gray-300">•</span>
-                  <span className="rounded-md bg-amber-100/60 px-2.5 py-0.5 text-xs font-bold text-amber-800">
-                    {product.category}
-                  </span>
-                  <span className="text-gray-300">•</span>
-                  <span className="rounded-md bg-gray-100 px-2.5 py-0.5 text-xs font-medium text-gray-600">
-                    {product.size}
-                  </span>
-                </div>
-
                 {/* Name */}
                 <h1 className="mt-3 text-3xl font-extrabold tracking-tight md:text-4xl text-gray-900">
                   {product.name}
@@ -219,7 +209,7 @@ export default function ProductDetailClient({ product, relatedProducts }: Props)
                     </span>
                   )}
                   {discountPercent && (
-                    <span className="rounded-full bg-rose-50 px-2 py-0.5 text-xs font-bold text-rose-600">
+                    <span className="rounded-full bg-[var(--surface-muted)] px-2 py-0.5 text-xs font-bold text-rose-600">
                       Tiết kiệm {discountPercent}%
                     </span>
                   )}
@@ -230,8 +220,26 @@ export default function ProductDetailClient({ product, relatedProducts }: Props)
                   {product.description}
                 </p>
 
+                {/* Rating & Sold count */}
+                <div className="flex flex-wrap items-center gap-3">
+                  <div className="flex items-center gap-1 rounded-full bg-amber-50 px-2.5 py-1 border border-amber-200">
+                    <span className="text-sm font-bold text-amber-700">★ {product.rating}</span>
+                  </div>
+                  <span className="text-sm text-gray-500">
+                    Đã bán <strong className="text-gray-800">{product.sold}</strong>
+                  </span>
+                  <span className="text-gray-300">•</span>
+                  <span className="rounded-md bg-amber-100/60 px-2.5 py-0.5 text-xs font-bold text-amber-800">
+                    {product.category}
+                  </span>
+                  <span className="text-gray-300">•</span>
+                  <span className="rounded-md bg-gray-100 px-2.5 py-0.5 text-xs font-medium text-gray-600">
+                    {product.size}
+                  </span>
+                </div>
+
                 {/* Quick Spec Pills */}
-                <div className="mt-5 grid grid-cols-2 gap-2 text-xs bg-[#f8f6f2] p-3.5 rounded-2xl border border-[var(--brand-border)]">
+                <div className="mt-5 grid grid-cols-2 gap-2 text-xs bg-[var(--surface-muted)] p-3.5 rounded-2xl border border-[var(--brand-border)]">
                   <div>
                     <span className="text-gray-400">Máy tối đa:</span>
                     <span className="ml-1.5 font-bold text-gray-800">{product.kind === "sleeve" ? `${product.maxWidth} × ${product.maxHeight} × ${product.maxThickness ?? "—"} cm` : "Không áp dụng"}</span>
@@ -242,7 +250,7 @@ export default function ProductDetailClient({ product, relatedProducts }: Props)
                   </div>
                   <div>
                     <span className="text-gray-400">Chống nước:</span>
-                    <span className={`ml-1.5 font-bold ${product.waterproof ? "text-emerald-600" : "text-gray-600"}`}>
+                    <span className={`ml-1.5 font-bold ${product.waterproof ? "text-[var(--secondary-ink)]" : "text-gray-600"}`}>
                       {product.waterproof ? "Có" : "Kháng bụi nhẹ"}
                     </span>
                   </div>
@@ -256,7 +264,7 @@ export default function ProductDetailClient({ product, relatedProducts }: Props)
                 {product.colors && product.colors.length > 0 && (
                   <div className="mt-6 border-t border-[var(--brand-border)] pt-5">
                     <span className="text-sm font-semibold text-gray-800">
-                      Màu sắc: <span className="font-normal text-gray-600">{selectedColor}</span>
+                      {product.kind === "sleeve" ? "Chọn màu vải" : "Màu sắc"}: <span className="font-normal text-gray-600">{selectedColor}</span>
                     </span>
                     <div className="mt-3 flex flex-wrap gap-2.5">
                       {product.colors.map((color) => {
@@ -266,9 +274,10 @@ export default function ProductDetailClient({ product, relatedProducts }: Props)
                             key={color}
                             type="button"
                             onClick={() => setSelectedColor(color)}
-                            className={`rounded-full px-4 py-2 text-sm font-medium transition-all ${
+                            aria-pressed={selectedColor === color}
+                            className={`min-h-11 rounded-full px-4 py-2 text-sm font-medium transition-all ${
                               isChosen
-                                ? "border-2 border-amber-600 bg-amber-50 text-amber-800 shadow-sm"
+                                ? "border-2 border-[var(--secondary)] bg-[var(--secondary-soft)] text-[var(--text-primary)] shadow-sm"
                                 : "border border-gray-200 bg-white text-gray-700 hover:border-gray-400"
                             }`}
                           >
@@ -280,9 +289,11 @@ export default function ProductDetailClient({ product, relatedProducts }: Props)
                   </div>
                 )}
 
-                {product.supportsEmbroidery && <label className="mt-5 flex gap-2 text-sm"><input type="checkbox" checked={embroidery} onChange={e => setEmbroidery(e.target.checked)} />Thêu tên +{embroideryService.price.toLocaleString("vi-VN")}₫ / bao (thêm thành dòng dịch vụ trong giỏ)</label>}
+                {product.kind === "sleeve" && <ButtonSelector value={selectedButton} onChange={setSelectedButton} />}
+
+                {product.supportsEmbroidery && <label className="mt-5 flex min-h-12 items-center gap-3 rounded-2xl border border-[var(--border)] bg-[var(--surface-muted)] p-4 text-sm"><input type="checkbox" checked={embroidery} onChange={e => setEmbroidery(e.target.checked)} />Thêu tên +{embroideryService.price.toLocaleString("vi-VN")}₫ / bao</label>}
                 {product.priceConfirmed === false && <p className="mt-3 text-sm text-amber-800">Giá size này chưa được xác nhận. Vui lòng liên hệ trước khi mua.</p>}
-                {product.supportsEmbroidery && <p className="mt-4 text-sm">Gợi ý mua kèm: <Link className="underline" href={`/products/${accessory.id}`}>{accessory.name} · {accessory.price.toLocaleString("vi-VN")}₫</Link></p>}
+                {product.supportsEmbroidery && <p className="mt-4 rounded-2xl border border-[var(--border)] p-4 text-sm leading-relaxed">Phụ kiện mua kèm (giá riêng): <Link className="underline" href={`/products/${accessory.id}`}>{accessory.name} · {accessory.price.toLocaleString("vi-VN")}₫</Link></p>}
                 {/* Quantity Selector */}
                 <div className="mt-6 border-t border-[var(--brand-border)] pt-5">
                   <span className="text-sm font-semibold text-gray-800">Số lượng:</span>
@@ -292,7 +303,7 @@ export default function ProductDetailClient({ product, relatedProducts }: Props)
                         type="button"
                         onClick={() => setQuantity((q) => Math.max(1, q - 1))}
                         disabled={quantity <= 1}
-                        className="flex h-9 w-9 items-center justify-center rounded-full text-gray-600 transition hover:bg-gray-100 disabled:opacity-30"
+                        className="flex h-11 w-11 items-center justify-center rounded-full text-gray-600 transition hover:bg-gray-100 disabled:opacity-30"
                         aria-label="Giảm số lượng"
                       >
                         <span className="text-lg font-bold">−</span>
@@ -303,25 +314,25 @@ export default function ProductDetailClient({ product, relatedProducts }: Props)
                       <button
                         type="button"
                         onClick={() => setQuantity((q) => q + 1)}
-                        className="flex h-9 w-9 items-center justify-center rounded-full text-gray-600 transition hover:bg-gray-100"
+                        className="flex h-11 w-11 items-center justify-center rounded-full text-gray-600 transition hover:bg-gray-100"
                         aria-label="Tăng số lượng"
                       >
                         <span className="text-lg font-bold">+</span>
                       </button>
                     </div>
-                    <span className="text-xs font-medium text-emerald-600">✓ Còn hàng sẵn sàng đóng gói</span>
+                    <span className="text-xs font-medium text-[var(--secondary-ink)]">✓ Còn hàng sẵn sàng đóng gói</span>
                   </div>
                 </div>
 
                 {/* Add to Cart and Buy Now */}
                 <div className="mt-8 flex flex-col gap-3 sm:flex-row">
                   <div className="flex-1">
-                    <button onClick={handleAdd} disabled={product.priceConfirmed === false} className="w-full rounded-full bg-[var(--primary)] px-6 py-4 font-semibold text-white disabled:opacity-40">Thêm vào giỏ hàng</button>
+                    <button onClick={handleAdd} disabled={product.priceConfirmed === false} className="w-full rounded-full bg-[var(--primary)] px-6 py-4 font-semibold text-[var(--on-primary)] transition-colors hover:bg-[var(--brand-primary-hover)] disabled:opacity-40">Thêm vào giỏ hàng</button>
                   </div>
                   <button
                     type="button"
                     onClick={handleBuyNow}
-                    className="flex-1 rounded-full bg-[var(--brand-blue)] px-6 py-4 font-semibold text-[#36556a] transition-all hover:bg-[#d3e6f1] hover:shadow-lg flex items-center justify-center gap-2"
+                    className="flex-1 rounded-full bg-[var(--soft-blue)] px-6 py-4 font-semibold text-[var(--text-primary)] transition-all hover:bg-[var(--secondary-soft)] hover:shadow-lg flex items-center justify-center gap-2"
                   >
                     <span>⚡ Mua ngay COD</span>
                   </button>
@@ -331,7 +342,7 @@ export default function ProductDetailClient({ product, relatedProducts }: Props)
                 <div className="mt-8 grid grid-cols-2 gap-3 border-t border-[var(--brand-border)] pt-6 sm:grid-cols-4">
                   {guarantees.map((item, idx) => (
                     <div key={idx} className="flex flex-col items-center rounded-2xl bg-white p-3 text-center border border-[var(--brand-border)] shadow-sm">
-                      <span className="text-2xl">{item.icon}</span>
+                      <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-[var(--success-soft)] text-[var(--success)]"><BenefitIcon kind={item.icon} /></span>
                       <span className="mt-1 text-xs font-semibold text-gray-800">{item.title}</span>
                       <span className="text-[11px] text-gray-500">{item.desc}</span>
                     </div>
@@ -349,7 +360,7 @@ export default function ProductDetailClient({ product, relatedProducts }: Props)
                 onClick={() => setActiveTab("description")}
                 className={`border-b-2 pb-4 text-sm font-semibold transition-colors ${
                   activeTab === "description"
-                    ? "border-amber-600 text-amber-600"
+                    ? "border-[var(--primary)] bg-[var(--primary-soft)] text-[var(--text-primary)]"
                     : "border-transparent text-gray-500 hover:text-gray-900"
                 }`}
               >
@@ -360,7 +371,7 @@ export default function ProductDetailClient({ product, relatedProducts }: Props)
                 onClick={() => setActiveTab("details")}
                 className={`ml-8 border-b-2 pb-4 text-sm font-semibold transition-colors ${
                   activeTab === "details"
-                    ? "border-amber-600 text-amber-600"
+                    ? "border-[var(--primary)] bg-[var(--primary-soft)] text-[var(--text-primary)]"
                     : "border-transparent text-gray-500 hover:text-gray-900"
                 }`}
               >
@@ -371,7 +382,7 @@ export default function ProductDetailClient({ product, relatedProducts }: Props)
                 onClick={() => setActiveTab("reviews")}
                 className={`ml-8 border-b-2 pb-4 text-sm font-semibold transition-colors ${
                   activeTab === "reviews"
-                    ? "border-amber-600 text-amber-600"
+                    ? "border-[var(--primary)] bg-[var(--primary-soft)] text-[var(--text-primary)]"
                     : "border-transparent text-gray-500 hover:text-gray-900"
                 }`}
               >
@@ -511,7 +522,7 @@ export default function ProductDetailClient({ product, relatedProducts }: Props)
                   href={`/products/${item.id}`}
                   className="group block rounded-3xl bg-[var(--brand-cream)] p-4 transition-all hover:-translate-y-1 hover:shadow-lg border border-[var(--brand-border)]"
                 >
-                  <div className="relative aspect-square w-full overflow-hidden rounded-2xl bg-[#f2eee9]">
+                  <div className="relative aspect-square w-full overflow-hidden rounded-2xl bg-[var(--surface-muted)]">
                     <Image
                       src={item.image}
                       alt={item.name}
@@ -520,7 +531,7 @@ export default function ProductDetailClient({ product, relatedProducts }: Props)
                       className="object-contain p-3 transition-transform duration-300 group-hover:scale-105"
                     />
                     {item.badge && (
-                      <span className="absolute left-2.5 top-2.5 rounded-full bg-amber-500 px-2 py-0.5 text-[10px] font-bold text-white">
+                      <span className="absolute left-2.5 top-2.5 rounded-full bg-amber-500 px-2 py-0.5 text-[10px] font-bold text-[var(--on-primary)]">
                         {item.badge}
                       </span>
                     )}
@@ -546,7 +557,7 @@ export default function ProductDetailClient({ product, relatedProducts }: Props)
 
       {/* AI Help Banner */}
       <section className="mx-auto max-w-7xl px-6 py-10 md:px-12 lg:px-20">
-        <div className="relative overflow-hidden rounded-3xl bg-gradient-to-r from-amber-500 to-amber-600 p-8 text-white shadow-xl md:p-12">
+        <div className="relative overflow-hidden rounded-3xl bg-[var(--primary)] p-8 text-[var(--on-primary)] shadow-xl md:p-12">
           <div className="relative z-10 max-w-2xl">
             <span className="rounded-full bg-white/20 px-3 py-1 text-xs font-semibold backdrop-blur-sm">
               Trợ lý thông minh
@@ -554,7 +565,7 @@ export default function ProductDetailClient({ product, relatedProducts }: Props)
             <h3 className="mt-3 text-2xl font-bold md:text-3xl">
               Bạn phân vân không biết máy mình vừa size nào?
             </h3>
-            <p className="mt-2 text-sm text-amber-100 md:text-base">
+            <p className="mt-2 text-sm text-[var(--on-primary)] md:text-base">
               Chỉ cần nhập tên đời máy hoặc kích thước dài × rộng, AI CaseUp sẽ tính toán và tư vấn chính xác chiếc bao phù hợp nhất.
             </p>
             <div className="mt-6">

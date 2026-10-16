@@ -1,9 +1,12 @@
 "use client";
 
+import { contact } from "@/data/contact";
 import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { useCart, CartItem } from "@/components/CartContext";
+import { cartVariantKey } from "@/data/customization";
+import { useDialogFocus } from "@/components/useDialogFocus";
 import Navbar from "@/components/Navbar";
 import ChatBox from "@/components/ChatBox";
 
@@ -40,8 +43,9 @@ export default function CartPage() {
 
   // Checkout modal state
   const [isCheckoutOpen, setIsCheckoutOpen] = useState(false);
+  const checkoutRef = useDialogFocus(isCheckoutOpen, () => setIsCheckoutOpen(false));
   const [customerName, setCustomerName] = useState("Nguyễn Ngọc Phương Uyên");
-  const [phone, setPhone] = useState("0988 123 456");
+  const [phone, setPhone] = useState<string>(contact.phone);
   const [address, setAddress] = useState("Cam Ranh, Khánh Hòa");
   const [note, setNote] = useState("Giao giờ hành chính, gọi trước khi đến");
   const [paymentMethod, setPaymentMethod] = useState<"cod" | "banking">("cod");
@@ -103,7 +107,7 @@ export default function CartPage() {
       total: totalPrice,
       totalQuantity: totalItems,
       customerName: customerName.trim() || "Khách hàng",
-      phone: phone.trim() || "0988 123 456",
+      phone: phone.trim() || contact.phone,
       address: address.trim() || "Địa chỉ mẫu",
       note: note.trim(),
       paymentMethod,
@@ -127,7 +131,7 @@ export default function CartPage() {
   const freeshipProgress = Math.min(100, Math.round((rawSubtotal / FREESHIP_THRESHOLD) * 100));
 
   return (
-    <main className="min-h-screen bg-[var(--brand-cream)] text-[#1a1a1a]">
+    <main className="min-h-screen bg-[var(--brand-cream)] text-[var(--text-primary)]">
       <Navbar />
 
       <section className="mx-auto max-w-7xl px-6 py-10 md:px-12 lg:px-20">
@@ -154,7 +158,7 @@ export default function CartPage() {
             </div>
             <div className="mt-2.5 h-2 w-full overflow-hidden rounded-full bg-amber-200/50">
               <div
-                className="h-full rounded-full bg-gradient-to-r from-amber-500 to-emerald-500 transition-all duration-500"
+                className="h-full rounded-full bg-[var(--primary)] transition-all duration-500"
                 style={{ width: `${freeshipProgress}%` }}
               />
             </div>
@@ -165,7 +169,7 @@ export default function CartPage() {
         {placedOrder ? (
           <div className="mt-8 space-y-8 animate-fade-in-up">
             {/* Banner chúc mừng */}
-            <div className="relative overflow-hidden rounded-3xl border border-emerald-200/60 bg-[#f5f8f2] p-6 md:p-10 shadow-lg">
+            <div className="relative overflow-hidden rounded-3xl border border-emerald-200/60 bg-[var(--surface-muted)] p-6 md:p-10 shadow-lg">
               <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
                 <div className="flex items-start gap-4">
                   <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-emerald-100 text-emerald-800 text-2xl">
@@ -201,7 +205,7 @@ export default function CartPage() {
                       setPlacedOrder(null);
                       setJustReset(true);
                     }}
-                    className="mt-2 text-xs font-semibold text-gray-600 hover:text-black underline"
+                    className="mt-2 text-xs font-semibold text-gray-600 hover:text-[var(--text-primary)] underline"
                   >
                     Bỏ qua đếm ngược
                   </button>
@@ -218,10 +222,10 @@ export default function CartPage() {
                     <p className="font-bold text-emerald-700">Đã nhận đơn</p>
                   </div>
                   <div className="space-y-1.5">
-                    <div className="mx-auto flex h-8 w-8 items-center justify-center rounded-full bg-[#efe4d6] text-[#70543c] font-bold">
+                    <div className="mx-auto flex h-8 w-8 items-center justify-center rounded-full bg-[var(--yellow)] text-[var(--text-primary)] font-bold">
                       📦
                     </div>
-                    <p className="font-bold text-[#70543c]">Đang đóng gói</p>
+                    <p className="font-bold text-[var(--text-primary)]">Đang đóng gói</p>
                   </div>
                   <div className="space-y-1.5">
                     <div className="mx-auto flex h-8 w-8 items-center justify-center rounded-full bg-gray-100 text-gray-400 font-bold">
@@ -250,7 +254,8 @@ export default function CartPage() {
                         <Image src={item.image} alt={item.name} fill className="object-contain p-1" />
                       </div>
                       <div className="flex-1 min-w-0">
-                        <h4 className="font-bold text-xs text-gray-900 truncate">{item.name}</h4>
+                        <h4 className="font-bold text-xs text-gray-900">{item.name}</h4>
+                        <p className="mt-1 text-xs text-[var(--text-secondary)]">{item.selectedColor}{item.selectedButton ? ` · Nút: ${item.selectedButton}` : ""}{item.embroidery ? " · Có thêu tên" : ""}</p>
                         <p className="text-[11px] text-gray-400">{item.size} • Số lượng: {item.quantity}</p>
                       </div>
                       <span className="price-text font-bold text-xs">
@@ -307,7 +312,7 @@ export default function CartPage() {
             </p>
             <Link
               href="/products"
-              className="mt-6 inline-flex items-center gap-2 rounded-full bg-[var(--primary)] px-7 py-3.5 text-xs md:text-sm font-semibold text-white shadow-md hover:bg-[var(--brand-primary-hover)] transition"
+              className="mt-6 inline-flex items-center gap-2 rounded-full bg-[var(--primary)] px-7 py-3.5 text-xs md:text-sm font-semibold text-[var(--on-primary)] shadow-md hover:bg-[var(--brand-primary-hover)] transition"
             >
               <span>Khám phá sản phẩm ngay</span>
               <span>→</span>
@@ -320,10 +325,10 @@ export default function CartPage() {
             <div className="space-y-4">
               {cart.map((item) => (
                 <div
-                  key={`${item.id}-${item.selectedColor || "default"}`}
+                  key={cartVariantKey(item)}
                   className="flex gap-4 sm:gap-6 rounded-3xl border border-[var(--brand-border)] bg-white p-4 sm:p-6 shadow-sm transition hover:shadow-md"
                 >
-                  <div className="relative h-28 w-28 shrink-0 overflow-hidden rounded-2xl bg-[#f2eee9] border border-[var(--brand-border)]">
+                  <div className="relative h-20 w-20 sm:h-28 sm:w-28 shrink-0 overflow-hidden rounded-2xl bg-[var(--surface-muted)] border border-[var(--brand-border)]">
                     <Image
                       src={item.image}
                       alt={item.name}
@@ -332,7 +337,7 @@ export default function CartPage() {
                     />
                   </div>
 
-                  <div className="flex flex-1 flex-col justify-between">
+                  <div className="flex min-w-0 flex-1 flex-col justify-between">
                     <div>
                       <div className="flex items-start justify-between gap-2">
                         <Link
@@ -343,7 +348,7 @@ export default function CartPage() {
                         </Link>
                         <button
                           type="button"
-                          onClick={() => removeFromCart(item.id, item.selectedColor)}
+                          onClick={() => removeFromCart(item.id, item.selectedColor, item.selectedButton, item.embroidery)}
                           className="text-xs font-semibold text-rose-500 hover:text-rose-700 transition"
                         >
                           Xóa
@@ -354,6 +359,8 @@ export default function CartPage() {
                         <span className="rounded bg-black/5 px-2 py-0.5 font-medium text-gray-700">
                           {item.size}
                         </span>
+                        {item.embroidery && <span className="rounded bg-[var(--surface-muted)] px-2 py-1 font-medium">Có thêu tên · phí ở dòng dịch vụ riêng</span>}
+                        {item.selectedButton && <span className="rounded bg-[var(--surface-muted)] px-2 py-1 font-medium text-[var(--primary-ink)]">Nút: {item.selectedButton}</span>}
                         {item.selectedColor && (
                           <span className="rounded bg-black/5 px-2 py-0.5 font-medium text-gray-700">
                             Màu: {item.selectedColor}
@@ -366,12 +373,12 @@ export default function CartPage() {
                       </p>
                     </div>
 
-                    <div className="mt-4 flex items-center justify-between border-t border-gray-100 pt-3">
+                    <div className="mt-4 flex flex-wrap items-center justify-between gap-3 border-t border-gray-100 pt-3">
                       <div className="flex items-center gap-2">
                         <button
                           type="button"
-                          onClick={() => decreaseQuantity(item.id, item.selectedColor)}
-                          className="flex h-7 w-7 items-center justify-center rounded-full border border-gray-300 text-gray-600 transition hover:bg-gray-100"
+                          onClick={() => decreaseQuantity(item.id, item.selectedColor, item.selectedButton, item.embroidery)}
+                          className="flex h-11 w-11 items-center justify-center rounded-full border border-gray-300 text-gray-600 transition hover:bg-gray-100"
                         >
                           −
                         </button>
@@ -380,8 +387,8 @@ export default function CartPage() {
                         </span>
                         <button
                           type="button"
-                          onClick={() => increaseQuantity(item.id, item.selectedColor)}
-                          className="flex h-7 w-7 items-center justify-center rounded-full border border-gray-300 text-gray-600 transition hover:bg-gray-100"
+                          onClick={() => increaseQuantity(item.id, item.selectedColor, item.selectedButton, item.embroidery)}
+                          className="flex h-11 w-11 items-center justify-center rounded-full border border-gray-300 text-gray-600 transition hover:bg-gray-100"
                         >
                           +
                         </button>
@@ -432,18 +439,18 @@ export default function CartPage() {
                         value={couponCode}
                         onChange={(e) => setCouponCode(e.target.value)}
                         placeholder="Nhập mã (CASEUP10, VIP20)"
-                        className="flex-1 rounded-2xl border border-gray-200 bg-[#f9f8f6] px-3.5 py-2 text-xs uppercase font-bold outline-none focus:border-black"
+                        className="flex-1 rounded-2xl border border-gray-200 bg-[var(--background)] px-3.5 py-2 text-xs uppercase font-bold outline-none focus:border-black"
                       />
                       <button
                         type="submit"
-                        className="rounded-2xl bg-[var(--primary)] px-4 py-2 text-xs font-semibold text-white hover:bg-[var(--brand-primary-hover)] transition"
+                        className="rounded-2xl bg-[var(--primary)] px-4 py-2 text-xs font-semibold text-[var(--on-primary)] hover:bg-[var(--brand-primary-hover)] transition"
                       >
                         Áp dụng
                       </button>
                     </form>
 
                     {couponFeedback && (
-                      <p className={`mt-2 text-xs font-medium ${couponFeedback.success ? "text-emerald-600" : "text-rose-600"}`}>
+                      <p className={`mt-2 text-xs font-medium ${couponFeedback.success ? "text-[var(--secondary-ink)]" : "text-rose-600"}`}>
                         {couponFeedback.message}
                       </p>
                     )}
@@ -460,7 +467,7 @@ export default function CartPage() {
                       <button
                         type="button"
                         onClick={() => handleQuickCoupon("VIP20")}
-                        className="rounded-full bg-purple-50 px-2.5 py-1 text-[10px] font-bold text-purple-800 border border-purple-200 hover:bg-purple-100 transition"
+                        className="min-h-11 rounded-full bg-[var(--surface-muted)] px-3 py-2 text-xs font-bold text-[var(--primary-ink)] border border-[var(--border)] hover:bg-[var(--success-soft)] transition"
                       >
                         👑 VIP20 (-20%)
                       </button>
@@ -485,7 +492,7 @@ export default function CartPage() {
                     </span>
                   </div>
                   {discountAmount > 0 && (
-                    <div className="flex justify-between text-emerald-600">
+                    <div className="flex justify-between text-[var(--secondary-ink)]">
                       <span>Giảm giá ({appliedCoupon}):</span>
                       <span className="price-text font-bold">
                         -{discountAmount.toLocaleString("vi-VN")}₫
@@ -511,7 +518,7 @@ export default function CartPage() {
                 <button
                   type="button"
                   onClick={handleOpenCheckout}
-                  className="mt-6 flex w-full items-center justify-center gap-2 rounded-full bg-[var(--primary)] py-4 text-sm font-bold text-white shadow-md transition-all hover:bg-[var(--brand-primary-hover)] hover:shadow-xl active:scale-98"
+                  className="mt-6 flex w-full items-center justify-center gap-2 rounded-full bg-[var(--primary)] py-4 text-sm font-bold text-[var(--on-primary)] shadow-md transition-all hover:bg-[var(--brand-primary-hover)] hover:shadow-xl active:scale-98"
                 >
                   <span>📦 Đặt Hàng Nhận COD</span>
                 </button>
@@ -530,70 +537,82 @@ export default function CartPage() {
         <div
           role="dialog"
           aria-modal="true"
+          aria-labelledby="checkout-title"
+          ref={checkoutRef}
+          tabIndex={-1}
           className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-fade-in-up"
         >
           <div className="relative w-full max-w-lg rounded-3xl bg-white p-6 sm:p-8 shadow-2xl max-h-[90vh] overflow-y-auto">
             <div className="flex items-center justify-between border-b border-gray-100 pb-4">
               <div>
-                <h3 className="text-xl font-bold text-gray-900">Xác nhận thông tin giao hàng</h3>
+                <h3 id="checkout-title" className="text-xl font-bold text-gray-900">Xác nhận thông tin giao hàng</h3>
                 <p className="text-xs text-gray-500">Thanh toán khi nhận hàng (COD)</p>
               </div>
               <button
                 type="button"
                 onClick={() => setIsCheckoutOpen(false)}
+                aria-label="Đóng thanh toán"
                 className="flex h-8 w-8 items-center justify-center rounded-full text-gray-400 hover:bg-gray-100 hover:text-gray-700"
               >
                 ✕
               </button>
             </div>
 
+            <div className="mt-4 space-y-3 rounded-2xl border border-[var(--border)] bg-[var(--background)] p-4">
+              <h4 className="text-sm font-bold">Kiểm tra lựa chọn của bạn</h4>
+              {cart.map(item => <div key={cartVariantKey(item)} className="text-xs leading-relaxed">
+                <p className="font-semibold">{item.name} × {item.quantity}</p>
+                <p className="text-[var(--text-secondary)]">{item.selectedColor}{item.selectedButton ? ` · Nút: ${item.selectedButton}` : ""}{item.embroidery ? " · Có thêu tên" : ""}</p>
+              </div>)}
+              <p className="text-xs text-[var(--primary-ink)]">Đổi Trả 3 Ngày · Không vừa size đổi ngay</p>
+            </div>
             <form onSubmit={handleConfirmOrder} className="mt-5 space-y-4 text-xs">
               <div>
-                <label className="block font-semibold text-gray-700 mb-1">
+                <label htmlFor="checkout-name" className="block font-semibold text-gray-700 mb-1">
                   Họ và tên người nhận <span className="text-red-500">*</span>
                 </label>
                 <input
                   type="text"
                   required
-                  value={customerName}
+                  id="checkout-name" autoComplete="name" value={customerName}
                   onChange={(e) => setCustomerName(e.target.value)}
                   className="w-full rounded-xl border border-gray-300 p-2.5 text-sm outline-none focus:border-black"
                 />
               </div>
 
               <div>
-                <label className="block font-semibold text-gray-700 mb-1">
+                <label htmlFor="checkout-phone" className="block font-semibold text-gray-700 mb-1">
                   Số điện thoại <span className="text-red-500">*</span>
                 </label>
                 <input
                   type="tel"
                   required
-                  value={phone}
+                  id="checkout-phone" autoComplete="tel" value={phone}
                   onChange={(e) => setPhone(e.target.value)}
                   className="w-full rounded-xl border border-gray-300 p-2.5 text-sm outline-none focus:border-black"
                 />
               </div>
 
               <div>
-                <label className="block font-semibold text-gray-700 mb-1">
+                <label htmlFor="checkout-address" className="block font-semibold text-gray-700 mb-1">
                   Địa chỉ giao hàng <span className="text-red-500">*</span>
                 </label>
                 <input
                   type="text"
                   required
-                  value={address}
+                  id="checkout-address" autoComplete="street-address" value={address}
                   onChange={(e) => setAddress(e.target.value)}
                   className="w-full rounded-xl border border-gray-300 p-2.5 text-sm outline-none focus:border-black"
                 />
               </div>
 
               <div>
-                <label className="block font-semibold text-gray-700 mb-1">
+                <label htmlFor="checkout-note" className="block font-semibold text-gray-700 mb-1">
                   Ghi chú cho shipper (tùy chọn)
                 </label>
                 <input
                   type="text"
-                  value={note}
+                  id="checkout-note" value={note}
                   onChange={(e) => setNote(e.target.value)}
                   className="w-full rounded-xl border border-gray-300 p-2.5 text-sm outline-none focus:border-black"
                 />
@@ -604,14 +623,14 @@ export default function CartPage() {
                   Hình thức thanh toán
                 </label>
                 <div className="space-y-2">
-                  <label className="flex items-center gap-3 rounded-2xl border p-3 cursor-pointer border-amber-500 bg-amber-50/50">
+                  <label className="flex items-center gap-3 rounded-2xl border p-3 cursor-pointer border-[var(--primary)] bg-[var(--primary-soft)]">
                     <input
                       type="radio"
                       name="paymentMethod"
                       value="cod"
                       checked={paymentMethod === "cod"}
                       onChange={() => setPaymentMethod("cod")}
-                      className="accent-amber-600"
+                      className="accent-[var(--secondary)]"
                     />
                     <div>
                       <span className="font-bold text-gray-900 text-sm">💵 Thanh toán khi nhận hàng (COD)</span>
@@ -628,7 +647,7 @@ export default function CartPage() {
                   <span className="price-text">{rawSubtotal.toLocaleString("vi-VN")}₫</span>
                 </div>
                 {discountAmount > 0 && (
-                  <div className="flex justify-between text-emerald-600 font-semibold">
+                  <div className="flex justify-between text-[var(--secondary-ink)] font-semibold">
                     <span>Mã giảm giá ({appliedCoupon}):</span>
                     <span className="price-text">-{discountAmount.toLocaleString("vi-VN")}₫</span>
                   </div>
@@ -653,7 +672,7 @@ export default function CartPage() {
                 </button>
                 <button
                   type="submit"
-                  className="flex-1 rounded-full bg-[var(--primary)] py-3 text-xs font-semibold text-white shadow-md hover:bg-[var(--brand-primary-hover)]"
+                  className="flex-1 rounded-full bg-[var(--primary)] py-3 text-xs font-semibold text-[var(--on-primary)] shadow-md hover:bg-[var(--brand-primary-hover)]"
                 >
                   Xác nhận đặt hàng COD
                 </button>

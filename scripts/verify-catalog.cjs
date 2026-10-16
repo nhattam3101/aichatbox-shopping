@@ -22,6 +22,42 @@ assert.deepEqual(products.slice(0,6).map(p => p.name), [
   'Bao bảo vệ Laptop 15.6–16 inch', 'Bao bảo vệ Laptop 17.3 inch'
 ]);
 const { matchesProduct } = require('../data/product-search.ts');
+const { buttonOptions, normalizeButton, sameCartVariant, cartVariantKey, productGallery } = require('../data/customization.ts');
+assert.deepEqual(buttonOptions.map(option => option.name), ['Baby Blue','Vàng','Bích','Hồng','Kem','Đỏ']);
+const sleeve = products[0];
+const variant = { id: sleeve.id, selectedColor: sleeve.colors[0], selectedButton: 'Kem' };
+assert.ok(sameCartVariant(variant, { ...variant }));
+assert.ok(!sameCartVariant(variant, { ...variant, selectedButton: 'Đỏ' }));
+assert.ok(!sameCartVariant(variant, { ...variant, selectedColor: sleeve.colors[1] }));
+assert.ok(!sameCartVariant(variant, { ...variant, id: products[1].id }));
+assert.ok(!sameCartVariant(variant, { ...variant, embroidery: true }));
+assert.ok(sameCartVariant({ ...variant, embroidery: true }, JSON.parse(JSON.stringify({ ...variant, embroidery: true }))));
+assert.notEqual(cartVariantKey(variant), cartVariantKey({ ...variant, embroidery: true }));
+assert.notEqual(cartVariantKey(variant), cartVariantKey({ ...variant, selectedButton: 'Đỏ' }));
+assert.equal(normalizeButton(sleeve, 'invalid saved value'), 'Baby Blue');
+assert.equal(normalizeButton(sleeve), 'Baby Blue');
+assert.equal(normalizeButton(accessories[0], 'Kem'), undefined);
+assert.equal(normalizeButton(services[0], 'Kem'), undefined);
+assert.ok(sameCartVariant({ ...variant, selectedButton: undefined }, { ...variant, selectedButton: 'Baby Blue' }));
+for (const product of products) {
+  const original = [...product.gallery];
+  const gallery = productGallery(product);
+  assert.equal(gallery[0], product.image);
+  assert.equal(gallery.at(-1), '/products/bang_mau_nut.jpg');
+  assert.ok(gallery.includes('/products/bang_mau.png'));
+  assert.equal(new Set(gallery).size, gallery.length);
+  assert.deepEqual(product.gallery, original);
+  for (const image of gallery) assert.ok(fs.existsSync(path.join(__dirname, '../public', image)));
+}
+for (const product of accessories) assert.deepEqual(productGallery(product), product.gallery);
+assert.equal(accessories.find(p => p.id === 16).name, 'Móc khóa hoa hồng');
+for (const directory of ['app','components','data']) {
+  for (const file of fs.readdirSync(path.join(__dirname,'..',directory), {recursive:true})) {
+    if (!/\.(tsx?|css)$/.test(file)) continue;
+    const source = fs.readFileSync(path.join(__dirname,'..',directory,file),'utf8');
+    assert.ok(!/7\s*ngày|7[ -]*days?/i.test(source), `Old policy in ${directory}/${file}`);
+  }
+}
 for (const q of ['laptop','ipad','tablet','11 inch','13 inch','13.3 inch','14 inch','15.6 inch','16 inch','17.3 inch','móc khóa','phụ kiện','tag treo']) {
   assert.ok(saleProducts.some(p => matchesProduct(p, q)), q);
 }
@@ -55,7 +91,7 @@ assert.ok(allProducts.every(p => p.priceConfirmed !== false));
 assert.deepEqual(products.slice(4,6).map(p => p.price), [149000,159000]);
 assert.equal(products.find(p => p.id === 5).image, '/products/product_07.jpg');
 assert.equal(products.find(p => p.id === 6).image, '/products/product_04.jpg');
-for (const file of ['size_table.jpg','bang_mau.jpg','bang_mau_nut.jpg']) assert.ok(fs.existsSync(path.join(__dirname,'../public/products',file)));
+for (const file of ['size_table.jpg','bang_mau.png','bang_mau_nut.jpg']) assert.ok(fs.existsSync(path.join(__dirname,'../public/products',file)));
 (async () => {
   const { POST } = require('../app/api/chat/route.ts');
   for (const [content,id] of [['Máy tôi 34 x 23 x 1.8 cm',3],['Máy 36 x 25 x 2.4 cm',5],['Máy 25 × 36 × 2 cm',4],['Máy 41 x 28 x 3 cm',6]]) {
@@ -82,5 +118,5 @@ for (const file of ['size_table.jpg','bang_mau.jpg','bang_mau_nut.jpg']) assert.
   assert.match((await provisional.json()).reply,/sơ bộ/);
   const bad = await POST(new Request('http://localhost/api/chat',{method:'POST',body:JSON.stringify({messages:[{role:'user',content:23}]})}));
   assert.equal(bad.status,400);
-  console.log('PASS: 17 catalog records, group-specific galleries, prices, search terms, size boundaries, chat accessory pricing and thickness history.');
+  console.log('PASS: 17 catalog records, prices, image mappings, size boundaries, chat, handmade variants, legacy defaults, gallery references and 3-day policy.');
 })().catch(error => { console.error(error); process.exitCode=1; });

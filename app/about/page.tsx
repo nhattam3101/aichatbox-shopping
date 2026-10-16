@@ -4,7 +4,7 @@ import ChatBox from "@/components/ChatBox";
 
 export default function AboutPage() {
   return (
-    <main className="min-h-screen bg-[var(--brand-cream)] text-[#1a1a1a]">
+    <main className="min-h-screen bg-[var(--brand-cream)] text-[var(--text-primary)]">
       <Navbar />
 
       <section className="px-6 py-20 md:px-12 lg:px-20">
@@ -14,10 +14,10 @@ export default function AboutPage() {
           </span>
 
           <h1 className="mt-4 text-4xl sm:text-5xl lg:text-6xl font-extrabold leading-tight tracking-tight text-gray-900">
-            Định hình lại trải nghiệm mua bao laptop
+            Chiếc bao vừa máy,
             <br />
-            <span className="bg-gradient-to-r from-amber-500 via-orange-500 to-rose-500 bg-clip-text text-transparent">
-              với trí tuệ nhân tạo AI.
+            <span className="text-[var(--primary-ink)]">
+              mang dấu ấn riêng bạn.
             </span>
           </h1>
 
@@ -26,7 +26,7 @@ export default function AboutPage() {
           </p>
 
           <p className="mt-4 text-base sm:text-lg leading-relaxed text-gray-600 max-w-3xl">
-            Chúng tôi kết hợp bộ sưu tập bao laptop cao cấp chất lượng chuẩn xuất khẩu với hệ thống AI Assistant chuyên sâu, giúp bạn tìm ra chiếc bao chuẩn từng centimet chỉ trong vài giây.
+            CaseUp là shop handmade với bao laptop, bao iPad / Tablet, móc khóa và dịch vụ thêu tên. Bạn có thể phối màu vải, chọn mẫu cúc/nút và dùng công cụ chọn size cùng trợ lý AI để tìm chiếc bao phù hợp.
           </p>
 
           {/* Core Values 3 Columns */}
@@ -57,28 +57,28 @@ export default function AboutPage() {
               </div>
               <h2 className="text-xl font-bold text-gray-900">Chính Sách Uy Tín</h2>
               <p className="mt-2 text-xs sm:text-sm leading-relaxed text-gray-500">
-                100% khách hàng được kiểm tra hàng trước khi thanh toán COD. Hỗ trợ đổi size miễn phí tận nhà trong 7 ngày.
+                100% khách hàng được kiểm tra hàng trước khi thanh toán COD. Hỗ trợ đổi size miễn phí tận nhà trong 3 ngày.
               </p>
             </div>
           </div>
 
           {/* Stats Bar */}
-          <div className="mt-12 rounded-3xl bg-[#1a1a1a] p-8 md:p-12 text-white shadow-xl">
+          <div className="brand-dark mt-12 rounded-3xl bg-[var(--deep-navy)] p-8 md:p-12 text-white shadow-xl">
             <div className="grid grid-cols-2 md:grid-cols-4 gap-6 text-center">
               <div>
-                <p className="text-3xl md:text-4xl font-extrabold text-amber-400">24+</p>
+                <p className="text-3xl md:text-4xl font-extrabold text-[var(--yellow)]">24+</p>
                 <p className="text-xs text-gray-400 mt-1">Mẫu thiết kế cao cấp</p>
               </div>
               <div>
-                <p className="text-3xl md:text-4xl font-extrabold text-amber-400">2,400+</p>
+                <p className="text-3xl md:text-4xl font-extrabold text-[var(--yellow)]">2,400+</p>
                 <p className="text-xs text-gray-400 mt-1">Khách hàng tin tưởng</p>
               </div>
               <div>
-                <p className="text-3xl md:text-4xl font-extrabold text-amber-400">99.8%</p>
+                <p className="text-3xl md:text-4xl font-extrabold text-[var(--yellow)]">99.8%</p>
                 <p className="text-xs text-gray-400 mt-1">Tỉ lệ vừa vặn máy</p>
               </div>
               <div>
-                <p className="text-3xl md:text-4xl font-extrabold text-amber-400">4.9/5</p>
+                <p className="text-3xl md:text-4xl font-extrabold text-[var(--yellow)]">4.9/5</p>
                 <p className="text-xs text-gray-400 mt-1">Điểm đánh giá trung bình</p>
               </div>
             </div>
@@ -87,7 +87,7 @@ export default function AboutPage() {
           <div className="mt-12 flex flex-wrap gap-4 items-center">
             <Link
               href="/products"
-              className="rounded-full bg-[var(--primary)] px-8 py-4 text-sm font-bold text-white shadow-md hover:bg-[var(--brand-primary-hover)] transition"
+              className="rounded-full bg-[var(--primary)] px-8 py-4 text-sm font-bold text-[var(--on-primary)] shadow-md hover:bg-[var(--brand-primary-hover)] transition"
             >
               Khám phá sản phẩm ngay →
             </Link>

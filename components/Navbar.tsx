@@ -25,8 +25,8 @@ export default function Navbar() {
 
   return (
     <>
-      <header className="sticky top-0 z-40 border-b border-[var(--brand-border)] bg-[#fffaf5]/95 backdrop-blur-xl transition-all">
-        <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-3.5 md:px-12">
+      <header className="sticky top-0 z-40 border-b border-[var(--brand-border)] bg-[var(--background)]/95 backdrop-blur-xl transition-all">
+        <div className="mx-auto flex max-w-7xl items-center justify-between gap-3 px-4 py-3 sm:px-6 lg:px-12">
           {/* Logo */}
           <Link href="/" className="flex items-center gap-3 group">
             <div className="overflow-hidden rounded-2xl border border-[var(--brand-border)] shadow-sm transition group-hover:scale-105">
@@ -50,17 +50,18 @@ export default function Navbar() {
           </Link>
 
           {/* Desktop Nav */}
-          <nav className="hidden items-center gap-1 md:flex">
+          <nav className="hidden items-center gap-1 lg:flex">
             {navLinks.map((link) => {
-              const isActive = pathname === link.href;
+              const isActive = pathname === link.href || (link.href !== "/" && pathname.startsWith(link.href + "/"));
               return (
                 <Link
                   key={link.href}
                   href={link.href}
-                  className={`rounded-full px-4 py-2 text-sm font-semibold transition-all duration-300 hover-scale hover-lift ${
+                  aria-current={isActive ? "page" : undefined}
+                  className={`rounded-full px-4 py-2 text-sm font-semibold transition-all duration-200 ${
                     isActive
-                      ? "bg-[var(--primary)] text-white shadow-sm"
-                      : "text-gray-600 hover:bg-black/5 hover:text-black"
+                      ? "bg-[var(--primary)] text-[var(--on-primary)] shadow-sm"
+                      : "text-gray-600 hover:bg-black/5 hover:text-[var(--text-primary)]"
                   }`}
                 >
                   {link.label}
@@ -70,12 +71,13 @@ export default function Navbar() {
           </nav>
 
           {/* Action Icons */}
-          <div className="flex items-center gap-2.5">
+          <div className="flex items-center gap-2">
             {/* Search Button */}
             <button
               onClick={() => setIsSearchOpen(true)}
-              className="flex items-center gap-2 rounded-full border border-gray-200 bg-gray-50/80 px-3.5 py-2 text-xs font-medium text-gray-500 transition hover:border-gray-400 hover:bg-white hover:text-black hover:shadow-sm"
+              className="flex min-h-11 min-w-11 items-center justify-center gap-2 rounded-full border border-gray-200 bg-[var(--surface-muted)] px-3.5 py-2 text-xs font-medium text-gray-500 transition hover:border-gray-400 hover:bg-white hover:text-[var(--text-primary)] hover:shadow-sm"
               title="Tìm kiếm (ESC để đóng)"
+              aria-label="Tìm kiếm sản phẩm"
             >
               <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" />
@@ -86,14 +88,14 @@ export default function Navbar() {
             {/* Wishlist Button */}
             <button
               onClick={() => setIsWishlistOpen(true)}
-              className="relative flex h-10 w-10 items-center justify-center rounded-full border border-gray-200 bg-white text-gray-700 transition hover:border-rose-300 hover:bg-rose-50 hover:text-rose-500 shadow-sm"
+              className="relative flex h-11 w-11 shrink-0 items-center justify-center rounded-full border border-gray-200 bg-white text-gray-700 transition hover:border-rose-300 hover:bg-rose-50 hover:text-[var(--text-primary)] shadow-sm"
               aria-label="Danh sách yêu thích"
             >
               <svg className="h-4.5 w-4.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12z" />
               </svg>
               {wishlistCount > 0 && (
-                <span className="absolute -top-1 -right-1 flex h-4.5 w-4.5 items-center justify-center rounded-full bg-rose-500 text-[10px] font-bold text-white shadow">
+                <span className="absolute -top-1 -right-1 flex h-4.5 w-4.5 items-center justify-center rounded-full bg-[var(--yellow)] text-[10px] font-bold text-[var(--text-primary)] shadow">
                   {wishlistCount}
                 </span>
               )}
@@ -102,14 +104,15 @@ export default function Navbar() {
             {/* Cart Button */}
             <Link
               href="/cart"
-              className="relative flex items-center gap-2 rounded-full bg-[var(--primary)] px-4 sm:px-5 py-2.5 text-xs sm:text-sm font-semibold text-white transition-all hover:bg-[var(--brand-primary-hover)] hover:shadow-lg active:scale-95"
+              aria-label={`Giỏ hàng (${totalItems} sản phẩm)`}
+              className="relative flex min-h-11 items-center gap-2 rounded-full bg-[var(--primary)] px-4 sm:px-5 py-2.5 text-xs sm:text-sm font-semibold text-[var(--on-primary)] transition-all hover:bg-[var(--brand-primary-hover)] hover:shadow-lg active:scale-95"
             >
               <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 10.5V6a3.75 3.75 0 10-7.5 0v4.5m11.356-1.993l1.263 12c.07.665-.45 1.243-1.119 1.243H4.25a1.125 1.125 0 01-1.12-1.243l1.264-12A1.125 1.125 0 015.513 7.5h12.974c.576 0 1.059.435 1.119 1.007zM8.625 10.5a.375.375 0 11-.75 0 .375.375 0 01.75 0zm7.5 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z" />
               </svg>
               <span className="hidden sm:inline">Giỏ hàng</span>
               {totalItems > 0 && (
-                <span className="flex h-5 w-5 items-center justify-center rounded-full bg-amber-400 text-xs font-extrabold text-black animate-pulse">
+                <span className="flex h-5 w-5 items-center justify-center rounded-full bg-amber-400 text-xs font-extrabold text-[var(--text-primary)] animate-pulse">
                   {totalItems}
                 </span>
               )}
@@ -118,8 +121,10 @@ export default function Navbar() {
             {/* Mobile hamburger */}
             <button
               onClick={() => setMobileOpen(!mobileOpen)}
-              className="rounded-full p-2 text-gray-700 hover:bg-gray-100 md:hidden"
+              className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full p-2 text-gray-700 hover:bg-gray-100 lg:hidden"
               aria-label="Menu"
+              aria-expanded={mobileOpen}
+              aria-controls="mobile-navigation"
             >
               <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.75}>
                 {mobileOpen ? (
@@ -134,16 +139,17 @@ export default function Navbar() {
 
         {/* Mobile Navigation Dropdown */}
         {mobileOpen && (
-          <nav className="border-t border-[var(--brand-border)] bg-white px-6 py-4 md:hidden space-y-1 animate-fade-in-up">
+          <nav id="mobile-navigation" className="border-t border-[var(--brand-border)] bg-white px-6 py-4 lg:hidden space-y-1 animate-fade-in-up">
             {navLinks.map((link) => {
-              const isActive = pathname === link.href;
+              const isActive = pathname === link.href || (link.href !== "/" && pathname.startsWith(link.href + "/"));
               return (
                 <Link
                   key={link.href}
                   href={link.href}
+                  aria-current={isActive ? "page" : undefined}
                   onClick={() => setMobileOpen(false)}
                   className={`block rounded-xl px-4 py-3 text-sm font-semibold transition-colors ${
-                    isActive ? "bg-[var(--primary)] text-white" : "text-gray-700 hover:bg-black/5"
+                    isActive ? "bg-[var(--primary)] text-[var(--on-primary)]" : "text-gray-700 hover:bg-black/5"
                   }`}
                 >
                   {link.label}
@@ -158,7 +164,7 @@ export default function Navbar() {
                 }}
                 className="flex-1 rounded-xl bg-gray-100 py-2.5 text-xs font-semibold text-gray-700 text-center"
               >
-                🔍 Tìm kiếm sản phẩm
+                Tìm kiếm sản phẩm
               </button>
               <button
                 onClick={() => {
@@ -167,7 +173,7 @@ export default function Navbar() {
                 }}
                 className="flex-1 rounded-xl bg-rose-50 py-2.5 text-xs font-semibold text-rose-600 text-center"
               >
-                ❤️ Yêu thích ({wishlistCount})
+                Yêu thích ({wishlistCount})
               </button>
             </div>
           </nav>

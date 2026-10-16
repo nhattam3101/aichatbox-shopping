@@ -32,7 +32,7 @@ export default function CartToast({ notification, onClose }: Props) {
         {/* Header */}
         <div className="flex items-center justify-between gap-3">
           <div className="flex items-center gap-2.5">
-            <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-emerald-500 text-white shadow-md shadow-emerald-500/25 hover-scale-large tilt-element">
+            <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[var(--success-soft)] text-[var(--deep-navy)] shadow-sm ">
               <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
               </svg>
@@ -51,7 +51,7 @@ export default function CartToast({ notification, onClose }: Props) {
             type="button"
             onClick={onClose}
             aria-label="Đóng thông báo"
-            className="flex h-7 w-7 items-center justify-center rounded-full text-gray-400 transition hover:bg-black/5 hover:text-gray-700 hover-scale animate-pulse"
+            className="flex h-7 w-7 items-center justify-center rounded-full text-gray-400 transition hover:bg-black/5 hover:text-gray-700 "
           >
             <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
@@ -61,7 +61,7 @@ export default function CartToast({ notification, onClose }: Props) {
 
         {/* Product card */}
         <div className="mt-3.5 flex items-center gap-3.5 rounded-2xl border border-[var(--brand-border)] bg-[var(--brand-cream)] p-3 hover-lift transition-transform duration-300">
-          <div className="relative h-14 w-14 shrink-0 overflow-hidden rounded-xl border border-[var(--brand-border)] bg-[#f0ece7] hover-scale">
+          <div className="relative h-14 w-14 shrink-0 overflow-hidden rounded-xl border border-[var(--brand-border)] bg-[var(--surface-muted)] hover-scale">
             <Image
               src={product.image}
               alt={product.name}
@@ -78,6 +78,8 @@ export default function CartToast({ notification, onClose }: Props) {
               <span className="rounded bg-black/5 px-1.5 py-0.5 font-medium text-gray-700 hover-scale transition-transform duration-200">
                 {product.size}
               </span>
+              {product.embroidery && <span className="rounded bg-[var(--surface-muted)] px-2 py-1">Có thêu tên</span>}
+              {product.selectedButton && <span className="rounded bg-[var(--surface-muted)] px-2 py-1 text-[var(--primary-ink)]">Nút: {product.selectedButton}</span>}
               {product.selectedColor && (
                 <span className="rounded bg-black/5 px-1.5 py-0.5 font-medium text-gray-700 hover-scale transition-transform duration-200">
                   {product.selectedColor}
@@ -96,7 +98,7 @@ export default function CartToast({ notification, onClose }: Props) {
           <Link
             href="/cart"
             onClick={onClose}
-            className="flex flex-1 items-center justify-center gap-1.5 rounded-full bg-[var(--primary)] py-2.5 px-4 text-xs font-semibold text-white shadow-sm transition hover:bg-[var(--brand-primary-hover)] hover:shadow-md hover-lift btn-hover-premium"
+            className="flex flex-1 items-center justify-center gap-1.5 rounded-full bg-[var(--primary)] py-2.5 px-4 text-xs font-semibold text-[var(--on-primary)] shadow-sm transition hover:bg-[var(--brand-primary-hover)] hover:shadow-md hover-lift btn-hover-premium"
           >
             <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
@@ -115,7 +117,7 @@ export default function CartToast({ notification, onClose }: Props) {
 
         {/* Progress bar */}
         <div className="absolute bottom-0 left-0 right-0 h-1 bg-black/5">
-          <div className="h-full bg-gradient-to-r from-amber-500 to-amber-600 animate-toast-progress animate-shine" />
+          <div className="h-full bg-[var(--primary)] animate-toast-progress" />
         </div>
 
         {/* Floating decorative elements */}

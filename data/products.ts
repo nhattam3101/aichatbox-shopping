@@ -251,7 +251,7 @@ export const accessories: Product[] = [
   { id: 13, name: "Móc khóa treo túi hình bánh vòng", image: "mockhoa_02.jpg", colors: ["Hồng pastel"] },
   { id: 14, name: "Móc khóa ngôi sao hồng pastel", image: "mockhoa_03.jpg", colors: ["Hồng pastel"] },
   { id: 15, name: "Móc khóa ngôi sao chấm bi", image: "mockhoa_04.jpg", colors: ["Kem"] },
-  { id: 16, name: "Móc khóa hoa trắng", image: "mockhoa_05.jpg", colors: ["Trắng"] },
+  { id: 16, name: "Móc khóa hoa hồng", image: "mockhoa_05.jpg", colors: ["Trắng"] },
   { id: 17, name: "Móc khóa hoa xanh", image: "mockhoa_06.jpg", colors: ["Xanh pastel"] },
 ].map(item => ({
   ...item, kind: "accessory", category: "Móc khóa / Phụ kiện",

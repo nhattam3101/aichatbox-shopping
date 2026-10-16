@@ -45,16 +45,16 @@ export default function ProductCard({ product, onQuickView }: Props) {
   }
 
   return (
-    <div className="group relative flex flex-col overflow-hidden rounded-3xl border border-[var(--brand-border)] bg-white p-3.5 shadow-sm hover-lift transition-all duration-400 tilt-container">
+    <div className="group relative flex flex-col overflow-hidden rounded-3xl border border-[var(--brand-border)] bg-white p-3.5 shadow-sm product-card">
       {/* Image Area */}
-      <div className="relative aspect-[4/3] w-full overflow-hidden rounded-2xl bg-[#faf3f5] hover-scale-large">
+      <div className="relative aspect-[4/3] w-full overflow-hidden rounded-2xl bg-[var(--surface-muted)]">
         <Link href={`/products/${product.id}`} className="block h-full w-full">
           <Image
             src={product.image}
             alt={product.name}
             fill
             sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
-            className="object-contain p-4 transition-transform duration-700 group-hover:scale-105 tilt-element"
+            className="object-contain p-4 transition-transform duration-300 group-hover:scale-[1.02]"
           />
         </Link>
 
@@ -62,21 +62,21 @@ export default function ProductCard({ product, onQuickView }: Props) {
         <div className="absolute left-3 top-3 flex flex-col gap-1.5 z-10 pointer-events-none">
           {product.badge && (
             <span
-              className={`rounded-full px-2.5 py-0.5 text-[10px] font-extrabold shadow-sm animate-pulse-subtle ${
+              className={`rounded-full px-2.5 py-0.5 text-[10px] font-extrabold shadow-sm ${
                 product.badge === "Bán chạy" || product.badge === "Top 1"
-                  ? "bg-[var(--brand-yellow)] text-[#69512d]"
+                  ? "bg-[var(--brand-yellow)] text-[var(--text-primary)]"
                   : product.badge === "Mới"
-                  ? "bg-[#e7f0df] text-[#416348]"
+                  ? "bg-[var(--soft-blue)] text-[var(--text-primary)]"
                   : product.badge === "Premium"
-                  ? "bg-[#ede4f4] text-[#6c517c]"
-                  : "bg-[var(--brand-pink)] text-[var(--primary)]"
+                  ? "bg-[var(--yellow)] text-[var(--text-primary)]"
+                  : "bg-[var(--primary)] text-[var(--text-primary)]"
               }`}
             >
               {product.badge}
             </span>
           )}
           {discountPercent && (
-            <span className="rounded-full bg-rose-500 px-2 py-0.5 text-[10px] font-bold text-white shadow-sm animate-shine">
+            <span className="rounded-full bg-[var(--yellow)] px-2 py-0.5 text-[10px] font-bold text-[var(--text-primary)] shadow-sm">
               -{discountPercent}%
             </span>
           )}
@@ -92,10 +92,11 @@ export default function ProductCard({ product, onQuickView }: Props) {
               toggleWishlist(product);
             }}
             aria-label="Yêu thích"
-            className={`flex h-9 w-9 items-center justify-center rounded-full shadow-md backdrop-blur-md transition-transform duration-300 hover:scale-120 ${
+            aria-pressed={isFavorite}
+            className={`flex h-11 w-11 items-center justify-center rounded-full border border-[var(--border)] shadow-sm transition-transform duration-300 hover:scale-105 ${
               isFavorite
-                ? "bg-white text-rose-500 animate-heart-beat"
-                : "bg-white/90 text-gray-400 hover:text-rose-500"
+                ? "bg-white text-[var(--primary-ink)] hover:bg-[var(--soft-blue)]"
+                : "bg-white text-gray-600 hover:bg-[var(--soft-blue)] hover:text-[var(--text-primary)]"
             }`}
           >
             <svg className="h-4.5 w-4.5 fill-current" viewBox="0 0 24 24">
@@ -111,10 +112,12 @@ export default function ProductCard({ product, onQuickView }: Props) {
               toggleCompare(product);
             }}
             title="Thêm vào bảng so sánh"
-            className={`flex h-9 w-9 items-center justify-center rounded-full shadow-md backdrop-blur-md transition-transform duration-300 hover:scale-120 ${
+            aria-label="Thêm vào bảng so sánh"
+            aria-pressed={isCompared}
+            className={`flex h-11 w-11 items-center justify-center rounded-full border border-[var(--border)] shadow-sm transition-transform duration-300 hover:scale-105 ${
               isCompared
-                ? "bg-amber-500 text-white"
-                : "bg-white/90 text-gray-500 hover:text-amber-600"
+                ? "bg-[var(--primary)] text-[var(--on-primary)]"
+                : "bg-white text-gray-600 hover:bg-[var(--soft-blue)] hover:text-amber-600"
             }`}
           >
             <svg className="h-4.5 w-4.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -125,16 +128,16 @@ export default function ProductCard({ product, onQuickView }: Props) {
 
         {/* Quick View Hover Button */}
         {onQuickView && (
-          <div className="absolute inset-x-3 bottom-3 z-10 opacity-0 transition-all duration-400 group-hover:opacity-100 transform translate-y-2 group-hover:translate-y-0">
+          <div className="absolute inset-x-3 bottom-3 z-10 opacity-100 transition-opacity duration-200 md:opacity-0 md:group-hover:opacity-100 md:group-focus-within:opacity-100">
             <button
               onClick={(e) => {
                 e.preventDefault();
                 e.stopPropagation();
                 onQuickView(product);
               }}
-              className="w-full rounded-xl bg-white/95 py-2 text-xs font-bold text-gray-800 shadow-md backdrop-blur-md transition hover:bg-[var(--brand-primary-hover)] hover:text-white hover-lift"
+              className="w-full rounded-xl bg-white/95 py-2 text-xs font-bold text-gray-800 border border-[var(--border)] shadow-sm transition hover:bg-[var(--brand-primary-hover)] hover:text-[var(--on-primary)] hover-lift"
             >
-              👁️ Xem nhanh
+              Xem nhanh
             </button>
           </div>
         )}
@@ -144,23 +147,23 @@ export default function ProductCard({ product, onQuickView }: Props) {
       <div className="mt-3.5 flex flex-1 flex-col justify-between">
         <div>
           {/* Category & Size */}
-          <div className="flex items-center justify-between text-xs text-gray-500">
+          <div className="flex flex-wrap items-center justify-between gap-2 text-xs text-gray-500">
             <span className={`font-semibold text-amber-700 bg-amber-50 px-2 py-0.5 rounded-md text-[10px] hover-scale`}>
               {product.category}
             </span>
-            <span className="font-medium text-gray-600 hover-scale">{product.size}</span>
+            <span className="font-medium text-gray-600 hover-scale">{product.kind === "sleeve" ? product.size : "Phụ kiện"}</span>
           </div>
 
           {/* Title */}
           <Link href={`/products/${product.id}`} className="mt-1.5 block">
-            <h3 className="line-clamp-1 text-sm font-bold text-gray-900 group-hover:text-amber-600 transition duration-300 hover-scale">
+            <h3 title={product.name} className="line-clamp-2 min-h-10 text-sm leading-5 font-bold text-gray-900 group-hover:text-amber-600 transition-colors duration-200">
               {product.name}
             </h3>
           </Link>
 
           {/* Ratings & Sold */}
           <div className="mt-1 flex items-center gap-2 text-[11px] text-gray-500">
-            <span className="flex items-center text-amber-500 font-bold animate-pulse">
+            <span className="flex items-center text-amber-500 font-bold">
               ★ {product.rating}
             </span>
             <span>•</span>
@@ -168,11 +171,11 @@ export default function ProductCard({ product, onQuickView }: Props) {
           </div>
 
           {/* Color Dots */}
-          <div className="mt-2.5 flex items-center gap-1.5">
+          <div className="mt-2.5 flex flex-wrap items-center gap-1.5">
             {product.colors.map((color, i) => (
               <span
                 key={i}
-                className={`rounded-full bg-gray-100 px-2 py-0.5 text-[9px] font-medium text-gray-600 border border-gray-200 hover-scale transition-transform duration-200`}
+                className={`rounded-full bg-gray-100 px-2 py-0.5 text-[11px] font-medium text-gray-600 border border-gray-200 hover-scale transition-transform duration-200`}
               >
                 {color}
               </span>
@@ -180,8 +183,10 @@ export default function ProductCard({ product, onQuickView }: Props) {
           </div>
         </div>
 
+        {product.kind === "sleeve" && <Link href={`/products/${product.id}`} className="mt-3 text-xs leading-relaxed font-medium text-[var(--primary-ink)] underline underline-offset-4">Tùy chọn màu vải · cúc/nút · thêu tên</Link>}
+
         {/* Price & Add to Cart */}
-        <div className="mt-4 flex items-center justify-between pt-3 border-t border-gray-100">
+        <div className="mt-4 flex items-center justify-between gap-2 pt-3 border-t border-gray-100">
           <div>
             <div className="flex items-baseline gap-1.5">
               <span className="price-text text-base font-extrabold">
@@ -197,11 +202,11 @@ export default function ProductCard({ product, onQuickView }: Props) {
 
           <button
             onClick={handleQuickAdd}
-            aria-label="Thêm vào giỏ"
-            className={`flex h-10 w-10 items-center justify-center rounded-full transition-all duration-300 active:scale-95 shadow hover-lift btn-hover-premium ${
+            aria-label={product.kind === "sleeve" ? "Thêm vào giỏ với màu đầu tiên và nút Baby Blue" : "Thêm vào giỏ"}
+            className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-full transition-all duration-300 active:scale-95 shadow hover-lift btn-hover-premium ${
               isAdding
                 ? "bg-emerald-600 text-white"
-                : "bg-[var(--primary)] text-white hover:bg-amber-600"
+                : "bg-[var(--primary)] text-[var(--on-primary)] hover:bg-[var(--brand-primary-hover)]"
             }`}
           >
             {isAdding ? (

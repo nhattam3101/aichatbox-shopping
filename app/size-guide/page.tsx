@@ -63,7 +63,7 @@ export default function SizeGuidePage() {
   }
 
   return (
-    <main className="min-h-screen bg-[var(--brand-cream)] text-[#1a1a1a]">
+    <main className="min-h-screen bg-[var(--brand-cream)] text-[var(--text-primary)]">
       <Navbar />
 
       {/* Hero Header */}
@@ -88,76 +88,45 @@ export default function SizeGuidePage() {
           <div className="grid gap-10 lg:grid-cols-12">
             {/* Left Column: Preset Selector & Custom Inputs */}
             <div className="lg:col-span-5 space-y-6">
-              {/* Presets Box */}
-              <div className="rounded-3xl border border-[var(--brand-border)] bg-white p-6 md:p-8 shadow-sm">
-                <div className="flex items-center justify-between mb-4">
-                  <h2 className="text-base font-bold text-gray-900 flex items-center gap-2">
-                    ⚡ Chọn nhanh theo dòng máy:
-                  </h2>
-                </div>
-
-                <div className="grid grid-cols-1 gap-2 max-h-[300px] overflow-y-auto pr-1 no-scrollbar">
-                  {POPULAR_LAPTOPS.map((laptop) => (
-                    <button
-                      key={laptop.name}
-                      onClick={() => applyPreset(laptop)}
-                      className={`flex items-center justify-between rounded-2xl px-4 py-3 text-left transition text-xs ${
-                        selectedPreset === laptop.name
-                          ? "bg-[var(--primary)] text-white font-bold shadow-md"
-                          : "bg-[#f8f6f2] text-gray-700 hover:bg-[#ece8e1]"
-                      }`}
-                    >
-                      <div>
-                        <p className="font-semibold">{laptop.name}</p>
-                        <p className={`text-[10px] mt-0.5 ${selectedPreset === laptop.name ? "text-gray-300" : "text-gray-400"}`}>
-                          {laptop.brand} • {laptop.screenSize}
-                        </p>
-                      </div>
-                      <span className="font-mono text-[11px] opacity-80">
-                        {laptop.width} × {laptop.height}cm
-                      </span>
-                    </button>
-                  ))}
-                </div>
-              </div>
-
               {/* Custom Input Box */}
               <div className="rounded-3xl border border-[var(--brand-border)] bg-white p-6 md:p-8 shadow-sm">
-                <h3 className="text-sm font-bold text-gray-900 mb-4 flex items-center gap-2">
-                  📏 Hoặc nhập kích thước đo thực tế:
-                </h3>
+                <h2 className="text-sm font-bold text-gray-900 mb-4 flex items-center gap-2">
+                  Nhập kích thước đo thực tế
+                </h2>
 
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <label className="text-xs font-semibold text-gray-600">
+                    <label htmlFor="device-width" className="text-xs font-semibold text-gray-600">
                       Chiều Dài máy (cm)
                     </label>
                     <input
                       type="number"
                       step="0.1"
+                      id="device-width"
                       value={width}
                       onChange={(e) => {
                         setWidth(e.target.value);
                         setSelectedPreset("");
                       }}
                       placeholder="Ví dụ: 31.5"
-                      className="mt-1.5 w-full rounded-2xl border border-gray-200 bg-[#f8f6f2] p-3 text-sm font-bold text-gray-800 outline-none focus:border-black focus:bg-white transition"
+                      className="mt-1.5 w-full rounded-2xl border border-gray-200 bg-[var(--surface-muted)] p-3 text-sm font-bold text-gray-800 outline-none focus:border-black focus:bg-white transition"
                     />
                   </div>
                   <div>
-                    <label className="text-xs font-semibold text-gray-600">
+                    <label htmlFor="device-height" className="text-xs font-semibold text-gray-600">
                       Chiều Rộng máy (cm)
                     </label>
                     <input
                       type="number"
                       step="0.1"
+                      id="device-height"
                       value={height}
                       onChange={(e) => {
                         setHeight(e.target.value);
                         setSelectedPreset("");
                       }}
                       placeholder="Ví dụ: 22.0"
-                      className="mt-1.5 w-full rounded-2xl border border-gray-200 bg-[#f8f6f2] p-3 text-sm font-bold text-gray-800 outline-none focus:border-black focus:bg-white transition"
+                      className="mt-1.5 w-full rounded-2xl border border-gray-200 bg-[var(--surface-muted)] p-3 text-sm font-bold text-gray-800 outline-none focus:border-black focus:bg-white transition"
                     />
                   </div>
                 </div>
@@ -169,7 +138,7 @@ export default function SizeGuidePage() {
                 {numWidth > 0 && numHeight > 0 && (
                   <div className="mt-4 flex items-center justify-between text-xs">
                     <span className="text-gray-500">
-                      Đang tìm bao vừa: <strong className="text-black">{numWidth} × {numHeight} cm</strong>
+                      Đang tìm bao vừa: <strong className="text-[var(--text-primary)]">{numWidth} × {numHeight} cm</strong>
                     </span>
                     <button
                       onClick={handleReset}
@@ -180,9 +149,38 @@ export default function SizeGuidePage() {
                   </div>
                 )}
 
-                {/* Guide Tip */}
-                <div className="mt-6 rounded-2xl bg-amber-50 p-4 border border-amber-200/60 text-xs text-amber-900 leading-relaxed">
-                  💡 <strong>Mẹo đo chuẩn xác:</strong> Đặt laptop gập kín lên mặt bàn phẳng, dùng thước kẻ hoặc thước dây đo viền ngoài cùng của chiều dài và chiều rộng (tính cả độ cong của vỏ máy).
+
+              </div>
+              {/* Presets Box */}
+              <div className="rounded-3xl border border-[var(--brand-border)] bg-white p-6 md:p-8 shadow-sm">
+                <div className="flex items-center justify-between mb-4">
+                  <h2 className="text-base font-bold text-gray-900 flex items-center gap-2">
+                    Chọn nhanh theo model
+                  </h2>
+                </div>
+
+                <div className="grid grid-cols-1 gap-2 max-h-[300px] overflow-y-auto pr-1 no-scrollbar">
+                  {POPULAR_LAPTOPS.map((laptop) => (
+                    <button
+                      key={laptop.name}
+                      onClick={() => applyPreset(laptop)}
+                      className={`flex items-center justify-between rounded-2xl px-4 py-3 text-left transition text-xs ${
+                        selectedPreset === laptop.name
+                          ? "bg-[var(--secondary-soft)] text-[var(--text-primary)] font-bold ring-2 ring-[var(--secondary)]"
+                          : "bg-[var(--surface-muted)] text-gray-700 hover:bg-[var(--soft-blue)]"
+                      }`}
+                    >
+                      <div>
+                        <p className="font-semibold">{laptop.name}</p>
+                        <p className={`text-[10px] mt-0.5 ${selectedPreset === laptop.name ? "text-[var(--on-primary)]" : "text-gray-600"}`}>
+                          {laptop.brand} • {laptop.screenSize}
+                        </p>
+                      </div>
+                      <span className="font-mono text-[11px] opacity-80">
+                        {laptop.width} × {laptop.height}cm
+                      </span>
+                    </button>
+                  ))}
                 </div>
               </div>
             </div>
@@ -222,7 +220,7 @@ export default function SizeGuidePage() {
                               >
                                 {isSnugFit ? "✓ Gợi ý ôm sát" : "✓ Vừa vặn thoải mái"}
                               </span>
-                              <span className="text-gray-400 font-mono">
+                              <span className="text-gray-600 font-mono">
                                 Dư +{slackW}cm / +{slackH}cm
                               </span>
                             </div>
@@ -251,7 +249,7 @@ export default function SizeGuidePage() {
               ) : (
                 /* Empty / Intro state */
                 <div className="flex h-full flex-col items-center justify-center rounded-3xl border border-dashed border-gray-200 bg-white p-12 text-center">
-                  <div className="flex h-20 w-20 items-center justify-center rounded-full bg-[#f8f6f2] text-3xl mb-4">
+                  <div className="flex h-20 w-20 items-center justify-center rounded-full bg-[var(--surface-muted)] text-3xl mb-4">
                     💻
                   </div>
                   <h3 className="text-xl font-bold text-gray-900">
@@ -265,7 +263,7 @@ export default function SizeGuidePage() {
                       <button
                         key={lp.name}
                         onClick={() => applyPreset(lp)}
-                        className="rounded-full bg-[#f6f4f0] px-3.5 py-1.5 text-xs font-semibold text-gray-700 hover:bg-[var(--brand-primary-hover)] hover:text-white transition"
+                        className="rounded-full bg-[var(--surface-muted)] px-3.5 py-1.5 text-xs font-semibold text-gray-700 hover:bg-[var(--brand-primary-hover)] hover:text-[var(--on-primary)] transition"
                       >
                         {lp.name.split(" ")[0]} {lp.screenSize}
                       </button>
@@ -290,7 +288,7 @@ export default function SizeGuidePage() {
             <h3 className="mt-2 text-xl font-bold">Bảng size tham khảo</h3>
             <p className="mt-2 text-sm text-gray-600">Đo máy khi gập kín, tính cả chiều dài, chiều rộng và độ dày. Size 25 × 36 × 2 cm chỉ dành cho máy thân mỏng ≤ 2 cm.</p>
             <a href="/products/size_table.jpg" target="_blank" rel="noreferrer" className="mt-5 block overflow-hidden rounded-2xl border border-[var(--brand-border)] bg-white" aria-label="Mở bảng size đầy đủ">
-              <div className="relative aspect-[5/2]"><Image src="/products/size_table.jpg" alt="Bảng 6 size bao CaseUp và thiết bị tương thích" fill sizes="(max-width: 768px) 100vw, 1100px" className="object-cover object-center" /></div>
+              <div className="relative aspect-[4/3] sm:aspect-[5/2]"><Image src="/products/size_table.jpg" alt="Bảng 6 size bao CaseUp và thiết bị tương thích" fill sizes="(max-width: 768px) 100vw, 1100px" className="object-contain object-center" /></div>
             </a>
             <div className="mt-5 grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
               {products.slice(0, 6).map(p => <div key={p.id} className="rounded-2xl bg-[var(--brand-cream)] p-3 text-sm"><p className="font-bold">{p.maxHeight} × {p.maxWidth} × {p.maxThickness} cm</p><p className="mt-1 text-xs leading-relaxed text-gray-600">{p.name}</p></div>)}
@@ -298,7 +296,7 @@ export default function SizeGuidePage() {
           </article>
           <div className="mt-6 grid gap-6 md:grid-cols-2">
             {[
-              { title: "Bảng màu vải", number: "02 · Màu vải", image: "/products/bang_mau.jpg", description: "Tham khảo baby blue, tím baby, green baby, be kem, hồng phấn cùng các tông màu trong bảng vải thực tế.", background: "bg-[var(--brand-pink)]" },
+              { title: "Bảng màu vải", number: "02 · Màu vải", image: "/products/bang_mau.png", description: "Tham khảo baby blue, tím baby, green baby, be kem, hồng phấn cùng các tông màu trong bảng vải thực tế.", background: "bg-[var(--brand-pink)]" },
               { title: "Bảng màu nút", number: "03 · Màu nút", image: "/products/bang_mau_nut.jpg", description: "Phối nút baby blue, vàng, xanh bích, hồng, kem hoặc đỏ để hoàn thiện chiếc bao theo sở thích.", background: "bg-[var(--brand-blue)]" },
             ].map(card => <article key={card.image} className="rounded-3xl border border-[var(--brand-border)] bg-white p-5 shadow-sm md:p-8">
               <span className="text-xs font-semibold uppercase tracking-wider text-[var(--primary)]">{card.number}</span>
@@ -311,6 +309,14 @@ export default function SizeGuidePage() {
             </article>)}
           </div>
         </div>
+      </section>
+
+      <section className="mx-auto max-w-7xl px-6 pb-12 md:px-12 lg:px-20">
+        <aside className="rounded-3xl border border-[var(--border)] bg-[var(--soft-blue)] p-6 text-sm leading-relaxed">
+          <h2 className="font-bold">Lưu ý khi đo máy</h2>
+          <p className="mt-2 text-[var(--text-primary)]">Gập kín máy, đặt trên mặt phẳng và đo viền ngoài cùng của chiều dài, chiều rộng và độ dày, tính cả phần vỏ cong hoặc ốp đang dùng. Không chọn size chỉ dựa vào số inch màn hình.</p>
+          <p className="mt-2 font-medium">Size 25 × 36 × 2 cm chỉ dành cho máy thân mỏng có độ dày tối đa 2 cm.</p>
+        </aside>
       </section>
 
       {/* Quick View Modal */}

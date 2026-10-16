@@ -40,7 +40,7 @@ export default function AddToCartButton({ product, className }: Props) {
       onClick={handleAddToCart}
       className={
         className ??
-        "mt-10 w-full rounded-full bg-[var(--primary)] px-6 py-4 font-medium text-white transition hover:bg-[var(--brand-primary-hover)] flex items-center justify-center gap-2"
+        "mt-10 w-full rounded-full bg-[var(--primary)] px-6 py-4 font-medium text-[var(--on-primary)] transition hover:bg-[var(--brand-primary-hover)] flex items-center justify-center gap-2"
       }
     >
       {isJustAdded ? (

@@ -2,7 +2,8 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { useState, useMemo, useEffect, useRef } from "react";
+import { useState, useMemo } from "react";
+import { useDialogFocus } from "@/components/useDialogFocus";
 import { saleProducts as products } from "@/data/products";
 
 import { matchesProduct } from "@/data/product-search";
@@ -14,30 +15,12 @@ type Props = {
 
 export default function GlobalSearchModal({ isOpen, onClose }: Props) {
   const [query, setQuery] = useState("");
-  const inputRef = useRef<HTMLInputElement>(null);
-
-  useEffect(() => {
-    if (isOpen) {
-      const timer = setTimeout(() => inputRef.current?.focus(), 50);
-      return () => clearTimeout(timer);
-    }
-  }, [isOpen]);
+  const dialogRef = useDialogFocus(isOpen, handleClose);
 
   function handleClose() {
     setQuery("");
     onClose();
   }
-
-  // Handle ESC
-  useEffect(() => {
-    function handleKeyDown(e: KeyboardEvent) {
-      if (e.key === "Escape" && isOpen) {
-        handleClose();
-      }
-    }
-    window.addEventListener("keydown", handleKeyDown);
-    return () => window.removeEventListener("keydown", handleKeyDown);
-  });
 
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
@@ -65,24 +48,24 @@ export default function GlobalSearchModal({ isOpen, onClose }: Props) {
       />
 
       {/* Search Container */}
-      <div className="relative z-10 w-full max-w-2xl overflow-hidden rounded-3xl bg-white shadow-2xl border border-black/10 animate-fade-in-up mt-8">
+      <div ref={dialogRef} role="dialog" aria-modal="true" aria-label="Tìm kiếm sản phẩm" tabIndex={-1} className="relative z-10 w-full max-w-2xl overflow-hidden rounded-3xl bg-white shadow-2xl border border-black/10 animate-fade-in-up mt-8">
         {/* Search Input Bar */}
         <div className="flex items-center gap-3 border-b border-gray-100 px-6 py-4">
           <svg className="h-5 w-5 text-gray-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
           </svg>
           <input
-            ref={inputRef}
+            aria-label="Tên sản phẩm hoặc thông số máy"
             type="text"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             placeholder="Tìm theo tên máy, kích thước (13, 14, 15.6, 16), chất liệu da, màu sắc..."
-            className="flex-1 text-sm font-medium outline-none placeholder:text-gray-400"
+            className="min-w-0 flex-1 text-sm font-medium outline-none placeholder:text-gray-400"
           />
           {query && (
             <button
               onClick={() => setQuery("")}
-              className="text-xs font-semibold text-gray-400 hover:text-black p-1"
+              className="text-xs font-semibold text-gray-400 hover:text-[var(--text-primary)] p-1"
             >
               Xóa
             </button>
@@ -106,7 +89,7 @@ export default function GlobalSearchModal({ isOpen, onClose }: Props) {
                 <button
                   key={tag}
                   onClick={() => setQuery(tag)}
-                  className="rounded-full bg-[#f6f4f0] px-3.5 py-1.5 text-xs font-medium text-gray-700 hover:bg-amber-100 hover:text-amber-800 transition"
+                  className="rounded-full bg-[var(--surface-muted)] px-3.5 py-1.5 text-xs font-medium text-gray-700 hover:bg-amber-100 hover:text-amber-800 transition"
                 >
                   🔍 {tag}
                 </button>
@@ -156,7 +139,7 @@ export default function GlobalSearchModal({ isOpen, onClose }: Props) {
                   className="group flex items-center justify-between gap-4 p-3 hover:bg-[var(--brand-cream)] rounded-2xl transition"
                 >
                   <div className="flex items-center gap-3.5 min-w-0">
-                    <div className="relative h-14 w-14 shrink-0 overflow-hidden rounded-xl bg-[#f2eee9] border border-gray-100">
+                    <div className="relative h-14 w-14 shrink-0 overflow-hidden rounded-xl bg-[var(--surface-muted)] border border-gray-100">
                       <Image src={item.image} alt={item.name} fill className="object-contain p-1 group-hover:scale-105 transition duration-300" />
                     </div>
                     <div className="min-w-0">

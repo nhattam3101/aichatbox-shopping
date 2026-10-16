@@ -152,23 +152,23 @@ export default function ChatBox() {
       {!isOpen && (
         <div className="fixed bottom-6 right-6 z-40 flex items-center gap-3">
           {/* Subtle tooltip / teaser bubble */}
-          <div className="hidden sm:flex items-center gap-2 rounded-2xl border border-black/10 bg-white/95 px-3.5 py-2 text-xs font-semibold text-gray-800 shadow-xl backdrop-blur-md animate-bounce-subtle">
-            <span className="flex h-2 w-2 rounded-full bg-emerald-500 animate-ping" />
+          <div className="hidden sm:flex items-center gap-2 rounded-2xl border border-black/10 bg-white/95 px-3.5 py-2 text-xs font-semibold text-gray-800 shadow-xl backdrop-blur-md ">
+            <span className="flex h-2 w-2 rounded-full bg-emerald-500 " />
             <span>Cần tư vấn chọn size? Chat AI ngay</span>
           </div>
 
           <button
             id="chatbox-toggle"
             onClick={() => setIsOpen(true)}
-            className="group relative flex items-center gap-2.5 rounded-full bg-[var(--primary)] px-5 py-3.5 text-white shadow-[0_10px_25px_-5px_rgba(0,0,0,0.3)] transition-all hover:bg-[var(--brand-primary-hover)] hover:scale-105 active:scale-95"
+            className="group relative flex items-center gap-2.5 rounded-full bg-[var(--primary)] px-5 py-3.5 text-[var(--on-primary)] shadow-[0_10px_25px_-5px_rgba(0,0,0,0.3)] transition-all hover:bg-[var(--brand-primary-hover)] hover:scale-[1.02] active:scale-95"
             aria-label="Mở trợ lý AI"
           >
             <div className="relative flex h-3 w-3">
-              <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-amber-400 opacity-75"></span>
+              <span className="absolute inline-flex h-full w-full  rounded-full bg-amber-400 opacity-75"></span>
               <span className="relative inline-flex h-3 w-3 rounded-full bg-amber-400"></span>
             </div>
             <span className="text-sm font-bold tracking-tight">AI Tư Vấn</span>
-            <span className="rounded-full bg-amber-400/20 px-1.5 py-0.5 text-[10px] font-extrabold text-amber-300">
+            <span className="rounded-full bg-amber-400/20 px-1.5 py-0.5 text-[10px] font-extrabold text-[var(--on-primary)]">
               Pro
             </span>
           </button>
@@ -179,27 +179,27 @@ export default function ChatBox() {
       {isOpen && (
         <div className="fixed bottom-5 right-4 sm:right-6 z-50 flex h-[620px] max-h-[88vh] w-[calc(100vw-2rem)] sm:w-[420px] flex-col overflow-hidden rounded-3xl border border-black/10 bg-white shadow-[0_25px_60px_-15px_rgba(0,0,0,0.3)] backdrop-blur-xl animate-fade-in-up">
           {/* Header */}
-          <div className="flex items-center justify-between border-b border-gray-100 bg-[var(--primary)] px-5 py-4 text-white">
+          <div className="flex items-center justify-between border-b border-gray-100 bg-[var(--primary)] px-5 py-4 text-[var(--on-primary)]">
             <div className="flex items-center gap-3">
-              <div className="relative flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-amber-500 text-white font-bold shadow-md shadow-amber-500/30">
+              <div className="relative flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-amber-500 text-[var(--on-primary)] font-bold shadow-md shadow-amber-500/30">
                 🤖
-                <span className="absolute -bottom-0.5 -right-0.5 h-3 w-3 rounded-full border-2 border-[#1a1a1a] bg-emerald-400" />
+                <span className="absolute -bottom-0.5 -right-0.5 h-3 w-3 rounded-full border-2 border-[var(--text-primary)] bg-emerald-400" />
               </div>
               <div>
                 <div className="flex items-center gap-1.5">
                   <h3 className="font-bold text-sm tracking-tight">CaseUp AI Assistant</h3>
-                  <span className="rounded-full bg-amber-400/20 px-1.5 py-0.2 text-[9px] font-bold text-amber-300">
+                  <span className="rounded-full bg-amber-400/20 px-1.5 py-0.2 text-[9px] font-bold text-[var(--on-primary)]">
                     Online
                   </span>
                 </div>
-                <p className="text-[11px] text-gray-400">Tư vấn chọn size & mẫu bao 24/7</p>
+                <p className="text-[11px] text-[var(--on-primary)]">Tư vấn chọn size & mẫu bao 24/7</p>
               </div>
             </div>
 
             <div className="flex items-center gap-1">
               <button
                 onClick={handleClearChat}
-                className="rounded-full p-1.5 text-gray-400 hover:bg-white/10 hover:text-white transition"
+                className="flex h-11 w-11 items-center justify-center rounded-full p-1.5 text-[var(--on-primary)] hover:bg-black/5 hover:text-[var(--text-primary)] transition"
                 title="Làm mới đoạn chat"
               >
                 <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -208,7 +208,7 @@ export default function ChatBox() {
               </button>
               <button
                 onClick={() => setIsOpen(false)}
-                className="rounded-full p-1.5 text-gray-400 hover:bg-white/10 hover:text-white transition"
+                className="flex h-11 w-11 items-center justify-center rounded-full p-1.5 text-[var(--on-primary)] hover:bg-black/5 hover:text-[var(--text-primary)] transition"
                 aria-label="Đóng"
               >
                 <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -219,7 +219,7 @@ export default function ChatBox() {
           </div>
 
           {/* Quick Prompts Bar */}
-          <div className="border-b border-gray-100 bg-[#f9f8f6] px-4 py-2.5 overflow-x-auto no-scrollbar flex gap-2">
+          <div className="border-b border-gray-100 bg-[var(--background)] px-4 py-2.5 overflow-x-auto no-scrollbar flex gap-2">
             {quickPrompts.map((p, i) => (
               <button
                 key={i}
@@ -233,14 +233,14 @@ export default function ChatBox() {
           </div>
 
           {/* Messages Body */}
-          <div className="flex-1 space-y-4 overflow-y-auto bg-[var(--brand-cream)] p-4 text-sm">
+          <div className="flex-1 space-y-4 overflow-y-auto bg-[var(--secondary-soft)] p-4 text-sm">
             {messages.map((item, index) => (
               <div key={index} className="space-y-2">
                 <div
                   className={
                     item.role === "user"
-                      ? "ml-auto max-w-[85%] whitespace-pre-wrap break-words rounded-2xl rounded-tr-sm bg-[var(--primary)] px-4 py-3 text-white shadow-sm"
-                      : "mr-auto max-w-[90%] whitespace-pre-wrap break-words rounded-2xl rounded-tl-sm bg-white px-4 py-3 text-gray-800 shadow-sm border border-[var(--brand-border)]"
+                      ? "ml-auto max-w-[85%] whitespace-pre-wrap break-words rounded-2xl rounded-tr-sm bg-[var(--soft-blue)] px-4 py-3 text-[var(--on-primary)] shadow-sm"
+                      : "mr-auto max-w-[90%] whitespace-pre-wrap break-words rounded-2xl rounded-tl-sm bg-[var(--surface-muted)] px-4 py-3 text-gray-800 shadow-sm border border-[var(--brand-border)]"
                   }
                 >
                   {item.content}
@@ -258,7 +258,7 @@ export default function ChatBox() {
                           key={prod.id}
                           className="flex items-center gap-3 rounded-2xl border border-gray-100 bg-white p-2.5 shadow-sm hover:border-amber-200 transition"
                         >
-                          <div className="relative h-14 w-14 shrink-0 overflow-hidden rounded-xl bg-[#f2eee9]">
+                          <div className="relative h-14 w-14 shrink-0 overflow-hidden rounded-xl bg-[var(--surface-muted)]">
                             <Image src={prod.image} alt={prod.name} fill className="object-contain p-1" />
                           </div>
 
@@ -293,7 +293,7 @@ export default function ChatBox() {
                                   selectedColor: prod.colors[0],
                                 });
                               }}
-                              className="rounded-full bg-[var(--primary)] px-2.5 py-1 text-[10px] font-bold text-white hover:bg-[var(--brand-primary-hover)] transition"
+                              className="rounded-full bg-[var(--primary)] px-2.5 py-1 text-[10px] font-bold text-[var(--on-primary)] hover:bg-[var(--brand-primary-hover)] transition"
                             >
                               + Giỏ
                             </button>
@@ -308,7 +308,7 @@ export default function ChatBox() {
 
             {/* Loading Indicator */}
             {isLoading && (
-              <div className="mr-auto flex items-center gap-2 rounded-2xl rounded-tl-sm bg-white px-4 py-3 text-xs text-gray-500 shadow-sm border border-[var(--brand-border)]">
+              <div className="mr-auto flex items-center gap-2 rounded-2xl rounded-tl-sm bg-[var(--surface-muted)] px-4 py-3 text-xs text-gray-500 shadow-sm border border-[var(--brand-border)]">
                 <span className="font-medium">AI đang tìm kiếm mẫu phù hợp nhất</span>
                 <span className="flex gap-1">
                   <span className="h-1.5 w-1.5 rounded-full bg-amber-500 animate-bounce" style={{ animationDelay: "0ms" }} />
@@ -330,13 +330,13 @@ export default function ChatBox() {
                 onKeyDown={handleKeyDown}
                 placeholder="Nhập tên laptop hoặc yêu cầu tư vấn..."
                 disabled={isLoading}
-                className="flex-1 rounded-full border border-gray-200 bg-[#f9f8f6] px-4 py-2.5 text-xs sm:text-sm outline-none transition focus:border-black focus:bg-white disabled:bg-gray-100"
+                className="flex-1 rounded-full border border-gray-200 bg-[var(--background)] px-4 py-2.5 text-xs sm:text-sm outline-none transition focus:border-black focus:bg-white disabled:bg-gray-100"
               />
 
               <button
                 onClick={() => handleSend()}
                 disabled={isLoading || !message.trim()}
-                className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[var(--primary)] text-white transition hover:bg-[var(--brand-primary-hover)] disabled:opacity-40"
+                className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[var(--primary)] text-[var(--on-primary)] transition hover:bg-[var(--brand-primary-hover)] disabled:opacity-40"
                 aria-label="Gửi tin nhắn"
               >
                 <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>

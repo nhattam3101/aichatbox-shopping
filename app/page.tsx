@@ -1,19 +1,21 @@
 "use client";
 
+import { contact } from "@/data/contact";
 import Link from "next/link";
 import Image from "next/image";
 import { useState } from "react";
 import { products, accessories, type Product } from "@/data/products";
 import ChatBox from "@/components/ChatBox";
+import BenefitIcon from "@/components/BenefitIcon";
 import Navbar from "@/components/Navbar";
 import ProductCard from "@/components/ProductCard";
 import QuickViewModal from "@/components/QuickViewModal";
 
 const showcaseCards = [
-  { product: products.find(p => p.id === 1)!, label: "Bao bảo vệ iPad / Tablet 11 inch", tone: "bg-[#f8eee8]" },
-  { product: products.find(p => p.id === 3)!, label: "Bao bảo vệ Laptop 14 inch", tone: "bg-[#eaf1f4]" },
-  { product: accessories.find(p => p.id === 15)!, label: "Móc treo trang trí ngôi sao", tone: "bg-[#f4efdf]" },
-  { product: accessories.find(p => p.id === 16)!, label: "Móc treo trang trí hoa", tone: "bg-[#f7eaf0]" },
+  { product: products.find(p => p.id === 1)!, label: "Bao bảo vệ iPad / Tablet 11 inch", tone: "bg-white" },
+  { product: products.find(p => p.id === 3)!, label: "Bao bảo vệ Laptop 14 inch", tone: "bg-[var(--soft-blue)]" },
+  { product: accessories.find(p => p.id === 15)!, label: "Móc treo trang trí ngôi sao", tone: "bg-[var(--primary-soft)]" },
+  { product: accessories.find(p => p.id === 16)!, label: "Móc treo trang trí hoa", tone: "bg-[var(--surface-muted)]" },
 ];
 
 export default function Home() {
@@ -49,7 +51,7 @@ export default function Home() {
     },
     {
       q: "Nếu máy không vừa hoặc muốn đổi màu khác thì sao?",
-      a: "CaseUp áp dụng chính sách đổi trả miễn phí trong 7 ngày đầu tiên nếu sản phẩm chưa qua sử dụng. Bạn chỉ cần liên hệ qua hotline hoặc chatbox, nhân viên sẽ gửi mẫu mới đến tận nhà đổi cho bạn.",
+      a: "CaseUp áp dụng chính sách đổi trả miễn phí trong 3 ngày đầu tiên nếu sản phẩm chưa qua sử dụng. Bạn chỉ cần liên hệ qua hotline hoặc chatbox, nhân viên sẽ gửi mẫu mới đến tận nhà đổi cho bạn.",
     },
     {
       q: "Chất liệu của bao CaseUp có chống nước tốt không?",
@@ -58,11 +60,11 @@ export default function Home() {
   ];
 
   return (
-    <main className="home-page min-h-screen bg-[var(--brand-cream)] text-[#1a1a1a] selection:bg-amber-100 selection:text-amber-900">
+    <main className="home-page min-h-screen bg-[var(--brand-cream)] text-[var(--text-primary)] selection:bg-amber-100 selection:text-amber-900">
       <Navbar />
 
       {/* Announcement Marquee Ticker */}
-      <div className="overflow-hidden bg-[#1a1a1a] py-2.5 text-white">
+      <div className="overflow-hidden bg-[var(--text-primary)] py-2.5 text-white">
         <div className="animate-marquee flex whitespace-nowrap text-xs font-medium">
           {Array.from({ length: 2 }).map((_, i) => (
             <span key={i} className="mx-6 flex items-center gap-6 text-white/90">
@@ -70,7 +72,7 @@ export default function Home() {
               <span>•</span>
               <span>🚚 Miễn phí vận chuyển toàn quốc đơn từ 300K</span>
               <span>•</span>
-              <span>🔄 Đổi trả 7 ngày không cần lý do</span>
+              <span>🔄 Đổi Trả 3 Ngày không cần lý do</span>
               <span>•</span>
               <span>🤖 Trợ lý AI tư vấn chuẩn size 24/7</span>
               <span>•</span>
@@ -86,37 +88,39 @@ export default function Home() {
       {/* Hero Section */}
       <section className="relative overflow-hidden pt-12 pb-20 md:pt-20 md:pb-32">
         {/* Ambient Gradient Glows */}
-        <div className="absolute -right-40 -top-40 h-[550px] w-[550px] rounded-full bg-amber-200/30 blur-[120px] pointer-events-none" />
-        <div className="absolute -bottom-20 -left-20 h-[450px] w-[450px] rounded-full bg-orange-200/25 blur-[100px] pointer-events-none" />
+        <div className="absolute -right-40 -top-40 h-[550px] w-[550px] rounded-full bg-[var(--surface-muted)] opacity-40 pointer-events-none" />
+        <div className="absolute -bottom-20 -left-20 h-[450px] w-[450px] rounded-full bg-[var(--surface-muted)] opacity-40 pointer-events-none" />
 
         <div className="mx-auto grid max-w-7xl items-center gap-10 px-6 md:grid-cols-[minmax(0,2fr)_minmax(0,3fr)] md:px-8 lg:gap-12 lg:px-12">
           <div className="relative z-10 space-y-6">
-            <div className="inline-flex items-center gap-2.5 rounded-full border border-amber-300/80 bg-amber-50 px-4 py-2 text-xs font-bold text-amber-800 shadow-sm animate-pulse-subtle">
+            <div className="inline-flex items-center gap-2.5 rounded-full border border-amber-300/80 bg-amber-50 px-4 py-2 text-xs font-bold text-amber-800 shadow-sm">
               <span className="relative flex h-2.5 w-2.5">
-                <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-amber-500 opacity-75"></span>
+                <span className="absolute inline-flex h-full w-full rounded-full bg-amber-500 opacity-75"></span>
                 <span className="relative inline-flex h-2.5 w-2.5 rounded-full bg-amber-600"></span>
               </span>
-              <span>Bao Laptop Thế Hệ Mới 2026 • Tích Hợp AI</span>
+              <span>CaseUp Handmade · Theo gu của bạn</span>
             </div>
 
             <h1 className="text-4xl font-extrabold leading-[1.08] tracking-tight sm:text-5xl lg:text-6xl">
-              Bảo vệ máy yêu,
+              Bảo vệ
               <br />
-              <span className="text-amber-600">
+              máy yêu,
+              <br />
+              <span className="text-[var(--text-primary)]">
                 chuẩn gu tinh tế.
               </span>
             </h1>
 
             <p className="max-w-lg text-base md:text-lg leading-relaxed text-gray-600">
-              Khám phá bộ sưu tập các mẫu bao laptop cao cấp từ da Saffiano, lựa chọn kích thước đến phong cách pastel Hàn Quốc. Được may đo chuẩn xác cho từng dòng máy.
+              Một chiếc bao bảo vệ, một chút dấu ấn riêng. Chọn size vừa máy, phối màu vải, mẫu cúc/nút và thêm nét thêu tên để chiếc bao mang gu của bạn.
             </p>
 
             <div className="flex flex-wrap items-center gap-4 pt-2">
               <Link
                 href="/products"
-                className="group inline-flex items-center gap-2 rounded-full bg-black px-8 py-4 text-sm font-bold text-white shadow-md transition-[background-color,transform,box-shadow] duration-200 hover:bg-neutral-800 hover:-translate-y-0.5 hover:shadow-lg"
+                className="group inline-flex items-center gap-2 rounded-full bg-[var(--primary)] px-8 py-4 text-sm font-bold text-[var(--on-primary)] shadow-md transition-[background-color,transform,box-shadow] duration-200 hover:bg-[var(--brand-primary-hover)] hover:-translate-y-0.5 hover:shadow-lg"
               >
-                <span>Khám phá 24 sản phẩm</span>
+                <span>Khám phá bộ sưu tập</span>
                 <svg className="h-4 w-4 transition-transform group-hover:translate-x-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
                   <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" />
                 </svg>
@@ -124,21 +128,21 @@ export default function Home() {
 
               <Link
                 href="/size-guide"
-                className="inline-flex items-center gap-2 rounded-full border border-black/10 bg-white px-7 py-4 text-sm font-bold text-gray-800 shadow-sm transition hover:border-black/30 hover:bg-gray-50"
+                className="inline-flex items-center gap-2 rounded-full border border-[var(--deep-navy)] bg-white px-7 py-4 text-sm font-bold text-gray-800 shadow-sm transition hover:border-black/30 hover:bg-gray-50"
               >
                 <span>📏 Tìm size theo máy</span>
               </Link>
             </div>
 
             {/* Social Proof */}
-            <div className="pt-6 border-t border-[var(--brand-border)] flex items-center gap-5">
+            <div className="pt-6 border-t border-[var(--brand-border)] flex flex-wrap items-center gap-4">
               <div className="flex -space-x-3">
                 {["ĐH", "TA", "MN", "QT", "LK"].map((initials, i) => (
                   <div
                     key={initials}
                     className="flex h-10 w-10 items-center justify-center rounded-full border-2 border-white text-xs font-bold text-white shadow-sm"
                     style={{
-                      background: ["#f59e0b", "#ef4444", "#3b82f6", "#10b981", "#8b5cf6"][i],
+                      background: ["var(--primary-ink)", "var(--secondary)", "var(--deep-navy)", "var(--primary-ink)", "var(--secondary)"][i],
                       zIndex: 5 - i,
                     }}
                   >
@@ -149,7 +153,7 @@ export default function Home() {
               <div>
                 <div className="flex items-center gap-1">
                   {Array.from({ length: 5 }).map((_, i) => (
-                    <span key={i} className="text-amber-400 text-sm">★</span>
+                    <span key={i} className="text-[var(--yellow)] text-sm">★</span>
                   ))}
                   <span className="ml-1 text-xs font-bold text-gray-800">4.9 / 5</span>
                 </div>
@@ -176,10 +180,10 @@ export default function Home() {
                         alt={label}
                         fill
                         sizes="(max-width: 767px) calc((100vw - 64px) / 2), (max-width: 1279px) 27vw, 320px"
-                        className="object-cover transition-transform duration-300 group-hover:scale-[1.03]"
+                        className="object-contain p-2 transition-transform duration-300 group-hover:scale-[1.02]"
                         preload={cardIndex === 0}
                       />
-                      <span className="absolute bottom-3 left-3 right-3 w-fit max-w-[calc(100%-1.5rem)] rounded-xl bg-[#fffaf5]/90 px-3 py-2 text-[10px] font-semibold leading-snug text-black backdrop-blur-sm sm:bottom-4 sm:left-4 sm:right-4 sm:text-xs">
+                      <span className="absolute bottom-3 left-3 right-3 w-fit max-w-[calc(100%-1.5rem)] rounded-xl bg-[var(--background)]/90 px-3 py-2 text-[10px] font-semibold leading-snug text-[var(--text-primary)] backdrop-blur-sm sm:bottom-4 sm:left-4 sm:right-4 sm:text-xs">
                         {label}
                       </span>
                     </Link>
@@ -204,18 +208,18 @@ export default function Home() {
 
       {/* Trust Highlights Strip */}
       <section className="border-y border-[var(--brand-border)] bg-white">
-        <div className="mx-auto grid max-w-7xl grid-cols-2 divide-x divide-y md:divide-y-0 divide-black/5 md:grid-cols-4">
+        <div className="mx-auto grid max-w-7xl grid-cols-1 gap-3 p-4 sm:grid-cols-2 lg:grid-cols-4 md:p-6">
           {[
             { icon: "🚚", title: "Freeship Toàn Quốc", desc: "Áp dụng đơn từ 300.000₫" },
-            { icon: "🔄", title: "Đổi Trả 7 Ngày", desc: "Không vừa size đổi ngay" },
-            { icon: "🤖", title: "AI Tư Vấn Chọn Size", desc: "Hỗ trợ 24/7 trực tuyến" },
-            { icon: "💵", title: "Kiểm Tra Nhận COD", desc: "Ưng ý mới thanh toán" },
+            { icon: "🔄", title: "Đổi Trả 3 Ngày", desc: "Không vừa size đổi ngay" },
+            { icon: "🛡️", title: "Chống Va Đập", desc: "Bảo vệ máy mỗi ngày" },
+            { icon: "🤖", title: "AI Tư Vấn 24/7", desc: "Hỗ trợ chọn size" },
           ].map((item, i) => (
-            <div key={i} className="flex items-center gap-4 p-6 hover:bg-[var(--brand-cream)] transition">
-              <span className="text-3xl">{item.icon}</span>
+            <div key={i} className="flex min-w-0 items-center gap-4 rounded-2xl border border-[var(--brand-border)] bg-[var(--brand-cream)] p-5 transition-shadow duration-200 hover:shadow-sm">
+              <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-[var(--success-soft)] text-[var(--success)]"><BenefitIcon kind={item.icon} /></span>
               <div>
                 <p className="text-sm font-bold text-gray-900">{item.title}</p>
-                <p className="text-xs text-gray-400 mt-0.5">{item.desc}</p>
+                <p className="text-xs leading-relaxed text-gray-600 mt-1">{item.desc}</p>
               </div>
             </div>
           ))}
@@ -223,7 +227,7 @@ export default function Home() {
       </section>
 
       {/* Quick Laptop Size Selector Bar */}
-      <section className="py-12 px-6 md:px-12 bg-[#f8f6f2] border-b border-[var(--brand-border)]">
+      <section className="py-12 px-6 md:px-12 bg-[var(--surface-muted)] border-b border-[var(--brand-border)]">
         <div className="mx-auto max-w-7xl">
           <div className="flex flex-col md:flex-row items-center justify-between gap-6">
             <div>
@@ -236,7 +240,7 @@ export default function Home() {
             </div>
             <Link
               href="/size-guide"
-              className="text-xs font-bold text-amber-700 hover:text-black underline shrink-0"
+              className="text-xs font-bold text-amber-700 hover:text-[var(--text-primary)] underline shrink-0"
             >
               Mở công cụ đo chi tiết (cm) →
             </Link>
@@ -257,7 +261,7 @@ export default function Home() {
               <Link
                 key={name}
                 href="/size-guide"
-                className="rounded-full border border-[var(--brand-border)] bg-white px-4 py-2 text-xs font-semibold text-gray-700 shadow-sm transition hover:border-black/25 hover:bg-[#f3eeea]"
+                className="rounded-full border border-[var(--brand-border)] bg-white px-4 py-2 text-xs font-semibold text-gray-700 shadow-sm transition hover:border-black/25 hover:bg-[var(--soft-blue)]"
               >
                 💻 {name}
               </Link>
@@ -293,7 +297,7 @@ export default function Home() {
                   onClick={() => setActiveTab(tab.id as typeof activeTab)}
                   className={`rounded-full px-4 py-2 text-xs font-bold transition-all ${
                     activeTab === tab.id
-                      ? "bg-[var(--primary)] text-white shadow-md scale-105"
+                      ? "bg-[var(--primary)] text-[var(--on-primary)] shadow-md scale-105"
                       : "bg-white border border-gray-200 text-gray-600 hover:bg-gray-100"
                   }`}
                 >
@@ -317,7 +321,7 @@ export default function Home() {
           <div className="mt-12 text-center">
             <Link
               href="/products"
-              className="inline-flex items-center gap-2 rounded-full border-2 border-black bg-transparent px-8 py-3.5 text-sm font-bold text-black transition-colors hover:bg-black/5"
+              className="inline-flex items-center gap-2 rounded-full border-2 border-black bg-transparent px-8 py-3.5 text-sm font-bold text-[var(--text-primary)] transition-colors hover:bg-black/5"
             >
               Xem tất cả 24 sản phẩm & lọc nâng cao →
             </Link>
@@ -327,7 +331,7 @@ export default function Home() {
 
       {/* AI Assistant Feature Banner */}
       <section className="mx-auto max-w-7xl px-6 py-12 md:px-12">
-        <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-[#1c1b18] via-[#2a2723] to-[#121110] p-8 md:p-16 text-white shadow-2xl">
+        <div className="brand-dark relative overflow-hidden rounded-3xl bg-[var(--deep-navy)] p-8 md:p-16 text-white shadow-2xl">
           <div className="absolute -right-20 top-10 h-72 w-72 rounded-full bg-amber-500/20 blur-[120px] pointer-events-none" />
           <div className="grid gap-10 md:grid-cols-2 items-center">
             <div>
@@ -337,7 +341,7 @@ export default function Home() {
               <h2 className="mt-5 text-3xl sm:text-4xl font-extrabold leading-tight">
                 Không chắc chắn kích thước?
                 <br />
-                <span className="text-amber-400">Hỏi ngay trợ lý AI.</span>
+                <span className="text-[var(--yellow)]">Hỏi ngay trợ lý AI.</span>
               </h2>
               <p className="mt-4 text-sm text-gray-300 leading-relaxed max-w-md">
                 Trợ lý AI của CaseUp được đào tạo với thông số chi tiết của hơn 200 dòng laptop hiện đại. AI sẽ tư vấn kích thước vừa khít, màu sắc hợp mệnh và mức giá lý tưởng nhất.
@@ -348,7 +352,7 @@ export default function Home() {
                     const btn = document.getElementById("chatbox-toggle");
                     if (btn) btn.click();
                   }}
-                  className="rounded-full bg-[#f2c877] px-6 py-3.5 text-xs sm:text-sm font-bold text-black shadow-md hover:bg-[#e7bb68] transition"
+                  className="rounded-full bg-[var(--yellow)] px-6 py-3.5 text-xs sm:text-sm font-bold text-[var(--text-primary)] shadow-md hover:bg-[var(--yellow)] transition"
                 >
                   Mở Trợ Lý AI Ngay
                 </button>
@@ -364,7 +368,7 @@ export default function Home() {
             {/* AI Mockup Card */}
             <div className="rounded-3xl border border-white/10 bg-white/5 p-6 backdrop-blur-md space-y-3.5 text-xs">
               <div className="flex justify-end">
-                <div className="rounded-2xl rounded-tr-sm bg-amber-500 px-4 py-2.5 text-black font-semibold">
+                <div className="rounded-2xl rounded-tr-sm bg-[var(--primary)] px-4 py-2.5 text-[var(--on-primary)] font-semibold">
                   Laptop mình là MacBook Pro 14 M3, muốn mẫu da sang trọng đi họp?
                 </div>
               </div>
@@ -433,7 +437,7 @@ export default function Home() {
                   </div>
                 </div>
 
-                <div className="mt-3 flex text-amber-400 text-sm">
+                <div className="mt-3 flex text-[var(--yellow)] text-sm">
                   {Array.from({ length: item.rating }).map((_, i) => (
                     <span key={i}>★</span>
                   ))}
@@ -488,7 +492,7 @@ export default function Home() {
       </section>
 
       {/* Footer */}
-      <footer className="border-t border-black/10 bg-[#141414] text-white">
+      <footer className="brand-dark border-t border-black/10 bg-[var(--deep-navy)] text-white">
         <div className="mx-auto grid max-w-7xl gap-10 px-6 py-16 md:grid-cols-4 md:px-12">
           <div>
             <div className="flex items-center gap-3">
@@ -498,9 +502,9 @@ export default function Home() {
               <span className="text-xl font-extrabold tracking-tight">CaseUp</span>
             </div>
             <p className="mt-4 text-xs leading-relaxed text-gray-400">
-              Thương hiệu bao laptop thông minh tiên phong ứng dụng AI tư vấn kích thước và phong cách cá nhân hóa.
+              Bao laptop, iPad / Tablet handmade cùng phụ kiện và thêu tên. Chọn màu vải, phối cúc/nút, tạo dấu ấn riêng.
             </p>
-            <p className="mt-4 text-xs text-amber-400 font-semibold">
+            <p className="mt-4 text-xs text-[var(--yellow)] font-semibold">
               Mã voucher chào mừng: <strong>CASEUP10</strong>
             </p>
           </div>
@@ -508,31 +512,31 @@ export default function Home() {
           <div>
             <h4 className="text-xs font-bold uppercase tracking-wider text-gray-300 mb-3">Sản phẩm</h4>
             <ul className="space-y-2 text-xs text-gray-400">
-              <li><Link href="/products" className="hover:text-white transition">Tất cả sản phẩm ({products.length} mẫu)</Link></li>
-              <li><Link href="/products" className="hover:text-white transition">{products[1].name}</Link></li>
-              <li><Link href="/products" className="hover:text-white transition">{products[2].name}</Link></li>
-              <li><Link href="/products" className="hover:text-white transition">{products[3].name}</Link></li>
-              <li><Link href="/products" className="hover:text-white transition">{products[4].name}</Link></li>
+              <li><Link href="/products" className="hover:text-[var(--primary)] transition">Tất cả sản phẩm ({products.length} mẫu)</Link></li>
+              <li><Link href="/products" className="hover:text-[var(--primary)] transition">{products[1].name}</Link></li>
+              <li><Link href="/products" className="hover:text-[var(--primary)] transition">{products[2].name}</Link></li>
+              <li><Link href="/products" className="hover:text-[var(--primary)] transition">{products[3].name}</Link></li>
+              <li><Link href="/products" className="hover:text-[var(--primary)] transition">{products[4].name}</Link></li>
             </ul>
           </div>
 
           <div>
             <h4 className="text-xs font-bold uppercase tracking-wider text-gray-300 mb-3">Hỗ trợ khách hàng</h4>
             <ul className="space-y-2 text-xs text-gray-400">
-              <li><Link href="/size-guide" className="hover:text-white transition">Công cụ chọn size 2.0</Link></li>
-              <li><Link href="/cart" className="hover:text-white transition">Giỏ hàng & Đặt hàng COD</Link></li>
-              <li><Link href="/about" className="hover:text-white transition">Chính sách bảo hành & đổi trả</Link></li>
-              <li><Link href="/about" className="hover:text-white transition">Về CaseUp</Link></li>
+              <li><Link href="/size-guide" className="hover:text-[var(--primary)] transition">Công cụ chọn size 2.0</Link></li>
+              <li><Link href="/cart" className="hover:text-[var(--primary)] transition">Giỏ hàng & Đặt hàng COD</Link></li>
+              <li><Link href="/about" className="hover:text-[var(--primary)] transition">Đổi Trả 3 Ngày</Link></li>
+              <li><Link href="/about" className="hover:text-[var(--primary)] transition">Về CaseUp</Link></li>
             </ul>
           </div>
 
           <div>
             <h4 className="text-xs font-bold uppercase tracking-wider text-gray-300 mb-3">Liên hệ</h4>
             <ul className="space-y-2 text-xs text-gray-400">
-              <li>📍 TP. Hồ Chí Minh & Hà Nội</li>
-              <li>📞 Hotline: 0988 123 456</li>
-              <li>✉️ Email: support@caseup.vn</li>
-              <li>🕐 Hỗ trợ: 8:00 - 22:00 tất cả các ngày</li>
+              <li>📍 {contact.location}</li>
+              <li>📞 Hotline: <a href={contact.phoneHref} className="hover:text-white">{contact.phone}</a></li>
+              <li>✉️ Email: <a href={`mailto:${contact.email}`} className="hover:text-white">{contact.email}</a></li>
+              <li>🕐 Hỗ trợ: {contact.supportHours}</li>
             </ul>
           </div>
         </div>

@@ -9,7 +9,7 @@ export default function OpenChatButton() {
   return (
     <button
       onClick={handleClick}
-      className="rounded-full border border-black px-6 py-3 transition hover:bg-black hover:text-white"
+      className="rounded-full bg-[var(--secondary)] px-6 py-3 text-xl font-bold text-white transition-colors hover:bg-[var(--secondary-hover)]"
     >
       Hỏi AI
     </button>
