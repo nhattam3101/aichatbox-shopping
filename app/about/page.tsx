@@ -1,8 +1,14 @@
+"use client";
+
+import { useState } from "react";
 import Navbar from "@/components/Navbar";
 import Link from "next/link";
 import ChatBox from "@/components/ChatBox";
+import ReturnPolicyModal from "@/components/ReturnPolicyModal";
 
 export default function AboutPage() {
+  const [isReturnPolicyOpen, setIsReturnPolicyOpen] = useState(false);
+
   return (
     <main className="min-h-screen bg-[var(--brand-cream)] text-[var(--text-primary)]">
       <Navbar />
@@ -51,14 +57,23 @@ export default function AboutPage() {
               </p>
             </div>
 
-            <div className="rounded-3xl border border-[var(--brand-border)] bg-white p-8 shadow-sm hover:shadow-md transition">
-              <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-amber-50 text-2xl mb-4">
-                🛡️
+            <div className="rounded-3xl border border-[var(--brand-border)] bg-white p-8 shadow-sm hover:shadow-md transition flex flex-col justify-between">
+              <div>
+                <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-amber-50 text-2xl mb-4">
+                  🛡️
+                </div>
+                <h2 className="text-xl font-bold text-gray-900">Chính Sách Uy Tín</h2>
+                <p className="mt-2 text-xs sm:text-sm leading-relaxed text-gray-500">
+                  100% khách hàng được kiểm tra hàng trước khi thanh toán COD. Hỗ trợ đổi size miễn phí tận nhà trong 3 ngày.
+                </p>
               </div>
-              <h2 className="text-xl font-bold text-gray-900">Chính Sách Uy Tín</h2>
-              <p className="mt-2 text-xs sm:text-sm leading-relaxed text-gray-500">
-                100% khách hàng được kiểm tra hàng trước khi thanh toán COD. Hỗ trợ đổi size miễn phí tận nhà trong 3 ngày.
-              </p>
+              <button
+                type="button"
+                onClick={() => setIsReturnPolicyOpen(true)}
+                className="mt-4 inline-flex min-h-[44px] items-center text-xs font-bold text-[var(--secondary-ink)] hover:underline"
+              >
+                Xem chi tiết chính sách đổi trả →
+              </button>
             </div>
           </div>
 
@@ -87,19 +102,25 @@ export default function AboutPage() {
           <div className="mt-12 flex flex-wrap gap-4 items-center">
             <Link
               href="/products"
-              className="rounded-full bg-[var(--primary)] px-8 py-4 text-sm font-bold text-[var(--on-primary)] shadow-md hover:bg-[var(--brand-primary-hover)] transition"
+              className="min-h-[44px] inline-flex items-center rounded-full bg-[var(--primary)] px-8 py-3 text-sm font-bold text-[var(--on-primary)] shadow-md hover:bg-[var(--brand-primary-hover)] transition"
             >
               Khám phá sản phẩm ngay →
             </Link>
             <Link
-              href="/size-guide"
-              className="rounded-full border border-gray-300 bg-white px-7 py-4 text-sm font-semibold text-gray-800 hover:bg-gray-50 transition"
+              href="/custom"
+              className="min-h-[44px] inline-flex items-center rounded-full border border-gray-300 bg-white px-7 py-3 text-sm font-semibold text-gray-800 hover:bg-gray-50 transition"
             >
-              Thử công cụ đo size
+              🎨 Tự thiết kế theo máy
             </Link>
           </div>
         </div>
       </section>
+
+      {/* Return Policy Modal */}
+      <ReturnPolicyModal
+        isOpen={isReturnPolicyOpen}
+        onClose={() => setIsReturnPolicyOpen(false)}
+      />
 
       <ChatBox />
     </main>

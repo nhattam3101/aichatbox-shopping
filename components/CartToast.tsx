@@ -76,7 +76,9 @@ export default function CartToast({ notification, onClose }: Props) {
             </h4>
             <div className="mt-0.5 flex flex-wrap items-center gap-1.5 text-[11px] text-gray-500">
               <span className="rounded bg-black/5 px-1.5 py-0.5 font-medium text-gray-700 hover-scale transition-transform duration-200">
-                {product.size}
+                {product.sizeMode === "custom" && product.customDimensions
+                  ? `Kích thước riêng: ${product.customDimensions.lengthCm} × ${product.customDimensions.widthCm} × ${product.customDimensions.thicknessCm} cm`
+                  : product.size}
               </span>
               {product.embroidery && <span className="rounded bg-[var(--surface-muted)] px-2 py-1">Có thêu tên</span>}
               {product.selectedButton && <span className="rounded bg-[var(--surface-muted)] px-2 py-1 text-[var(--primary-ink)]">Nút: {product.selectedButton}</span>}

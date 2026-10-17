@@ -9,6 +9,7 @@ import {
 } from "react";
 import { allProducts } from "@/data/products";
 import { normalizeButton, sameCartVariant } from "@/data/customization";
+import type { CustomDimensions } from "@/data/size-validation";
 import CartToast from "@/components/CartToast";
 
 export type CartItem = {
@@ -21,6 +22,8 @@ export type CartItem = {
   selectedColor?: string;
   selectedButton?: string;
   embroidery?: boolean;
+  sizeMode?: "standard" | "custom";
+  customDimensions?: CustomDimensions;
 };
 
 export type ToastNotification = {
@@ -33,8 +36,10 @@ export type ToastNotification = {
     size: string;
     quantity: number;
     selectedColor?: string;
-  selectedButton?: string;
-  embroidery?: boolean;
+    selectedButton?: string;
+    embroidery?: boolean;
+    sizeMode?: "standard" | "custom";
+    customDimensions?: CustomDimensions;
   };
 };
 
@@ -44,9 +49,30 @@ type CartContextType = {
     item: Omit<CartItem, "quantity"> & { quantity?: number },
     showToast?: boolean
   ) => void;
-  removeFromCart: (id: number, selectedColor?: string, selectedButton?: string, embroidery?: boolean) => void;
-  increaseQuantity: (id: number, selectedColor?: string, selectedButton?: string, embroidery?: boolean) => void;
-  decreaseQuantity: (id: number, selectedColor?: string, selectedButton?: string, embroidery?: boolean) => void;
+  removeFromCart: (
+    id: number,
+    selectedColor?: string,
+    selectedButton?: string,
+    embroidery?: boolean,
+    sizeMode?: "standard" | "custom",
+    customDimensions?: CustomDimensions
+  ) => void;
+  increaseQuantity: (
+    id: number,
+    selectedColor?: string,
+    selectedButton?: string,
+    embroidery?: boolean,
+    sizeMode?: "standard" | "custom",
+    customDimensions?: CustomDimensions
+  ) => void;
+  decreaseQuantity: (
+    id: number,
+    selectedColor?: string,
+    selectedButton?: string,
+    embroidery?: boolean,
+    sizeMode?: "standard" | "custom",
+    customDimensions?: CustomDimensions
+  ) => void;
   clearCart: () => void;
   totalItems: number;
   totalPrice: number;
@@ -63,23 +89,48 @@ const CartContext = createContext<CartContextType | undefined>(undefined);
 export function CartProvider({ children }: { children: ReactNode }) {
   const [cart, setCart] = useState<CartItem[]>([]);
   const [storageReady, setStorageReady] = useState(false);
+
   useEffect(() => {
     let active = true;
     queueMicrotask(() => {
       if (!active) return;
       const readSaved = (): CartItem[] => {
-    try {
-      const saved = localStorage.getItem("cart");
-      const parsed: unknown = saved ? JSON.parse(saved) : [];
-      if (!Array.isArray(parsed)) return [];
-      return parsed.flatMap(item => {
-        const product = allProducts.find(p => p.id === item?.id);
-        if (!product || product.priceConfirmed === false || !Number.isSafeInteger(item.quantity) || item.quantity <= 0) return [];
-        return [{ id: product.id, name: product.name, price: product.price, image: product.image, size: product.size, quantity: item.quantity, selectedColor: product.colors.includes(item.selectedColor) ? item.selectedColor : product.colors[0] ?? "", selectedButton: normalizeButton(product, item.selectedButton), embroidery: product.supportsEmbroidery === true && item.embroidery === true }];
-      });
-    } catch {
-      return [];
-    }
+        try {
+          const saved = localStorage.getItem("cart");
+          const parsed: unknown = saved ? JSON.parse(saved) : [];
+          if (!Array.isArray(parsed)) return [];
+          return parsed.flatMap(item => {
+            const product = allProducts.find(p => p.id === item?.id);
+            if (!product || product.priceConfirmed === false || !Number.isSafeInteger(item.quantity) || item.quantity <= 0) return [];
+
+            const isCustom = product.kind === "sleeve" &&
+              item.sizeMode === "custom" &&
+              item.customDimensions &&
+              typeof item.customDimensions.lengthCm === "number" &&
+              typeof item.customDimensions.widthCm === "number" &&
+              typeof item.customDimensions.thicknessCm === "number";
+
+            return [{
+              id: product.id,
+              name: product.name,
+              price: product.price,
+              image: product.image,
+              size: product.size,
+              quantity: item.quantity,
+              selectedColor: product.colors.includes(item.selectedColor) ? item.selectedColor : product.colors[0] ?? "",
+              selectedButton: normalizeButton(product, item.selectedButton),
+              embroidery: product.supportsEmbroidery === true && item.embroidery === true,
+              sizeMode: isCustom ? "custom" : "standard",
+              customDimensions: isCustom ? {
+                lengthCm: Number(item.customDimensions.lengthCm),
+                widthCm: Number(item.customDimensions.widthCm),
+                thicknessCm: Number(item.customDimensions.thicknessCm),
+              } : undefined,
+            }];
+          });
+        } catch {
+          return [];
+        }
       };
       setCart(readSaved());
       setStorageReady(true);
@@ -111,14 +162,35 @@ export function CartProvider({ children }: { children: ReactNode }) {
   ) {
     const product = allProducts.find(p => p.id === item.id);
     if (!product) return;
-    if (product.priceConfirmed === false) { alert("Giá size này đang chờ xác nhận. Vui lòng liên hệ trước khi mua."); return; }
-    item = { ...item, name: product.name, price: product.price, image: product.image, size: product.size, selectedColor: product.colors.includes(item.selectedColor ?? "") ? item.selectedColor : product.colors[0] ?? "", selectedButton: normalizeButton(product, item.selectedButton), embroidery: product.supportsEmbroidery === true && item.embroidery === true };
+    if (product.priceConfirmed === false) {
+      alert("Giá size này đang chờ xác nhận. Vui lòng liên hệ trước khi mua.");
+      return;
+    }
+
+    const isCustom = product.kind === "sleeve" &&
+      item.sizeMode === "custom" &&
+      item.customDimensions &&
+      typeof item.customDimensions.lengthCm === "number" &&
+      typeof item.customDimensions.widthCm === "number" &&
+      typeof item.customDimensions.thicknessCm === "number";
+
+    item = {
+      ...item,
+      name: product.name,
+      price: product.price,
+      image: product.image,
+      size: product.size,
+      selectedColor: product.colors.includes(item.selectedColor ?? "") ? item.selectedColor : product.colors[0] ?? "",
+      selectedButton: normalizeButton(product, item.selectedButton),
+      embroidery: product.supportsEmbroidery === true && item.embroidery === true,
+      sizeMode: isCustom ? "custom" : "standard",
+      customDimensions: isCustom ? item.customDimensions : undefined,
+    };
     const qtyToAdd = Number.isSafeInteger(item.quantity) && item.quantity! > 0 ? item.quantity! : 1;
 
     setCart((prev) => {
       const existingItem = prev.find(
-        (cartItem) =>
-          sameCartVariant(cartItem, item)
+        (cartItem) => sameCartVariant(cartItem, item)
       );
 
       if (existingItem) {
@@ -154,24 +226,39 @@ export function CartProvider({ children }: { children: ReactNode }) {
           selectedColor: item.selectedColor,
           selectedButton: item.selectedButton,
           embroidery: item.embroidery,
+          sizeMode: item.sizeMode,
+          customDimensions: item.customDimensions,
         },
       });
     }
   }
 
-  function removeFromCart(id: number, selectedColor?: string, selectedButton?: string, embroidery?: boolean) {
+  function removeFromCart(
+    id: number,
+    selectedColor?: string,
+    selectedButton?: string,
+    embroidery?: boolean,
+    sizeMode?: "standard" | "custom",
+    customDimensions?: CustomDimensions
+  ) {
     setCart((prev) =>
       prev.filter((item) =>
-        !(sameCartVariant(item, { id, selectedColor, selectedButton, embroidery }))
+        !sameCartVariant(item, { id, selectedColor, selectedButton, embroidery, sizeMode, customDimensions })
       )
     );
   }
 
-  function increaseQuantity(id: number, selectedColor?: string, selectedButton?: string, embroidery?: boolean) {
+  function increaseQuantity(
+    id: number,
+    selectedColor?: string,
+    selectedButton?: string,
+    embroidery?: boolean,
+    sizeMode?: "standard" | "custom",
+    customDimensions?: CustomDimensions
+  ) {
     setCart((prev) =>
       prev.map((item) => {
-        const matches =
-          sameCartVariant(item, { id, selectedColor, selectedButton, embroidery });
+        const matches = sameCartVariant(item, { id, selectedColor, selectedButton, embroidery, sizeMode, customDimensions });
 
         return matches
           ? {
@@ -183,12 +270,18 @@ export function CartProvider({ children }: { children: ReactNode }) {
     );
   }
 
-  function decreaseQuantity(id: number, selectedColor?: string, selectedButton?: string, embroidery?: boolean) {
+  function decreaseQuantity(
+    id: number,
+    selectedColor?: string,
+    selectedButton?: string,
+    embroidery?: boolean,
+    sizeMode?: "standard" | "custom",
+    customDimensions?: CustomDimensions
+  ) {
     setCart((prev) =>
       prev
         .map((item) => {
-          const matches =
-            sameCartVariant(item, { id, selectedColor, selectedButton, embroidery });
+          const matches = sameCartVariant(item, { id, selectedColor, selectedButton, embroidery, sizeMode, customDimensions });
 
           return matches
             ? {

@@ -16,10 +16,10 @@ require.extensions['.ts'] = (module, filename) => {
 };
 const { products, services, accessories, saleProducts, allProducts } = require('../data/products.ts');
 const { recommendSizes } = require('../data/size-rules.ts');
-assert.deepEqual(products.slice(0,6).map(p => p.name), [
-  'Bao bảo vệ iPad / Tablet 11 inch', 'Bao bảo vệ Laptop 13–13.3 inch',
-  'Bao bảo vệ Laptop 14 inch', 'Bao bảo vệ Laptop 15.6 inch cho máy mỏng',
-  'Bao bảo vệ Laptop 15.6–16 inch', 'Bao bảo vệ Laptop 17.3 inch'
+    assert.deepEqual(products.slice(0,6).map(p => p.name), [
+    'Bao bảo vệ iPad / Tablet 11 inch', 'Bao bảo vệ Laptop 13–13.3 inch',
+    'Bao bảo vệ Laptop 14 inch', 'Bao bảo vệ Laptop 15.6 inch',
+    'Bao bảo vệ Laptop 15.6–16 inch', 'Bao bảo vệ Laptop 17.3 inch'
 ]);
 const { matchesProduct } = require('../data/product-search.ts');
 const { buttonOptions, normalizeButton, sameCartVariant, cartVariantKey, productGallery } = require('../data/customization.ts');
@@ -39,6 +39,13 @@ assert.equal(normalizeButton(sleeve), 'Baby Blue');
 assert.equal(normalizeButton(accessories[0], 'Kem'), undefined);
 assert.equal(normalizeButton(services[0], 'Kem'), undefined);
 assert.ok(sameCartVariant({ ...variant, selectedButton: undefined }, { ...variant, selectedButton: 'Baby Blue' }));
+const customVarA = { ...variant, sizeMode: 'custom', customDimensions: { lengthCm: 32, widthCm: 22, thicknessCm: 2 } };
+const customVarB = { ...variant, sizeMode: 'custom', customDimensions: { lengthCm: 34, widthCm: 24, thicknessCm: 2 } };
+assert.ok(sameCartVariant(customVarA, { ...customVarA }));
+assert.ok(!sameCartVariant(customVarA, customVarB));
+assert.ok(!sameCartVariant(variant, customVarA));
+assert.notEqual(cartVariantKey(customVarA), cartVariantKey(customVarB));
+assert.notEqual(cartVariantKey(variant), cartVariantKey(customVarA));
 for (const product of products) {
   const original = [...product.gallery];
   const gallery = productGallery(product);

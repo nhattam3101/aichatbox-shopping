@@ -15,6 +15,9 @@ import OpenChatButton from "@/components/OpenChatButton";
 import { useCart } from "@/components/CartContext";
 import { useWishlist } from "@/components/WishlistContext";
 import { useCompare } from "@/components/ProductCompareModal";
+import CustomSizeSelector from "@/components/CustomSizeSelector";
+import ReturnPolicyModal from "@/components/ReturnPolicyModal";
+import { validateCustomDimensions } from "@/data/size-validation";
 
 type Props = {
   product: Product;
@@ -46,14 +49,44 @@ export default function ProductDetailClient({ product, relatedProducts }: Props)
     ? Math.round(((product.originalPrice - product.price) / product.originalPrice) * 100)
     : null;
 
+  const [sizeMode, setSizeMode] = useState<"standard" | "custom">("standard");
+  const [customLength, setCustomLength] = useState("");
+  const [customWidth, setCustomWidth] = useState("");
+  const [customThickness, setCustomThickness] = useState("");
+  const [customSubmittedOrTouched, setCustomSubmittedOrTouched] = useState(false);
+  const [isReturnPolicyOpen, setIsReturnPolicyOpen] = useState(false);
+
+  const customValidation = validateCustomDimensions(customLength, customWidth, customThickness);
+
   function handleAdd() {
     if (product.priceConfirmed === false) return;
-    addToCart({ ...product, quantity, selectedColor, selectedButton, embroidery });
+    if (product.kind === "sleeve" && sizeMode === "custom") {
+      setCustomSubmittedOrTouched(true);
+      if (!customValidation.isValid || !customValidation.dimensions) {
+        return;
+      }
+    }
+
+    addToCart({
+      ...product,
+      quantity,
+      selectedColor,
+      selectedButton: product.kind === "sleeve" ? selectedButton : undefined,
+      embroidery,
+      sizeMode: product.kind === "sleeve" ? sizeMode : "standard",
+      customDimensions: product.kind === "sleeve" && sizeMode === "custom" ? customValidation.dimensions : undefined,
+    });
     if (embroidery && product.supportsEmbroidery) addToCart({ ...embroideryService, quantity }, false);
   }
 
   function handleBuyNow() {
     if (product.priceConfirmed === false) return;
+    if (product.kind === "sleeve" && sizeMode === "custom") {
+      setCustomSubmittedOrTouched(true);
+      if (!customValidation.isValid || !customValidation.dimensions) {
+        return;
+      }
+    }
     if (embroidery && product.supportsEmbroidery) addToCart({ ...embroideryService, quantity }, false);
     addToCart(
       {
@@ -64,8 +97,10 @@ export default function ProductDetailClient({ product, relatedProducts }: Props)
         size: product.size,
         quantity,
         selectedColor,
-        selectedButton,
+        selectedButton: product.kind === "sleeve" ? selectedButton : undefined,
         embroidery,
+        sizeMode: product.kind === "sleeve" ? sizeMode : "standard",
+        customDimensions: product.kind === "sleeve" && sizeMode === "custom" ? customValidation.dimensions : undefined,
       },
       false
     );
@@ -260,6 +295,32 @@ export default function ProductDetailClient({ product, relatedProducts }: Props)
                   </div>
                 </div>
 
+                {/* Custom Size Selection - placed before fabric color selection */}
+                {product.kind === "sleeve" && (
+                  <CustomSizeSelector
+                    sizeMode={sizeMode}
+                    onSizeModeChange={setSizeMode}
+                    length={customLength}
+                    width={customWidth}
+                    thickness={customThickness}
+                    onLengthChange={(val) => {
+                      setCustomLength(val);
+                      setCustomSubmittedOrTouched(true);
+                    }}
+                    onWidthChange={(val) => {
+                      setCustomWidth(val);
+                      setCustomSubmittedOrTouched(true);
+                    }}
+                    onThicknessChange={(val) => {
+                      setCustomThickness(val);
+                      setCustomSubmittedOrTouched(true);
+                    }}
+                    standardDimensionsText={`${product.maxWidth} × ${product.maxHeight} × ${product.maxThickness ?? 2} cm (${product.size})`}
+                    validation={customValidation}
+                    isSubmittedOrTouched={customSubmittedOrTouched}
+                  />
+                )}
+
                 {/* Color Selection */}
                 {product.colors && product.colors.length > 0 && (
                   <div className="mt-6 border-t border-[var(--brand-border)] pt-5">
@@ -347,6 +408,33 @@ export default function ProductDetailClient({ product, relatedProducts }: Props)
                       <span className="text-[11px] text-gray-500">{item.desc}</span>
                     </div>
                   ))}
+                </div>
+
+                {/* Compact Return Policy Card */}
+                <div className="mt-6 rounded-2xl border border-[var(--brand-border)] bg-[var(--surface-muted)] p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-sm">
+                  <div className="flex items-start gap-3">
+                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[var(--secondary-soft)] text-lg">
+                      🔄
+                    </div>
+                    <div>
+                      <div className="flex items-center gap-2">
+                        <h4 className="text-sm font-bold text-gray-900">Chính sách đổi trả</h4>
+                        <span className="rounded-full bg-emerald-100 px-2.5 py-0.5 text-[10px] font-extrabold text-emerald-800">
+                          Đổi trả trong 3 ngày
+                        </span>
+                      </div>
+                      <p className="mt-0.5 text-xs text-gray-600">
+                        Áp dụng cho sản phẩm lỗi / sai màu / sai kích thước
+                      </p>
+                    </div>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => setIsReturnPolicyOpen(true)}
+                    className="inline-flex min-h-[44px] items-center justify-center rounded-full border border-gray-300 bg-white px-4 py-2 text-xs font-bold text-gray-800 shadow-sm transition hover:bg-gray-50 hover:border-gray-400 shrink-0"
+                  >
+                    Xem chính sách
+                  </button>
                 </div>
               </div>
             </div>
@@ -574,6 +662,12 @@ export default function ProductDetailClient({ product, relatedProducts }: Props)
           </div>
         </div>
       </section>
+
+      {/* Return Policy Lightbox Modal */}
+      <ReturnPolicyModal
+        isOpen={isReturnPolicyOpen}
+        onClose={() => setIsReturnPolicyOpen(false)}
+      />
 
       {/* Floating Chat */}
       <ChatBox />

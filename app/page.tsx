@@ -10,6 +10,10 @@ import BenefitIcon from "@/components/BenefitIcon";
 import Navbar from "@/components/Navbar";
 import ProductCard from "@/components/ProductCard";
 import QuickViewModal from "@/components/QuickViewModal";
+import ReturnPolicyModal from "@/components/ReturnPolicyModal";
+import PromotionPopup from "@/components/PromotionPopup";
+import PromoBannerSection from "@/components/PromoBannerSection";
+import { homepageCampaign } from "@/data/promotions";
 
 const showcaseCards = [
   { product: products.find(p => p.id === 1)!, label: "Bao bảo vệ iPad / Tablet 11 inch", tone: "bg-white" },
@@ -21,6 +25,7 @@ const showcaseCards = [
 export default function Home() {
   const [activeTab, setActiveTab] = useState<"bestseller" | "new" | "leather" | "shockproof" | "pastel">("bestseller");
   const [quickViewProduct, setQuickViewProduct] = useState<Product | null>(null);
+  const [isReturnPolicyOpen, setIsReturnPolicyOpen] = useState(false);
   const [openFaq, setOpenFaq] = useState<number | null>(null);
 
   const bestSellers = products.filter((p) => p.badge === "Bán chạy" || p.badge === "Hot" || p.badge === "Top 1").slice(0, 8);
@@ -269,6 +274,8 @@ export default function Home() {
           </div>
         </div>
       </section>
+
+      <PromoBannerSection />
 
       {/* Interactive Tabbed Product Showcase */}
       <section className="py-20 px-6 md:px-12 lg:px-20">
@@ -525,7 +532,15 @@ export default function Home() {
             <ul className="space-y-2 text-xs text-gray-400">
               <li><Link href="/size-guide" className="hover:text-[var(--primary)] transition">Công cụ chọn size 2.0</Link></li>
               <li><Link href="/cart" className="hover:text-[var(--primary)] transition">Giỏ hàng & Đặt hàng COD</Link></li>
-              <li><Link href="/about" className="hover:text-[var(--primary)] transition">Đổi Trả 3 Ngày</Link></li>
+              <li>
+                <button
+                  type="button"
+                  onClick={() => setIsReturnPolicyOpen(true)}
+                  className="hover:text-[var(--primary)] transition text-left"
+                >
+                  Chính sách đổi trả (3 ngày)
+                </button>
+              </li>
               <li><Link href="/about" className="hover:text-[var(--primary)] transition">Về CaseUp</Link></li>
             </ul>
           </div>
@@ -552,7 +567,14 @@ export default function Home() {
         onClose={() => setQuickViewProduct(null)}
       />
 
+      {/* Return Policy Modal */}
+      <ReturnPolicyModal
+        isOpen={isReturnPolicyOpen}
+        onClose={() => setIsReturnPolicyOpen(false)}
+      />
+
       <ChatBox />
+      <PromotionPopup campaign={homepageCampaign} />
     </main>
   );
 }

@@ -122,7 +122,7 @@ export const products: Product[] = [
   {
     id: 4,
     kind: "sleeve",
-    name: "Bao bảo vệ Laptop 15.6 inch cho máy mỏng",
+    name: "Bao bảo vệ Laptop 15.6 inch",
     price: 139000,
     size: "15.6 inch",
     maxWidth: 36,
