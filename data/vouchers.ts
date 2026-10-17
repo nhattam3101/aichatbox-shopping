@@ -7,7 +7,6 @@ export const returningCustomerOffer = {
 export type Voucher = { id: string; code: string | null; title: string; description: string; href: string };
 export const vouchers: Voucher[] = [
   returningCustomerOffer,
-  { id: "back-to-school", code: "BACKTOSCHOOL", title: "Ưu đãi mùa tựu trường", description: "Theo dõi thông tin chương trình CaseUp Back To School.", href: "/products" },
   { id: "shipping", code: "FREESHIP", title: "Miễn phí vận chuyển", description: "Freeship toàn quốc cho đơn từ 300.000₫.", href: "/cart" },
 ];
 // A returning-customer public code/eligibility rule has not been confirmed.

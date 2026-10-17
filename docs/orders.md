@@ -3,7 +3,7 @@
 `/orders` lists purchases saved by checkout in the `caseup_orders` browser-storage
 array, merged with independent recovery records. New checkouts use unique IDs,
 never replace existing purchases, and keep the cart if persistence fails.
-There is no automatic seeding of purchases or expiry of completed orders.
+There is no automatic seeding of purchases. Final demo orders expire as described below.
 An existing single-order record is migrated when no order list exists; legacy
 ISO creation dates are normalized. Existing stored orders remain available.
 
@@ -16,9 +16,9 @@ shipping address, payment method, and a vertical fulfillment timeline.
 Seven statuses are defined in `data/orders.ts`. An explicit saved `status`,
 including `cancelled`, takes priority. Orders without an explicit status retain
 the internal progression based on their saved creation date. No duration or
-countdown is rendered. Completed local demo orders remain visible for two minutes
-after completion, then are removed deterministically on storage reads and the
-order page's 15-second refresh. Active, cancelled and explicitly non-demo orders
+countdown is rendered. Completed and cancelled local demo orders remain visible for two minutes
+after reaching their final state, then are removed deterministically on storage reads and the
+order page's 15-second refresh. Active and explicitly non-demo orders
 are retained. Cancellation is a
 separate state; the UI does not pretend a cancelled order will be delivered.
 Eligible orders can be cancelled with a required reason. Confirmation rechecks

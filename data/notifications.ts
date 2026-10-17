@@ -1,6 +1,5 @@
 import { getOrderStatus, loadStoredOrders, notifyCustomerData, type Order } from "@/data/orders";
 import { vouchers } from "@/data/vouchers";
-import { homepageCampaign } from "@/data/promotions";
 
 export type CustomerNotification = { id: string; title: string; description: string; href: string; read: boolean };
 const READ_KEY = "caseup_notification_reads";
@@ -16,7 +15,6 @@ export function getNotifications(now: number, orders: Order[] = loadStoredOrders
       return { id: `order:${order.orderId}:${status.id}`, title: `Đơn hàng ${order.orderId}: ${status.title}`, description: status.desc, href: `/orders?id=${encodeURIComponent(order.orderId)}` };
     }),
     ...vouchers.map(voucher => ({ id: `voucher:${voucher.id}`, title: voucher.code ? `Bạn có voucher ${voucher.code}.` : voucher.title, description: voucher.description, href: "/vouchers" })),
-    { id: `campaign:${homepageCampaign.id}`, title: homepageCampaign.title, description: homepageCampaign.description, href: homepageCampaign.href },
   ];
   return notifications.map(notification => ({ ...notification, read: read.has(notification.id) }));
 }

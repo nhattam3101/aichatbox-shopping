@@ -97,10 +97,10 @@ export function loadStoredOrders(now = Date.now()): Order[] {
       try { const order = readOrder(JSON.parse(localStorage.getItem(key) ?? "null")); if (order) records.set(order.orderId, order); }
       catch { /* Ignore only the malformed record. */ }
     }
-    if (raw !== null || records.size) return cleanupCompletedDemoOrders([...records.values()], now).sort((a, b) => b.createdAt - a.createdAt);
+    if (raw !== null || records.size) return cleanupFinalDemoOrders([...records.values()], now).sort((a, b) => b.createdAt - a.createdAt);
     const legacy = localStorage.getItem(LEGACY_ORDER_KEY);
     const order = legacy ? readOrder(JSON.parse(legacy)) : null;
-    if (order) { saveStoredOrders([order]); return cleanupCompletedDemoOrders([order], now); }
+    if (order) { saveStoredOrders([order]); return cleanupFinalDemoOrders([order], now); }
   } catch { /* Unavailable browser storage must not break the page. */ }
   return [];
 }
@@ -114,11 +114,18 @@ export function demoCompletionTime(order: Order, now: number): number | null {
     ? order.completedAt : order.createdAt + DEMO_ORDER_POLICY.fulfillmentDurationMs;
 }
 
-export function cleanupCompletedDemoOrders(orders: Order[], now: number): Order[] {
+export function demoFinalStateTime(order: Order, now: number): number | null {
+  if (order.status !== "cancelled") return demoCompletionTime(order, now);
+  // Never infer cancellation time from creation/completion: that could expire it early.
+  return order.demo === true && typeof order.cancelledAt === "number" && Number.isFinite(order.cancelledAt)
+    ? order.cancelledAt : null;
+}
+
+export function cleanupFinalDemoOrders(orders: Order[], now: number): Order[] {
   if (!DEMO_ORDER_POLICY.cleanupEnabled) return orders;
   const expired = orders.filter(order => {
-    const completedAt = demoCompletionTime(order, now);
-    return completedAt !== null && now - completedAt >= DEMO_ORDER_POLICY.completedRetentionMs;
+    const finalStateAt = demoFinalStateTime(order, now);
+    return finalStateAt !== null && now - finalStateAt >= DEMO_ORDER_POLICY.finalStateRetentionMs;
   });
   if (!expired.length) return orders;
   const expiredIds = new Set(expired.map(order => order.orderId));
@@ -187,7 +194,7 @@ function cancelOrderUnlocked(orderId: string, reason: string, now: number): { su
   const order = orders.find(o => o.orderId === orderId);
   if (!CANCELLATION_REASONS.some(r => r === reason)) return { success: false, message: "Vui lòng chọn lý do hủy đơn." };
   if (!order || !canCancelOrder(order, now)) return { success: false, message: "Đơn hàng này không còn có thể hủy. Vui lòng kiểm tra trạng thái mới nhất." };
-  const updated: Order = { ...order, status: "cancelled", cancellationReason: reason, cancelledAt: now };
+  const updated: Order = { ...order, demo: order.demo ?? (order.status === undefined), status: "cancelled", cancellationReason: reason, cancelledAt: now };
   return persistOrder(updated, orders.map(o => o.orderId === orderId ? updated : o))
     ? { success: true, message: "Đã hủy đơn hàng." } : { success: false, message: "Không thể lưu thay đổi. Vui lòng thử lại." };
 }

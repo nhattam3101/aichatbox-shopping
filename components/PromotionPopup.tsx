@@ -6,7 +6,7 @@ import { usePathname } from "next/navigation";
 import AccountDialog from "@/components/AccountDialog";
 import { claimPromotion, selectPromotion, type PromotionAd, type PromotionCampaign } from "@/data/promotions";
 
-export default function PromotionPopup({ campaign }: { campaign: PromotionCampaign }) {
+export default function PromotionPopup({ campaign }: { campaign: Pick<PromotionCampaign, "id" | "frequency"> }) {
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
   const [ad, setAd] = useState<PromotionAd | null>(null);

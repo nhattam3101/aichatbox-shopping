@@ -19,14 +19,12 @@ export const promotionAds: readonly PromotionAd[] = homepageBanners.map(banner =
 export function selectPromotion(ads: readonly PromotionAd[] = promotionAds, random = Math.random()): PromotionAd | null {
   return ads[Math.min(ads.length - 1, Math.max(0, Math.floor(random * ads.length)))] ?? null;
 }
-export const homepageCampaign: PromotionCampaign = {
-  id: "caseup-back-to-school", title: "CaseUp Back To School",
-  description: "Chuẩn bị mùa tựu trường cùng những thiết kế mang dấu ấn của bạn.",
-  voucherCode: "BACKTOSCHOOL", href: "/vouchers", cta: "Xem ưu đãi", frequency: "session",
+export const homepagePromotionPolicy: Pick<PromotionCampaign, "id" | "frequency"> = {
+  id: "caseup-visual-promotions", frequency: "session",
 };
 
 // Reserve on display, so revisiting the homepage never reopens the same campaign.
-export function claimPromotion(campaign: PromotionCampaign, now = Date.now()): boolean {
+export function claimPromotion(campaign: Pick<PromotionCampaign, "id" | "frequency">, now = Date.now()): boolean {
   if (typeof window === "undefined") return false;
   try {
     const storage = campaign.frequency === "day" ? localStorage : sessionStorage;

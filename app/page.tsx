@@ -14,7 +14,7 @@ import QuickViewModal from "@/components/QuickViewModal";
 import ReturnPolicyModal from "@/components/ReturnPolicyModal";
 import PromotionPopup from "@/components/PromotionPopup";
 import PromoBannerSection from "@/components/PromoBannerSection";
-import { homepageCampaign } from "@/data/promotions";
+import { homepagePromotionPolicy } from "@/data/promotions";
 
 const showcaseCards = [
   { product: products.find(p => p.id === 1)!, label: "Bao bảo vệ iPad / Tablet 11 inch", tone: "bg-white" },
@@ -571,7 +571,7 @@ export default function Home() {
       />
 
       <ChatBox />
-      <PromotionPopup campaign={homepageCampaign} />
+      <PromotionPopup campaign={homepagePromotionPolicy} />
     </main>
   );
 }

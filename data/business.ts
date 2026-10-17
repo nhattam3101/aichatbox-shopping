@@ -6,7 +6,7 @@ export const RETURN_POLICY_TITLE = "Đổi trả trong 3 ngày";
 export function shippingEligibility(subtotal: number) {
   const remaining = Math.max(0, FREE_SHIPPING_THRESHOLD - subtotal);
   return { free: subtotal >= FREE_SHIPPING_THRESHOLD, remaining,
-    progress: Math.min(100, Math.max(0, subtotal / FREE_SHIPPING_THRESHOLD * 100)) };
+    progress: Math.min(100, Math.max(0, Math.round(subtotal / FREE_SHIPPING_THRESHOLD * 100))) };
 }
 export const priceRanges = [
   { label: "Tất cả", value: "Tất cả" },

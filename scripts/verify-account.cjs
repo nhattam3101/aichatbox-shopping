@@ -81,10 +81,10 @@ notifications.markNotificationsRead(feed.map(n => n.id));
 assert.ok(notifications.getNotifications(now).every(n => n.read));
 orders.saveStoredOrders([{ ...fixture, status: 'delivered' }]);
 assert.equal(notifications.getNotifications(now)[0].read, false, 'new order status becomes unread');
-assert.ok(promotions.claimPromotion(promotions.homepageCampaign, now));
-assert.equal(promotions.claimPromotion(promotions.homepageCampaign, now + 1000), false);
-session.clear(); assert.ok(promotions.claimPromotion(promotions.homepageCampaign, now + 1000));
-const daily = { ...promotions.homepageCampaign, id: 'daily', frequency: 'day' };
+assert.ok(promotions.claimPromotion(promotions.homepagePromotionPolicy, now));
+assert.equal(promotions.claimPromotion(promotions.homepagePromotionPolicy, now + 1000), false);
+session.clear(); assert.ok(promotions.claimPromotion(promotions.homepagePromotionPolicy, now + 1000));
+const daily = { ...promotions.homepagePromotionPolicy, id: 'daily', frequency: 'day' };
 assert.ok(promotions.claimPromotion(daily, now));
 assert.equal(promotions.claimPromotion(daily, now + 86399999), false);
 assert.ok(promotions.claimPromotion(daily, now + 86400000));
@@ -139,16 +139,16 @@ function nodes(node) { return node && typeof node === 'object' ? [node, ...[node
   nodes(notificationTree).find(n => n.type === 'button' && n.props.children === 'Đánh dấu tất cả đã đọc').props.onClick();
   assert.ok(notifications.getNotifications(now).every(n => n.read));
   assert.ok(render(NotificationsPage).includes('0 thông báo chưa đọc'));
-  pathname = '/orders'; assert.equal(render(Popup, { campaign: promotions.homepageCampaign }, [true]), '');
-  pathname = '/'; const popupHtml = render(Popup, { campaign: promotions.homepageCampaign }, [true, promotions.promotionAds[1]]);
+  pathname = '/orders'; assert.equal(render(Popup, { campaign: promotions.homepagePromotionPolicy }, [true]), '');
+  pathname = '/'; const popupHtml = render(Popup, { campaign: promotions.homepagePromotionPolicy }, [true, promotions.promotionAds[1]]);
   assert.ok(popupHtml.includes('ad6.png')); assert.ok(popupHtml.includes('Khám phá ngay'));
   for (const ad of promotions.promotionAds) {
-    const html = render(Popup, { campaign: promotions.homepageCampaign }, [true, ad]);
+    const html = render(Popup, { campaign: promotions.homepagePromotionPolicy }, [true, ad]);
     assert.equal((html.match(/<img/g) ?? []).length, 1, 'exactly one promotion image');
     assert.ok(html.includes(ad.image)); assert.ok(html.includes('object-contain'));
   }
   slots = [true, promotions.promotionAds[0]]; cursor = 0;
-  Popup({ campaign: promotions.homepageCampaign }).props.onClose();
+  Popup({ campaign: promotions.homepagePromotionPolicy }).props.onClose();
   assert.equal(slots[0], false, 'close dismisses popup');
   const navbarHtml = render(Navbar);
   assert.ok(navbarHtml.includes('99+'), 'cart badge stays compact');

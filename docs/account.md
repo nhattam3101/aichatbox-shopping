@@ -35,8 +35,8 @@ are not silently added.
 notifications. No expiry dates or new discount conditions are assumed.
 The returning-customer offer is 5%, with no invented public code or automatic
 discount. The confirmed shipping code requires a merchandise subtotal of at least
-300.000₫. The previous first-order and VIP offers are retired. BACKTOSCHOOL is
-informational and links to products. Copy uses the Clipboard API, with a friendly
+300.000₫. Only the returning-customer offer and confirmed shipping benefit are listed.
+Copy uses the Clipboard API, with a friendly
 manual-copy message if unavailable. “Dùng ngay” opens the configured destination
 without automatically applying discounts.
 

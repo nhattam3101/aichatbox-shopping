@@ -21,6 +21,9 @@ const { productSpecifications } = require('../data/product-specs.ts');
 const { validateCustomDimensions } = require('../data/size-validation.ts');
 const { recommendSizes } = require('../data/size-rules.ts');
 const { validateMockup } = require('../data/mockup.ts');
+for (const [subtotal, percentage] of [[0, 0], [1200, 0], [119000, 40], [299000, 100], [300000, 100], [476000, 100], [-1000, 0]]) {
+  assert.equal(shippingEligibility(subtotal).progress, percentage, 'shipping percentage is rounded and clamped');
+}
 for (const [subtotal, free] of [[119000, false], [299000, false], [300000, true], [350000, true]]) {
   assert.equal(shippingEligibility(subtotal).free, free);
   assert.equal(shippingEligibility(subtotal).remaining, Math.max(0, 300000 - subtotal));
