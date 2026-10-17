@@ -31,10 +31,11 @@ export async function POST(request: Request) {
     const thicknessFollowup = latestUser.match(/(?:độ\s*)?dày\s*(?:là\s*|:)?\s*(\d+(?:[.,]\d+)?)\s*(?:cm)?/i);
     const thickness = measurements?.[3] ? Number(measurements[3].replace(",", ".")) : undefined;
     const effectiveThickness = thicknessFollowup ? Number(thicknessFollowup[1].replace(",", ".")) : thickness;
+    if (measurements && effectiveThickness === undefined && (dimensionsPattern.test(latestUser) || thicknessFollowup)) return Response.json({ reply: "Vui lòng cung cấp độ dày máy (cm). Cần đủ chiều dài, chiều rộng và độ dày hợp lệ trước khi gợi ý size.", recommendedProductIds: [] });
     const fitting = measurements ? recommendSizes(Number(measurements[1].replace(",", ".")), Number(measurements[2].replace(",", ".")), effectiveThickness) : null;
     if (dimensionsPattern.test(latestUser) || (thicknessFollowup && measurements)) {
       const best = fitting?.[0];
-      const warning = effectiveThickness === undefined ? " Đây là gợi ý sơ bộ; bạn cần cung cấp độ dày để xác nhận. Size 25 × 36 × 2 chỉ dành cho máy ≤ 2 cm." : "";
+      const warning = "";
       const reply = best ? `Theo số đo bạn cung cấp, size nhỏ nhất vừa máy là ${best.name}: ${best.maxWidth} × ${best.maxHeight} × ${best.maxThickness} cm. ${best.priceConfirmed === false ? "Giá size này đang chờ xác nhận." : `Giá ${best.price.toLocaleString("vi-VN")}₫.`}${warning} [RECOMMEND:${best.id}]` : "Catalog hiện chưa có size vừa đủ cả các số đo bạn cung cấp. Bạn vui lòng kiểm tra lại số đo; mình không thể cam kết mẫu nhỏ hơn sẽ vừa.";
       return Response.json({ reply, recommendedProductIds: best ? [best.id] : [] });
     }
@@ -53,12 +54,12 @@ ID: ${product.id}
 Tên: ${product.name}
 Giá: ${product.priceConfirmed === false ? "Chưa xác nhận, không báo giá và không nhận đặt mua" : product.price.toLocaleString("vi-VN") + "đ"}
 Size: ${product.size}
-Kích thước tối đa: ${product.kind === "sleeve" ? `${product.maxWidth} x ${product.maxHeight} x ${product.maxThickness} cm` : "Không áp dụng: đây không phải bao cho thiết bị"}
+Kích thước tối đa: ${!product.madeToMeasure && product.kind === "sleeve" ? `${product.maxWidth} x ${product.maxHeight} x ${product.maxThickness} cm` : "Không áp dụng: đây không phải bao cho thiết bị"}
 Nhóm: ${product.kind === "accessory" ? "Móc khóa / phụ kiện, giá tính riêng" : product.kind === "service" ? "Dịch vụ cộng thêm" : "Bao bảo vệ laptop / iPad"}
 Phân loại: ${product.category}
-Chất liệu: ${product.material}
-Kháng nước: ${product.waterproof ? "Có" : "Không"}
-Ngăn phụ: ${product.hasPockets ? "Có" : "Không"}
+Chất liệu: ${product.material ?? "Chưa có thông tin xác nhận"}
+Trượt nước: ${product.waterproof === undefined ? "Chưa có thông tin xác nhận" : product.waterproof ? "Có" : "Không"}
+Ngăn phụ: ${product.hasPockets === undefined ? "Chưa có thông tin xác nhận" : product.hasPockets ? "Có" : "Không"}
 Màu: ${product.colors.join(", ")}
 Mô tả: ${product.description}
 Phù hợp: ${product.suitableFor.join(", ")}
@@ -79,7 +80,7 @@ Bạn là CaseUp Assistant, chuyên gia AI tư vấn phong cách & chọn bao la
 Nhiệm vụ của bạn:
 1. Luôn xưng là "CaseUp Assistant" hoặc "mình" và gọi khách là "bạn" hoặc "quý khách".
 2. Hỗ trợ khách tìm đúng size bao vừa khít cho laptop của họ. Hãy hỏi chiều dài, chiều rộng và độ dày của máy nếu khách chưa cung cấp hoặc khách nói tên máy (như MacBook Air M2, ThinkPad X1, Dell XPS 15,...).
-3. Đề xuất sản phẩm phù hợp theo phong cách (Tối giản, Chống sốc, Da cao cấp doanh nhân, Pastel thời trang Hàn Quốc, hoặc Nhiều ngăn tiện lợi).
+3. Đề xuất sản phẩm phù hợp theo phong cách (Tối giản, Chống sốc, Pastel thời trang Hàn Quốc, hoặc Nhiều ngăn tiện lợi).
 4. ĐẶC BIỆT: Khi bạn nhắc đến hoặc gợi ý một sản phẩm cụ thể từ danh sách bên dưới, hãy chèn thẻ mã định danh dạng [RECOMMEND:ID] (Ví dụ: [RECOMMEND:1], [RECOMMEND:7]) ở cuối đoạn văn để hệ thống hiển thị thẻ sản phẩm tương tác cho khách hàng. Mỗi câu trả lời có thể gợi ý 1 đến 3 sản phẩm phù hợp nhất.
 5. Chỉ gợi ý sản phẩm có trong danh sách bên dưới. Tuyệt đối không tự bịa sản phẩm.
 6. Luôn thân thiện, giải thích rõ lý do tại sao sản phẩm đó phù hợp (ví dụ: máy kích thước X thì bao này kích thước tối đa Y nên vừa thoải mái/khít đẹp).
@@ -87,7 +88,7 @@ Nhiệm vụ của bạn:
 
 Quy tắc bắt buộc: không thêm bất kỳ tính năng, chính sách, giá, giảm giá hoặc thông số nào ngoài catalog.
 Kiểm tra cả chiều dài, rộng và dày; ưu tiên size nhỏ nhất vừa máy, không bao giờ chọn size nhỏ hơn máy. Có thể xoay chiều dài/rộng.
-Size 25 x 36 x 2 chỉ cho máy thân mỏng <= 2 cm. Nếu thiếu độ dày, chỉ gợi ý sơ bộ, cảnh báo và hỏi độ dày (đặc biệt 15.6 inch).
+Size 25 x 36 x 2 chỉ cho máy thân mỏng <= 2 cm. Nếu thiếu độ dày, hỏi độ dày và không gợi ý size trước khi có đủ ba số đo hợp lệ.
 Máy 34 x 23 x 1.8 cm vừa ${products.find(p => p.id === 3)!.name}. Máy 36 x 25 x 2.4 cm cần size 38 x 26 x 2.5, tuyệt đối không chọn Ultrabook 36 x 25 x 2.
 Thêu tên là dịch vụ cộng thêm theo catalog, không phải giá bao bảo vệ laptop. Tag/móc thuộc nhóm accessory, giá tính riêng theo catalog. Không dùng giá accessory để báo giá bao. Không khẳng định cọc 50% vì catalog chưa có quy tắc cọc.
 Danh sách sản phẩm của CaseUp:

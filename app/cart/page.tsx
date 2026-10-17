@@ -1,5 +1,8 @@
 "use client";
 
+import { shippingEligibility, CUSTOM_PRICE_NOTICE } from "@/data/business";
+import { returningCustomerOffer } from "@/data/vouchers";
+import { allProducts } from "@/data/products";
 import { contact } from "@/data/contact";
 import Image from "next/image";
 import Link from "next/link";
@@ -62,11 +65,6 @@ export default function CartPage() {
     }
   }
 
-  function handleQuickCoupon(code: string) {
-    const res = applyCoupon(code);
-    setCouponFeedback(res);
-  }
-
   async function handleConfirmOrder(e: React.FormEvent) {
     e.preventDefault();
     if (submitLock.current || cart.length === 0) return;
@@ -106,10 +104,9 @@ export default function CartPage() {
   }
 
   // Freeship threshold: 300,000₫
-  const FREESHIP_THRESHOLD = 300000;
   const rawSubtotal = cart.reduce((acc, i) => acc + i.price * i.quantity, 0);
-  const remainingForFreeship = Math.max(0, FREESHIP_THRESHOLD - rawSubtotal);
-  const freeshipProgress = Math.min(100, Math.round((rawSubtotal / FREESHIP_THRESHOLD) * 100));
+  const remainingForFreeship = shippingEligibility(rawSubtotal).remaining;
+  const freeshipProgress = shippingEligibility(rawSubtotal).progress;
 
   return (
     <main className="min-h-screen bg-[var(--brand-cream)] text-[var(--text-primary)]">
@@ -133,7 +130,7 @@ export default function CartPage() {
               <span className="flex items-center gap-1.5">
                 🚚
                 {remainingForFreeship === 0 ? (
-                  <span>Chúc mừng! Bạn đã nhận được <strong>Miễn phí giao hàng toàn quốc</strong> 🎉</span>
+                  <span>Bạn đã được <strong>Freeship toàn quốc</strong></span>
                 ) : (
                   <span>Mua thêm <strong className="price-text">{remainingForFreeship.toLocaleString("vi-VN")}₫</strong> để được <strong>FREESHIP toàn quốc!</strong></span>
                 )}
@@ -217,7 +214,7 @@ export default function CartPage() {
                         </Link>
                         <button
                           type="button"
-                          onClick={() => removeFromCart(item.id, item.selectedColor, item.selectedButton, item.embroidery, item.sizeMode, item.customDimensions)}
+                          onClick={() => removeFromCart(item.id, item.selectedColor, item.selectedButton, item.embroidery, item.sizeMode, item.customDimensions, item.embroideryText)}
                           className="min-h-[44px] min-w-[44px] inline-flex items-center justify-center text-xs font-semibold text-rose-500 hover:text-rose-700 transition"
                           aria-label={`Xóa ${item.name} khỏi giỏ`}
                         >
@@ -243,7 +240,7 @@ export default function CartPage() {
 
                         {item.embroidery && (
                           <span className="rounded bg-[var(--surface-muted)] px-2 py-0.5 font-medium text-gray-700">
-                            Có thêu tên
+                            {item.embroideryText ? `Thêu: ${item.embroideryText}` : "Có thêu tên"}
                           </span>
                         )}
                         {item.selectedButton && (
@@ -267,7 +264,7 @@ export default function CartPage() {
                       <div className="flex items-center gap-2">
                         <button
                           type="button"
-                          onClick={() => decreaseQuantity(item.id, item.selectedColor, item.selectedButton, item.embroidery, item.sizeMode, item.customDimensions)}
+                          onClick={() => decreaseQuantity(item.id, item.selectedColor, item.selectedButton, item.embroidery, item.sizeMode, item.customDimensions, item.embroideryText)}
                           className="flex h-11 w-11 items-center justify-center rounded-full border border-gray-300 text-gray-600 transition hover:bg-gray-100"
                           aria-label="Giảm số lượng"
                         >
@@ -278,7 +275,7 @@ export default function CartPage() {
                         </span>
                         <button
                           type="button"
-                          onClick={() => increaseQuantity(item.id, item.selectedColor, item.selectedButton, item.embroidery, item.sizeMode, item.customDimensions)}
+                          onClick={() => increaseQuantity(item.id, item.selectedColor, item.selectedButton, item.embroidery, item.sizeMode, item.customDimensions, item.embroideryText)}
                           className="flex h-11 w-11 items-center justify-center rounded-full border border-gray-300 text-gray-600 transition hover:bg-gray-100"
                           aria-label="Tăng số lượng"
                         >
@@ -331,7 +328,7 @@ export default function CartPage() {
                         type="text"
                         value={couponCode}
                         onChange={(e) => setCouponCode(e.target.value)}
-                        placeholder="Nhập mã (CASEUP10, VIP20)"
+                        placeholder="Nhập mã được CaseUp cung cấp"
                         className="flex-1 min-h-[44px] rounded-2xl border border-gray-200 bg-[var(--background)] px-3.5 py-2 text-xs uppercase font-bold outline-none focus:border-black"
                       />
                       <button
@@ -352,26 +349,12 @@ export default function CartPage() {
                       </p>
                     )}
 
-                    <div className="mt-3 flex flex-wrap gap-1.5">
-                      <button
-                        type="button"
-                        onClick={() => handleQuickCoupon("CASEUP10")}
-                        className="min-h-[36px] rounded-full border border-dashed border-amber-300 bg-amber-50 px-3 py-1 text-[11px] font-bold text-amber-800 hover:bg-amber-100 transition"
-                      >
-                        CASEUP10 (-10%)
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => handleQuickCoupon("VIP20")}
-                        className="min-h-[36px] rounded-full border border-dashed border-amber-300 bg-amber-50 px-3 py-1 text-[11px] font-bold text-amber-800 hover:bg-amber-100 transition"
-                      >
-                        VIP20 (-20%)
-                      </button>
-                    </div>
+                    <div className="mt-3 text-xs text-[var(--text-secondary)]">{returningCustomerOffer.title}. {returningCustomerOffer.description}</div>
                   </div>
                 )}
               </div>
 
+              {cart.some(item => allProducts.find(p => p.id === item.id)?.madeToMeasure) && <p className="rounded-2xl bg-[var(--secondary-soft)] p-4 text-sm">{CUSTOM_PRICE_NOTICE}</p>}
               {/* Tóm tắt thanh toán */}
               <div className="rounded-3xl border border-[var(--brand-border)] bg-white p-6 shadow-sm space-y-4">
                 <h3 className="text-sm font-bold text-gray-900 border-b border-gray-100 pb-3">
@@ -398,13 +381,13 @@ export default function CartPage() {
                   <div className="flex justify-between">
                     <span>Phí vận chuyển toàn quốc:</span>
                     <span className="price-text font-semibold">
-                      0₫ (Freeship)
+                      {shippingEligibility(rawSubtotal).free ? "0₫ (Freeship)" : "Chờ xác nhận phí giao hàng"}
                     </span>
                   </div>
                 </div>
 
                 <div className="border-t border-gray-100 pt-3 flex justify-between items-baseline">
-                  <span className="text-sm font-bold text-gray-900">Tổng cộng:</span>
+                  <span className="text-sm font-bold text-gray-900">Tạm tính thanh toán:</span>
                   <span className="price-text text-2xl font-extrabold">
                     {totalPrice.toLocaleString("vi-VN")}₫
                   </span>

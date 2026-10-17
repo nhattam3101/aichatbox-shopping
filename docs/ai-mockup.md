@@ -50,5 +50,6 @@ check keyboard focus, loading/result/error layout, change an option, regenerate,
 close, and add to cart after both success and failure. Confirm selected options
 and total remain identical. Check exact lettering and accessory fidelity only as
 visual references. No browser was available for this implementation session.
-The current catalog has no pink sleeve fabric; test supported colors rather than
-adding an otherwise unsupported option for AI.
+All sleeves use the 12 official fabric labels transcribed from the color chart.
+Standard configurations retain standard product IDs; custom dimensions use the
+separate made-to-measure product (ID 18, base price 149.000₫).

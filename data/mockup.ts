@@ -23,6 +23,7 @@ export function validateMockup(value: unknown): MockupConfiguration | null {
   if (!value || typeof value !== "object" || Array.isArray(value)) return null;
   const v = value as Record<string, unknown>;
   const product = products.find(p => p.id === v.productId && p.kind === "sleeve");
+  if (product && (product.madeToMeasure ? v.sizeMode !== "custom" : v.sizeMode !== "standard")) return null;
   if (!product || typeof v.selectedColor !== "string" || !product.colors.includes(v.selectedColor) ||
       !buttonOptions.some(b => b.name === v.selectedButton) ||
       !["standard", "custom"].includes(String(v.sizeMode)) || typeof v.embroidery !== "boolean" ||

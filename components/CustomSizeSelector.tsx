@@ -15,6 +15,7 @@ type Props = {
   standardDimensionsText?: string;
   validation: CustomSizeValidationResult;
   isSubmittedOrTouched?: boolean;
+  customOnly?: boolean;
 };
 
 export default function CustomSizeSelector({
@@ -29,6 +30,7 @@ export default function CustomSizeSelector({
   standardDimensionsText,
   validation,
   isSubmittedOrTouched = true,
+  customOnly = false,
 }: Props) {
   const baseId = useId();
   const lengthInputId = `${baseId}-length`;
@@ -49,7 +51,7 @@ export default function CustomSizeSelector({
       </div>
 
       {/* Mode Switch Buttons */}
-      <div className="mt-3 grid grid-cols-2 gap-2">
+      {!customOnly && <div className="mt-3 grid grid-cols-2 gap-2">
         <button
           type="button"
           onClick={() => onSizeModeChange("standard")}
@@ -75,7 +77,7 @@ export default function CustomSizeSelector({
         >
           2. Custom theo máy của bạn
         </button>
-      </div>
+      </div>}
 
       {/* Standard Size Description */}
       {sizeMode === "standard" && standardDimensionsText && (
@@ -99,6 +101,7 @@ export default function CustomSizeSelector({
               <input
                 id={lengthInputId}
                 type="number"
+                required
                 inputMode="decimal"
                 step="0.1"
                 min="10"
@@ -130,6 +133,7 @@ export default function CustomSizeSelector({
               <input
                 id={widthInputId}
                 type="number"
+                required
                 inputMode="decimal"
                 step="0.1"
                 min="7"
@@ -161,6 +165,7 @@ export default function CustomSizeSelector({
               <input
                 id={thicknessInputId}
                 type="number"
+                required
                 inputMode="decimal"
                 step="0.1"
                 min="0.3"

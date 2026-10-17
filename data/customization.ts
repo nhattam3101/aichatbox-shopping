@@ -18,6 +18,7 @@ export type CartVariant = {
   selectedColor?: string;
   selectedButton?: string;
   embroidery?: boolean;
+  embroideryText?: string;
   sizeMode?: "standard" | "custom";
   customDimensions?: CustomDimensions;
 };
@@ -32,6 +33,7 @@ export function sameCartVariant(a: CartVariant, b: CartVariant): boolean {
   const product = allProducts.find(p => p.id === a.id);
   if (a.id !== b.id || a.selectedColor !== b.selectedColor || !product) return false;
   if (product.supportsEmbroidery ? !!a.embroidery !== !!b.embroidery : false) return false;
+  if (product.supportsEmbroidery && a.embroidery && (a.embroideryText ?? "") !== (b.embroideryText ?? "")) return false;
   if (normalizeButton(product, a.selectedButton) !== normalizeButton(product, b.selectedButton)) return false;
 
   const aIsCustom = a.sizeMode === "custom" && !!a.customDimensions;
@@ -52,7 +54,7 @@ export function cartVariantKey(item: CartVariant): string {
   const customKey = item.sizeMode === "custom" && item.customDimensions
     ? `c:${item.customDimensions.lengthCm}x${item.customDimensions.widthCm}x${item.customDimensions.thicknessCm}`
     : "";
-  return JSON.stringify([item.id, item.selectedColor ?? "", item.selectedButton ?? "", !!item.embroidery, customKey]);
+  return JSON.stringify([item.id, item.selectedColor ?? "", item.selectedButton ?? "", !!item.embroidery, item.embroidery ? item.embroideryText ?? "" : "", customKey]);
 }
 
 export function productGallery(product: Product): string[] {

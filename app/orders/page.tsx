@@ -10,6 +10,7 @@ import OrderTrackingTimeline from "@/components/OrderTrackingTimeline";
 import OrderActions from "@/components/OrderActions";
 import { type Order, type OrderFilter, CUSTOMER_DATA_EVENT, ORDER_FILTERS, loadStoredOrders, getOrderStatus, matchesOrderFilter, formatOrderDate } from "@/data/orders";
 import type { CartItem } from "@/components/CartContext";
+import { DEMO_ORDER_POLICY } from "@/data/demo-orders";
 
 const action = "inline-flex min-h-11 items-center justify-center rounded-full px-5 py-2.5 text-sm font-bold transition focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[var(--secondary)]";
 const surface = "rounded-3xl border border-[var(--border)] bg-white p-5 shadow-sm sm:p-7";
@@ -35,7 +36,7 @@ function OrderItem({ item }: { item: CartItem }) {
           ? `Kích thước riêng: ${item.customDimensions.lengthCm} × ${item.customDimensions.widthCm} × ${item.customDimensions.thicknessCm} cm` : item.size}
         {item.selectedColor && ` · Màu: ${item.selectedColor}`}
         {item.selectedButton && ` · Nút: ${item.selectedButton}`}
-        {item.embroidery && " · Thêu tên"}
+        {item.embroidery && (item.embroideryText ? ` · Thêu: ${item.embroideryText}` : " · Thêu tên")}
       </p>
       <div className="mt-2 flex flex-wrap justify-between gap-2 text-sm">
         <span className="text-[var(--text-secondary)]">Số lượng: {item.quantity}</span>
@@ -57,7 +58,7 @@ function OrdersContent() {
     let active = true;
     const refresh = () => { if (active) { setOrders(loadStoredOrders()); setNow(Date.now()); setLoaded(true); } };
     queueMicrotask(refresh);
-    const interval = setInterval(() => { if (active) setNow(Date.now()); }, 15000);
+    const interval = setInterval(refresh, DEMO_ORDER_POLICY.refreshMs);
     window.addEventListener("storage", refresh);
     window.addEventListener("focus", refresh);
     window.addEventListener(CUSTOMER_DATA_EVENT, refresh);

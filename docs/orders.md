@@ -16,7 +16,10 @@ shipping address, payment method, and a vertical fulfillment timeline.
 Seven statuses are defined in `data/orders.ts`. An explicit saved `status`,
 including `cancelled`, takes priority. Orders without an explicit status retain
 the internal progression based on their saved creation date. No duration or
-countdown is rendered, and completed orders stay in history. Cancellation is a
+countdown is rendered. Completed local demo orders remain visible for two minutes
+after completion, then are removed deterministically on storage reads and the
+order page's 15-second refresh. Active, cancelled and explicitly non-demo orders
+are retained. Cancellation is a
 separate state; the UI does not pretend a cancelled order will be delivered.
 Eligible orders can be cancelled with a required reason. Confirmation rechecks
 the latest stored status and persists `cancelled`, the reason and cancellation

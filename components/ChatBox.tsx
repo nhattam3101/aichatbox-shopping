@@ -23,14 +23,14 @@ export default function ChatBox() {
     {
       role: "assistant",
       content:
-        "Xin chào! Mình là CaseUp Assistant 🤖\n\nMình có thể giúp bạn kiểm tra size vừa vặn cho laptop, tư vấn chống sốc hoặc chọn mẫu da cao cấp theo ngân sách của bạn.",
+        "Xin chào! Mình là CaseUp Assistant 🤖\n\nMình có thể giúp bạn kiểm tra đủ ba số đo để chọn size, phối màu vải và tìm mẫu bao theo ngân sách.",
     },
   ]);
 
   const quickPrompts = [
     "💻 MacBook Air M2 nên chọn size nào?",
     "🛡️ Tìm bao chống sốc dày bảo vệ tối đa",
-    "💼 Mẫu bao da cao cấp cho doanh nhân",
+    "💼 Bao laptop may theo kích thước yêu cầu",
     "🌸 Mẫu thời trang màu Pastel nhẹ nhàng",
     "💰 Bao laptop giá rẻ dưới 220k",
   ];

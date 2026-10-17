@@ -1,4 +1,5 @@
 "use client";
+import { priceRanges, matchesPriceRange } from "@/data/business";
 
 import { useMemo, useState } from "react";
 import { saleProducts as products, type Product } from "@/data/products";
@@ -23,13 +24,6 @@ export default function ProductsPage() {
 
   const sizes = ["Tất cả", ...new Set(products.map(p => p.size))];
 
-  const priceRanges = [
-    { label: "Tất cả", value: "Tất cả" },
-    { label: "Dưới 200k", value: "under200" },
-    { label: "200k - 300k", value: "200to300" },
-    { label: "Trên 300k", value: "above300" },
-  ];
-
   const filteredProducts = useMemo(() => {
     let result = products.filter((product) => {
       // Search
@@ -45,16 +39,7 @@ export default function ProductsPage() {
         selectedSize === "Tất cả" || product.size === selectedSize;
 
       // Price Range
-      let matchPrice = true;
-      if (selectedPriceRange === "under200") {
-        matchPrice = product.price < 200000;
-      } else if (selectedPriceRange === "200to300") {
-        matchPrice = product.price >= 200000 && product.price <= 300000;
-      } else if (selectedPriceRange === "above300") {
-        matchPrice = product.price > 300000;
-      }
-
-      if (selectedPriceRange !== "Tất cả" && product.priceConfirmed === false) matchPrice = false;
+      const matchPrice = matchesPriceRange(product.price, selectedPriceRange) && (selectedPriceRange === "Tất cả" || product.priceConfirmed !== false);
 
       // Features
       const matchWaterproof = !onlyWaterproof || product.waterproof;
@@ -261,7 +246,7 @@ export default function ProductsPage() {
                 onChange={(e) => setOnlyWaterproof(e.target.checked)}
                 className="rounded border-gray-300 text-[var(--text-primary)] focus:ring-black"
               />
-              <span>Chống nước</span>
+              <span>Trượt nước</span>
             </label>
 
             <label className="hidden md:flex items-center gap-1.5 text-xs font-medium text-gray-700 cursor-pointer select-none">
@@ -334,12 +319,12 @@ export default function ProductsPage() {
               )}
               {selectedPriceRange !== "Tất cả" && (
                 <span className="rounded-full bg-gray-200 px-2.5 py-0.5 font-medium">
-                  Giá: {selectedPriceRange}
+                  Giá: {priceRanges.find(range => range.value === selectedPriceRange)?.label}
                 </span>
               )}
               {onlyWaterproof && (
                 <span className="rounded-full bg-blue-100 text-blue-800 px-2.5 py-0.5 font-medium">
-                  Chống nước
+                  Trượt nước
                 </span>
               )}
               {onlyPockets && (

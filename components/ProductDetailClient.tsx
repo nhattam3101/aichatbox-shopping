@@ -15,9 +15,10 @@ import OpenChatButton from "@/components/OpenChatButton";
 import { useCart } from "@/components/CartContext";
 import { useWishlist } from "@/components/WishlistContext";
 import { useCompare } from "@/components/ProductCompareModal";
-import CustomSizeSelector from "@/components/CustomSizeSelector";
 import ReturnPolicyModal from "@/components/ReturnPolicyModal";
-import { validateCustomDimensions } from "@/data/size-validation";
+import { CUSTOM_PRODUCT_ID } from "@/data/business";
+import { RETURN_POLICY_TITLE } from "@/data/business";
+import { productDimensions, productSpecifications } from "@/data/product-specs";
 
 type Props = {
   product: Product;
@@ -49,23 +50,11 @@ export default function ProductDetailClient({ product, relatedProducts }: Props)
     ? Math.round(((product.originalPrice - product.price) / product.originalPrice) * 100)
     : null;
 
-  const [sizeMode, setSizeMode] = useState<"standard" | "custom">("standard");
-  const [customLength, setCustomLength] = useState("");
-  const [customWidth, setCustomWidth] = useState("");
-  const [customThickness, setCustomThickness] = useState("");
-  const [customSubmittedOrTouched, setCustomSubmittedOrTouched] = useState(false);
   const [isReturnPolicyOpen, setIsReturnPolicyOpen] = useState(false);
-
-  const customValidation = validateCustomDimensions(customLength, customWidth, customThickness);
 
   function handleAdd() {
     if (product.priceConfirmed === false) return;
-    if (product.kind === "sleeve" && sizeMode === "custom") {
-      setCustomSubmittedOrTouched(true);
-      if (!customValidation.isValid || !customValidation.dimensions) {
-        return;
-      }
-    }
+
 
     addToCart({
       ...product,
@@ -73,20 +62,13 @@ export default function ProductDetailClient({ product, relatedProducts }: Props)
       selectedColor,
       selectedButton: product.kind === "sleeve" ? selectedButton : undefined,
       embroidery,
-      sizeMode: product.kind === "sleeve" ? sizeMode : "standard",
-      customDimensions: product.kind === "sleeve" && sizeMode === "custom" ? customValidation.dimensions : undefined,
+      sizeMode: "standard",
     });
     if (embroidery && product.supportsEmbroidery) addToCart({ ...embroideryService, quantity }, false);
   }
 
   function handleBuyNow() {
     if (product.priceConfirmed === false) return;
-    if (product.kind === "sleeve" && sizeMode === "custom") {
-      setCustomSubmittedOrTouched(true);
-      if (!customValidation.isValid || !customValidation.dimensions) {
-        return;
-      }
-    }
     if (embroidery && product.supportsEmbroidery) addToCart({ ...embroideryService, quantity }, false);
     addToCart(
       {
@@ -99,8 +81,7 @@ export default function ProductDetailClient({ product, relatedProducts }: Props)
         selectedColor,
         selectedButton: product.kind === "sleeve" ? selectedButton : undefined,
         embroidery,
-        sizeMode: product.kind === "sleeve" ? sizeMode : "standard",
-        customDimensions: product.kind === "sleeve" && sizeMode === "custom" ? customValidation.dimensions : undefined,
+        sizeMode: "standard",
       },
       false
     );
@@ -109,8 +90,8 @@ export default function ProductDetailClient({ product, relatedProducts }: Props)
 
   const guarantees = [
     { icon: "🚚", title: "Freeship toàn quốc", desc: "Đơn từ 300k" },
-    { icon: "🔄", title: "Đổi Trả 3 Ngày", desc: "Không vừa size đổi ngay" },
-    { icon: "🛡️", title: "Chống va đập", desc: "Đệm khí an tâm" },
+    { icon: "🔄", title: RETURN_POLICY_TITLE, desc: "Theo điều kiện chính sách" },
+    { icon: "🛡️", title: "Chọn size theo số đo", desc: "Kiểm tra đủ ba chiều máy" },
     { icon: "🤖", title: "AI tư vấn 24/7", desc: "Hỗ trợ chọn size chuẩn" },
   ];
 
@@ -273,53 +254,8 @@ export default function ProductDetailClient({ product, relatedProducts }: Props)
                   </span>
                 </div>
 
-                {/* Quick Spec Pills */}
-                <div className="mt-5 grid grid-cols-2 gap-2 text-xs bg-[var(--surface-muted)] p-3.5 rounded-2xl border border-[var(--brand-border)]">
-                  <div>
-                    <span className="text-gray-400">Máy tối đa:</span>
-                    <span className="ml-1.5 font-bold text-gray-800">{product.kind === "sleeve" ? `${product.maxWidth} × ${product.maxHeight} × ${product.maxThickness ?? "—"} cm` : "Không áp dụng"}</span>
-                  </div>
-                  <div>
-                    <span className="text-gray-400">Chất liệu:</span>
-                    <span className="ml-1.5 font-bold text-gray-800">{product.material}</span>
-                  </div>
-                  <div>
-                    <span className="text-gray-400">Chống nước:</span>
-                    <span className={`ml-1.5 font-bold ${product.waterproof ? "text-[var(--secondary-ink)]" : "text-gray-600"}`}>
-                      {product.waterproof ? "Có" : "Kháng bụi nhẹ"}
-                    </span>
-                  </div>
-                  <div>
-                    <span className="text-gray-400">Trọng lượng:</span>
-                    <span className="ml-1.5 font-bold text-gray-800">{product.weight}</span>
-                  </div>
-                </div>
-
-                {/* Custom Size Selection - placed before fabric color selection */}
-                {product.kind === "sleeve" && (
-                  <CustomSizeSelector
-                    sizeMode={sizeMode}
-                    onSizeModeChange={setSizeMode}
-                    length={customLength}
-                    width={customWidth}
-                    thickness={customThickness}
-                    onLengthChange={(val) => {
-                      setCustomLength(val);
-                      setCustomSubmittedOrTouched(true);
-                    }}
-                    onWidthChange={(val) => {
-                      setCustomWidth(val);
-                      setCustomSubmittedOrTouched(true);
-                    }}
-                    onThicknessChange={(val) => {
-                      setCustomThickness(val);
-                      setCustomSubmittedOrTouched(true);
-                    }}
-                    standardDimensionsText={`${product.maxWidth} × ${product.maxHeight} × ${product.maxThickness ?? 2} cm (${product.size})`}
-                    validation={customValidation}
-                    isSubmittedOrTouched={customSubmittedOrTouched}
-                  />
-                )}
+                <p className="mt-4 rounded-2xl bg-[var(--surface-muted)] p-4 text-sm">Kích thước máy tối đa: {productDimensions(product)}</p>
+                {product.kind === "sleeve" && <Link href={`/products/${CUSTOM_PRODUCT_ID}`} className="mt-3 inline-flex min-h-11 items-center text-sm font-bold text-[var(--secondary-ink)] underline">Cần số đo riêng? May theo kích thước yêu cầu</Link>}
 
                 {/* Color Selection */}
                 {product.colors && product.colors.length > 0 && (
@@ -442,7 +378,7 @@ export default function ProductDetailClient({ product, relatedProducts }: Props)
 
           {/* Details / Reviews Tabs */}
           <div className="mt-16 rounded-3xl bg-white p-6 md:p-10 shadow-sm border border-[var(--brand-border)]">
-            <div className="flex border-b border-gray-200">
+            <div className="flex overflow-x-auto border-b border-gray-200 [&>button]:shrink-0 [&>button]:whitespace-nowrap">
               <button
                 type="button"
                 onClick={() => setActiveTab("description")}
@@ -483,7 +419,7 @@ export default function ProductDetailClient({ product, relatedProducts }: Props)
                 <div className="space-y-4 text-gray-700 leading-relaxed max-w-3xl text-sm">
                   <p>{product.description}</p>
                   <p>
-                    Dòng bao chống sốc <strong>{product.name}</strong> được thiết kế theo tiêu chuẩn công thái học hiện đại, bảo vệ toàn diện cho laptop khi bạn đi làm, đi học hoặc công tác xa.
+                    Đối chiếu chiều dài, chiều rộng và độ dày thực tế với số đo của <strong>{product.name}</strong> trước khi đặt hàng.
                   </p>
                   {product.features && (
                     <div className="mt-4">
@@ -499,44 +435,11 @@ export default function ProductDetailClient({ product, relatedProducts }: Props)
               )}
 
               {activeTab === "details" && (
-                <div className="max-w-xl space-y-3">
-                  <div className="flex justify-between border-b border-gray-100 py-2.5 text-sm">
-                    <span className="text-gray-500">Phân loại dòng máy</span>
-                    <span className="font-semibold text-gray-900">{product.category}</span>
-                  </div>
-                  <div className="flex justify-between border-b border-gray-100 py-2.5 text-sm">
-                    <span className="text-gray-500">Kích thước phù hợp</span>
-                    <span className="font-semibold text-gray-900">{product.size}</span>
-                  </div>
-                  <div className="flex justify-between border-b border-gray-100 py-2.5 text-sm">
-                    <span className="text-gray-500">Kích thước máy tối đa</span>
-                    <span className="font-semibold text-gray-900">
-                      {product.kind === "sleeve" ? `${product.maxWidth} × ${product.maxHeight} × ${product.maxThickness ?? "—"} cm` : "Không áp dụng"}
-                    </span>
-                  </div>
-                  <div className="flex justify-between border-b border-gray-100 py-2.5 text-sm">
-                    <span className="text-gray-500">Chất liệu cấu tạo</span>
-                    <span className="font-semibold text-gray-900">{product.material}</span>
-                  </div>
-                  <div className="flex justify-between border-b border-gray-100 py-2.5 text-sm">
-                    <span className="text-gray-500">Kháng nước</span>
-                    <span className="font-semibold text-gray-900">
-                      {product.waterproof ? "Có (Chống tia nước văng)" : "Kháng bụi nhẹ"}
-                    </span>
-                  </div>
-                  <div className="flex justify-between border-b border-gray-100 py-2.5 text-sm">
-                    <span className="text-gray-500">Trọng lượng siêu nhẹ</span>
-                    <span className="font-semibold text-gray-900">{product.weight}</span>
-                  </div>
-                  <div className="flex justify-between border-b border-gray-100 py-2.5 text-sm">
-                    <span className="text-gray-500">Màu sắc có sẵn</span>
-                    <span className="font-semibold text-gray-900">{product.colors.join(", ")}</span>
-                  </div>
-                  <div className="flex justify-between py-2.5 text-sm">
-                    <span className="text-gray-500">Thích hợp cho</span>
-                    <span className="font-semibold text-gray-900">{product.suitableFor.join(", ")}</span>
-                  </div>
-                </div>
+                <dl className="max-w-3xl divide-y divide-[var(--border)]">
+                  {productSpecifications(product).map(spec => <div key={spec.label} className="grid gap-2 py-3 text-sm sm:grid-cols-[minmax(0,1fr)_minmax(0,2fr)]">
+                    <dt className="text-[var(--text-secondary)]">{spec.label}</dt><dd className="min-w-0 break-words font-semibold">{spec.value}</dd>
+                  </div>)}
+                </dl>
               )}
 
               {activeTab === "reviews" && (

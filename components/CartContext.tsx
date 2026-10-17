@@ -7,6 +7,9 @@ import {
   useState,
   ReactNode,
 } from "react";
+import { evaluateVoucher } from "@/data/vouchers";
+import { customMadeProduct } from "@/data/products";
+import { validateCustomDimensions } from "@/data/size-validation";
 import { allProducts } from "@/data/products";
 import { normalizeButton, sameCartVariant } from "@/data/customization";
 import type { CustomDimensions } from "@/data/size-validation";
@@ -22,6 +25,7 @@ export type CartItem = {
   selectedColor?: string;
   selectedButton?: string;
   embroidery?: boolean;
+  embroideryText?: string;
   sizeMode?: "standard" | "custom";
   customDimensions?: CustomDimensions;
 };
@@ -38,6 +42,7 @@ export type ToastNotification = {
     selectedColor?: string;
     selectedButton?: string;
     embroidery?: boolean;
+    embroideryText?: string;
     sizeMode?: "standard" | "custom";
     customDimensions?: CustomDimensions;
   };
@@ -55,7 +60,8 @@ type CartContextType = {
     selectedButton?: string,
     embroidery?: boolean,
     sizeMode?: "standard" | "custom",
-    customDimensions?: CustomDimensions
+    customDimensions?: CustomDimensions,
+    embroideryText?: string
   ) => void;
   increaseQuantity: (
     id: number,
@@ -63,7 +69,8 @@ type CartContextType = {
     selectedButton?: string,
     embroidery?: boolean,
     sizeMode?: "standard" | "custom",
-    customDimensions?: CustomDimensions
+    customDimensions?: CustomDimensions,
+    embroideryText?: string
   ) => void;
   decreaseQuantity: (
     id: number,
@@ -71,7 +78,8 @@ type CartContextType = {
     selectedButton?: string,
     embroidery?: boolean,
     sizeMode?: "standard" | "custom",
-    customDimensions?: CustomDimensions
+    customDimensions?: CustomDimensions,
+    embroideryText?: string
   ) => void;
   clearCart: () => void;
   totalItems: number;
@@ -100,7 +108,8 @@ export function CartProvider({ children }: { children: ReactNode }) {
           const parsed: unknown = saved ? JSON.parse(saved) : [];
           if (!Array.isArray(parsed)) return [];
           return parsed.flatMap(item => {
-            const product = allProducts.find(p => p.id === item?.id);
+            const source = allProducts.find(p => p.id === item?.id);
+            const product = source?.kind === "sleeve" && item.sizeMode === "custom" ? customMadeProduct : source;
             if (!product || product.priceConfirmed === false || !Number.isSafeInteger(item.quantity) || item.quantity <= 0) return [];
 
             const isCustom = product.kind === "sleeve" &&
@@ -110,6 +119,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
               typeof item.customDimensions.widthCm === "number" &&
               typeof item.customDimensions.thicknessCm === "number";
 
+            if (product.madeToMeasure && (!isCustom || !validateCustomDimensions(String(item.customDimensions?.lengthCm ?? ""), String(item.customDimensions?.widthCm ?? ""), String(item.customDimensions?.thicknessCm ?? "")).isValid)) return [];
             return [{
               id: product.id,
               name: product.name,
@@ -120,6 +130,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
               selectedColor: product.colors.includes(item.selectedColor) ? item.selectedColor : product.colors[0] ?? "",
               selectedButton: normalizeButton(product, item.selectedButton),
               embroidery: product.supportsEmbroidery === true && item.embroidery === true,
+              embroideryText: product.supportsEmbroidery && item.embroidery && typeof item.embroideryText === "string" ? item.embroideryText.trim().slice(0, 15) : undefined,
               sizeMode: isCustom ? "custom" : "standard",
               customDimensions: isCustom ? {
                 lengthCm: Number(item.customDimensions.lengthCm),
@@ -139,7 +150,6 @@ export function CartProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const [appliedCoupon, setAppliedCoupon] = useState<string | null>(null);
-  const [discountPercent, setDiscountPercent] = useState<number>(0);
   const [toast, setToast] = useState<ToastNotification | null>(null);
 
   // Sync cart to localStorage whenever cart changes
@@ -160,7 +170,8 @@ export function CartProvider({ children }: { children: ReactNode }) {
     item: Omit<CartItem, "quantity"> & { quantity?: number },
     showToast = true
   ) {
-    const product = allProducts.find(p => p.id === item.id);
+    const source = allProducts.find(p => p.id === item.id);
+    const product = source?.kind === "sleeve" && item.sizeMode === "custom" ? customMadeProduct : source;
     if (!product) return;
     if (product.priceConfirmed === false) {
       alert("Giá size này đang chờ xác nhận. Vui lòng liên hệ trước khi mua.");
@@ -174,8 +185,10 @@ export function CartProvider({ children }: { children: ReactNode }) {
       typeof item.customDimensions.widthCm === "number" &&
       typeof item.customDimensions.thicknessCm === "number";
 
+    if (product.madeToMeasure && (!isCustom || !validateCustomDimensions(String(item.customDimensions?.lengthCm ?? ""), String(item.customDimensions?.widthCm ?? ""), String(item.customDimensions?.thicknessCm ?? "")).isValid)) { alert("Vui lòng nhập đủ ba kích thước hợp lệ cho sản phẩm may theo số đo."); return; }
     item = {
       ...item,
+      id: product.id,
       name: product.name,
       price: product.price,
       image: product.image,
@@ -183,6 +196,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
       selectedColor: product.colors.includes(item.selectedColor ?? "") ? item.selectedColor : product.colors[0] ?? "",
       selectedButton: normalizeButton(product, item.selectedButton),
       embroidery: product.supportsEmbroidery === true && item.embroidery === true,
+      embroideryText: product.supportsEmbroidery && item.embroidery && typeof item.embroideryText === "string" ? item.embroideryText.trim().slice(0, 15) : undefined,
       sizeMode: isCustom ? "custom" : "standard",
       customDimensions: isCustom ? item.customDimensions : undefined,
     };
@@ -226,6 +240,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
           selectedColor: item.selectedColor,
           selectedButton: item.selectedButton,
           embroidery: item.embroidery,
+          embroideryText: item.embroideryText,
           sizeMode: item.sizeMode,
           customDimensions: item.customDimensions,
         },
@@ -239,11 +254,12 @@ export function CartProvider({ children }: { children: ReactNode }) {
     selectedButton?: string,
     embroidery?: boolean,
     sizeMode?: "standard" | "custom",
-    customDimensions?: CustomDimensions
+    customDimensions?: CustomDimensions,
+    embroideryText?: string
   ) {
     setCart((prev) =>
       prev.filter((item) =>
-        !sameCartVariant(item, { id, selectedColor, selectedButton, embroidery, sizeMode, customDimensions })
+        !sameCartVariant(item, { id, selectedColor, selectedButton, embroidery, embroideryText, sizeMode, customDimensions })
       )
     );
   }
@@ -254,11 +270,12 @@ export function CartProvider({ children }: { children: ReactNode }) {
     selectedButton?: string,
     embroidery?: boolean,
     sizeMode?: "standard" | "custom",
-    customDimensions?: CustomDimensions
+    customDimensions?: CustomDimensions,
+    embroideryText?: string
   ) {
     setCart((prev) =>
       prev.map((item) => {
-        const matches = sameCartVariant(item, { id, selectedColor, selectedButton, embroidery, sizeMode, customDimensions });
+        const matches = sameCartVariant(item, { id, selectedColor, selectedButton, embroidery, embroideryText, sizeMode, customDimensions });
 
         return matches
           ? {
@@ -276,12 +293,13 @@ export function CartProvider({ children }: { children: ReactNode }) {
     selectedButton?: string,
     embroidery?: boolean,
     sizeMode?: "standard" | "custom",
-    customDimensions?: CustomDimensions
+    customDimensions?: CustomDimensions,
+    embroideryText?: string
   ) {
     setCart((prev) =>
       prev
         .map((item) => {
-          const matches = sameCartVariant(item, { id, selectedColor, selectedButton, embroidery, sizeMode, customDimensions });
+          const matches = sameCartVariant(item, { id, selectedColor, selectedButton, embroidery, embroideryText, sizeMode, customDimensions });
 
           return matches
             ? {
@@ -297,7 +315,6 @@ export function CartProvider({ children }: { children: ReactNode }) {
   function clearCart() {
     setCart([]);
     setAppliedCoupon(null);
-    setDiscountPercent(0);
     try {
       localStorage.removeItem("cart");
     } catch {
@@ -306,28 +323,13 @@ export function CartProvider({ children }: { children: ReactNode }) {
   }
 
   function applyCoupon(code: string): { success: boolean; message: string } {
-    const formatted = code.trim().toUpperCase();
-    if (formatted === "CASEUP10") {
-      setAppliedCoupon("CASEUP10");
-      setDiscountPercent(0.1); // 10%
-      return { success: true, message: "Đã áp dụng mã giảm giá 10%!" };
-    }
-    if (formatted === "VIP20") {
-      setAppliedCoupon("VIP20");
-      setDiscountPercent(0.2); // 20%
-      return { success: true, message: "Đã áp dụng mã VIP giảm 20%!" };
-    }
-    if (formatted === "FREESHIP") {
-      setAppliedCoupon("FREESHIP");
-      setDiscountPercent(0); // freeship
-      return { success: true, message: "Đã áp dụng miễn phí vận chuyển!" };
-    }
-    return { success: false, message: "Mã giảm giá không hợp lệ hoặc đã hết hạn." };
+    const result = evaluateVoucher(code, cart.reduce((sum, item) => sum + item.price * item.quantity, 0));
+    if (result.success) { setAppliedCoupon(result.code); }
+    return result;
   }
 
   function removeCoupon() {
     setAppliedCoupon(null);
-    setDiscountPercent(0);
   }
 
   const totalItems = cart.reduce((total, item) => total + item.quantity, 0);
@@ -337,7 +339,8 @@ export function CartProvider({ children }: { children: ReactNode }) {
     0
   );
 
-  const discountAmount = Math.round(rawTotalPrice * discountPercent);
+  const activeVoucher = evaluateVoucher(appliedCoupon ?? "", rawTotalPrice);
+  const discountAmount = activeVoucher.success ? Math.round(rawTotalPrice * activeVoucher.discountPercent) : 0;
   const totalPrice = Math.max(0, rawTotalPrice - discountAmount);
 
   return (
@@ -353,7 +356,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
         totalPrice,
         toast,
         hideToast,
-        appliedCoupon,
+        appliedCoupon: activeVoucher.success ? appliedCoupon : null,
         discountAmount,
         applyCoupon,
         removeCoupon,

@@ -33,7 +33,9 @@ are not silently added.
 
 `data/vouchers.ts` supplies display-only voucher records to `/vouchers` and
 notifications. No expiry dates or new discount conditions are assumed.
-CASEUP10 and FREESHIP retain existing checkout behavior. BACKTOSCHOOL is
+The returning-customer offer is 5%, with no invented public code or automatic
+discount. The confirmed shipping code requires a merchandise subtotal of at least
+300.000₫. The previous first-order and VIP offers are retired. BACKTOSCHOOL is
 informational and links to products. Copy uses the Clipboard API, with a friendly
 manual-copy message if unavailable. “Dùng ngay” opens the configured destination
 without automatically applying discounts.
@@ -59,14 +61,15 @@ frequency. Display is recorded before opening, so dismissal, CTA navigation and
 returning home do not reopen it during the configured period. Unavailable
 storage suppresses the popup. Change the campaign ID to launch a new campaign.
 
-`promotionAds` lists `/products/ad1.png`, `/products/ad2.png` and
-`/products/ad3.png`, including actual image dimensions and per-ad destinations.
+`promotionAds` lists `/products/ad5.png` and `/products/ad6.png`, including
+actual image dimensions and per-ad destinations. Earlier artwork containing the
+retired first-order offer is retained as an unreferenced asset, never displayed.
 One ad is selected randomly on display. All three share the campaign's seen
 period, so rotating creatives cannot reopen the popup during the same session.
 Images use `object-contain` and their original aspect ratio, with no placeholder
 gradient or newly invented discount calculation. Add another record to the list
-to extend the rotation. The supplied assets show CASEUP10; checkout formulas
-are unchanged. Cleanup closes the popup when a cached homepage is hidden.
+to extend the rotation. No extra discount logic is inferred from artwork.
+Cleanup closes the popup when a cached homepage is hidden.
 
 ## Verification
 

@@ -31,10 +31,9 @@ export default function GlobalSearchModal({ isOpen, onClose }: Props) {
   const popularTags = [
     "MacBook Air 13",
     "Chống sốc 14 inch",
-    "Da cao cấp",
     "Pastel",
     "Gaming 16 inch",
-    "Chống nước",
+    "Trượt nước",
   ];
 
   if (!isOpen) return null;

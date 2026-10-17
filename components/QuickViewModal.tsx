@@ -6,6 +6,7 @@ import { productGallery, type ButtonName } from "@/data/customization";
 import Image from "next/image";
 import Link from "next/link";
 import { useState } from "react";
+import { productDimensions } from "@/data/product-specs";
 import type { Product } from "@/data/products";
 import { useCart } from "@/components/CartContext";
 import { useWishlist } from "@/components/WishlistContext";
@@ -37,7 +38,7 @@ function QuickViewDialog({ product, onClose }: { product: Product; onClose: () =
   const isFavorite = isInWishlist(product.id);
 
   function handleAddToCart() {
-    if (product.priceConfirmed === false) return;
+    if (product.priceConfirmed === false || product.madeToMeasure) return;
     addToCart({
       id: product.id,
       name: product.name,
@@ -178,17 +179,17 @@ function QuickViewDialog({ product, onClose }: { product: Product; onClose: () =
               </div>
               <div>
                 <span className="text-gray-400">Tối đa:</span>
-                <span className="ml-1 font-semibold text-gray-800">{product.kind === "sleeve" ? `${product.maxWidth} × ${product.maxHeight} × ${product.maxThickness ?? "—"} cm` : "Không áp dụng"}</span>
+                <span className="ml-1 font-semibold text-gray-800">{productDimensions(product)}</span>
               </div>
               <div>
-                <span className="text-gray-400">Chống nước:</span>
+                <span className="text-gray-400">Trượt nước:</span>
                 <span className={`ml-1 font-semibold ${product.waterproof ? "text-[var(--secondary-ink)]" : "text-gray-600"}`}>
-                  {product.waterproof ? "Có" : "Tiêu chuẩn"}
+                  {product.waterproof === undefined ? "Chưa có thông tin xác nhận" : product.waterproof ? "Có" : "Không"}
                 </span>
               </div>
               <div>
                 <span className="text-gray-400">Trọng lượng:</span>
-                <span className="ml-1 font-semibold text-gray-800">{product.weight}</span>
+                <span className="ml-1 font-semibold text-gray-800">{product.weight ?? "Chưa có thông tin xác nhận"}</span>
               </div>
             </div>
 
@@ -266,7 +267,7 @@ function QuickViewDialog({ product, onClose }: { product: Product; onClose: () =
               onClick={onClose}
               className="block w-full text-center text-xs font-semibold text-gray-500 hover:text-[var(--text-primary)] py-2 transition"
             >
-              Xem trang chi tiết đầy đủ & đánh giá →
+              {product.madeToMeasure ? "Nhập số đo và tùy chỉnh →" : "Xem trang chi tiết đầy đủ & đánh giá →"}
             </Link>
           </div>
         </div>

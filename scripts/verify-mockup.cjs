@@ -38,8 +38,8 @@ const { POST } = require('../app/api/generate-mockup/route.ts');
 const { products, accessories } = require('../data/products.ts');
 const { buttonOptions } = require('../data/customization.ts');
 const { validateMockup, mockupPrompt } = require('../data/mockup.ts');
-const product = products.find(p => p.colors.includes('Xanh pastel'));
-// The catalog has no pink sleeve fabric: exercise actual supported fabric options.
+const product = products[0];
+// Exercise the confirmed official fabric palette.
 const base = { productId: product.id, sizeMode: 'standard', selectedColor: product.colors[0], selectedButton: buttonOptions[0].name,
   embroidery: false, embroideryText: '', selectedAccessoryId: null };
 const request = body => new Request('http://localhost/api/generate-mockup', { method: 'POST', body: typeof body === 'string' ? body : JSON.stringify(body) });
@@ -53,7 +53,7 @@ const request = body => new Request('http://localhost/api/generate-mockup', { me
     process.env.GEMINI_API_KEY = 'test-only-placeholder';
     for (const config of [base,
       { ...base, selectedButton: buttonOptions[3].name, embroidery: true, embroideryText: 'Uyen' },
-      { ...base, sizeMode: 'custom', customDimensions: { lengthCm: 32.5, widthCm: 22, thicknessCm: 2 }, embroidery: true, embroideryText: 'An' },
+      { ...base, productId: 18, sizeMode: 'custom', customDimensions: { lengthCm: 32.5, widthCm: 22, thicknessCm: 2 }, embroidery: true, embroideryText: 'An' },
       { ...base, selectedAccessoryId: accessories[0].id }]) {
       assert.ok(validateMockup(config));
       const response = await POST(request(config));

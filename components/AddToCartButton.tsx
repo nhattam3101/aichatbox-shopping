@@ -1,5 +1,7 @@
 "use client";
 
+import { allProducts } from "@/data/products";
+import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { useCart } from "@/components/CartContext";
 
@@ -17,10 +19,12 @@ type Props = {
 };
 
 export default function AddToCartButton({ product, className }: Props) {
+  const router = useRouter();
   const { addToCart } = useCart();
   const [isJustAdded, setIsJustAdded] = useState(false);
 
   function handleAddToCart() {
+    if (allProducts.find(p => p.id === product.id)?.madeToMeasure) { router.push(`/products/${product.id}`); return; }
     const enhancedProduct = {
       ...product,
       quantity: product.quantity ?? 1,

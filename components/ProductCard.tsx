@@ -2,6 +2,7 @@
 
 import Image from "next/image";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useState } from "react";
 import type { Product } from "@/data/products";
 import { useCart } from "@/components/CartContext";
@@ -14,6 +15,7 @@ type Props = {
 };
 
 export default function ProductCard({ product, onQuickView }: Props) {
+  const router = useRouter();
   const { addToCart } = useCart();
   const { isInWishlist, toggleWishlist } = useWishlist();
   const { isInCompare, toggleCompare } = useCompare();
@@ -30,6 +32,7 @@ export default function ProductCard({ product, onQuickView }: Props) {
   function handleQuickAdd(e: React.MouseEvent) {
     e.preventDefault();
     e.stopPropagation();
+    if (product.madeToMeasure) { router.push(`/products/${product.id}`); return; }
     if (product.priceConfirmed === false) { alert("Giá size này đang chờ xác nhận."); return; }
     addToCart({
       id: product.id,

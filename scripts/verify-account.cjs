@@ -88,10 +88,10 @@ const daily = { ...promotions.homepageCampaign, id: 'daily', frequency: 'day' };
 assert.ok(promotions.claimPromotion(daily, now));
 assert.equal(promotions.claimPromotion(daily, now + 86399999), false);
 assert.ok(promotions.claimPromotion(daily, now + 86400000));
-assert.equal(new Set(promotions.promotionAds.map(ad => ad.id)).size, 3);
-for (let index = 0; index < 3; index++) {
-  const ad = promotions.selectPromotion(promotions.promotionAds, (index + 0.5) / 3);
-  assert.equal(ad.id, `ad${index + 1}`, 'all ads can be randomly selected');
+assert.equal(new Set(promotions.promotionAds.map(ad => ad.id)).size, 2);
+for (let index = 0; index < promotions.promotionAds.length; index++) {
+  const ad = promotions.selectPromotion(promotions.promotionAds, (index + 0.5) / promotions.promotionAds.length);
+  assert.equal(ad.id, `ad${index + 5}`, 'all ads can be randomly selected');
   const bytes = fs.readFileSync(path.resolve(__dirname, '../public', ad.image.slice(1)));
   assert.equal(bytes.subarray(1, 4).toString(), 'PNG');
   assert.equal(bytes.readUInt32BE(16), ad.width);
@@ -128,10 +128,10 @@ function nodes(node) { return node && typeof node === 'object' ? [node, ...[node
   nodes(buyTree).find(n => n.type === 'button' && n.props.children === 'Mua lại').props.onClick();
   assert.equal(added.length, 1); assert.equal(added[0].selectedButton, 'Baby Blue');
   Object.defineProperty(global, 'navigator', { configurable: true, value: { clipboard: { writeText: async code => { copied = code; } } } });
-  slots = []; cursor = 0; await nodes(Copy({ code: 'CASEUP10' })).find(n => n.type === 'button').props.onClick();
-  assert.equal(copied, 'CASEUP10'); assert.ok(slots.includes('Đã sao chép mã.'));
+  slots = []; cursor = 0; await nodes(Copy({ code: 'FREESHIP' })).find(n => n.type === 'button').props.onClick();
+  assert.equal(copied, 'FREESHIP'); assert.ok(slots.includes('Đã sao chép mã.'));
   const voucherHtml = render(VoucherPage);
-  for (const voucher of vouchers) assert.ok(voucherHtml.includes(voucher.code));
+  for (const voucher of vouchers) assert.ok(voucherHtml.includes(voucher.title));
   assert.ok(voucherHtml.includes('Sao chép mã')); assert.ok(voucherHtml.includes('Dùng ngay'));
   store.delete('caseup_notification_reads');
   slots = []; cursor = 0;
@@ -141,7 +141,7 @@ function nodes(node) { return node && typeof node === 'object' ? [node, ...[node
   assert.ok(render(NotificationsPage).includes('0 thông báo chưa đọc'));
   pathname = '/orders'; assert.equal(render(Popup, { campaign: promotions.homepageCampaign }, [true]), '');
   pathname = '/'; const popupHtml = render(Popup, { campaign: promotions.homepageCampaign }, [true, promotions.promotionAds[1]]);
-  assert.ok(popupHtml.includes('CASEUP10')); assert.ok(popupHtml.includes('Xem ưu đãi'));
+  assert.ok(popupHtml.includes('ad6.png')); assert.ok(popupHtml.includes('Khám phá ngay'));
   for (const ad of promotions.promotionAds) {
     const html = render(Popup, { campaign: promotions.homepageCampaign }, [true, ad]);
     assert.equal((html.match(/<img/g) ?? []).length, 1, 'exactly one promotion image');

@@ -1,5 +1,6 @@
 "use client";
 
+import { returningCustomerOffer } from "@/data/vouchers";
 import { contact } from "@/data/contact";
 import Link from "next/link";
 import Image from "next/image";
@@ -23,14 +24,13 @@ const showcaseCards = [
 ];
 
 export default function Home() {
-  const [activeTab, setActiveTab] = useState<"bestseller" | "new" | "leather" | "shockproof" | "pastel">("bestseller");
+  const [activeTab, setActiveTab] = useState<"bestseller" | "new" | "shockproof" | "pastel">("bestseller");
   const [quickViewProduct, setQuickViewProduct] = useState<Product | null>(null);
   const [isReturnPolicyOpen, setIsReturnPolicyOpen] = useState(false);
   const [openFaq, setOpenFaq] = useState<number | null>(null);
 
   const bestSellers = products.filter((p) => p.badge === "Bán chạy" || p.badge === "Hot" || p.badge === "Top 1").slice(0, 8);
   const newArrivals = products.filter((p) => p.badge === "Mới" || p.badge === "Premium").slice(0, 8);
-  const leatherCollection = products.filter((p) => p.category === "Da cao cấp").slice(0, 8);
   const shockproofCollection = products.filter((p) => p.category === "Chống sốc").slice(0, 8);
   const pastelCollection = products.filter((p) => p.category === "Thời trang").slice(0, 8);
 
@@ -39,8 +39,6 @@ export default function Home() {
       ? bestSellers
       : activeTab === "new"
       ? newArrivals
-      : activeTab === "leather"
-      ? leatherCollection
       : activeTab === "shockproof"
       ? shockproofCollection
       : pastelCollection;
@@ -56,11 +54,11 @@ export default function Home() {
     },
     {
       q: "Nếu máy không vừa hoặc muốn đổi màu khác thì sao?",
-      a: "CaseUp áp dụng chính sách đổi trả miễn phí trong 3 ngày đầu tiên nếu sản phẩm chưa qua sử dụng. Bạn chỉ cần liên hệ qua hotline hoặc chatbox, nhân viên sẽ gửi mẫu mới đến tận nhà đổi cho bạn.",
+      a: "CaseUp hỗ trợ đổi trả trong 3 ngày cho sản phẩm lỗi, sai màu hoặc sai kích thước so với đơn hàng đã xác nhận. Sản phẩm cần còn nguyên tem mác, phụ kiện và chưa qua sử dụng. Vui lòng cung cấp video khui hàng và liên hệ CaseUp để được hỗ trợ.",
     },
     {
-      q: "Chất liệu của bao CaseUp có chống nước tốt không?",
-      a: "Khả năng kháng nước khác nhau theo từng sản phẩm. Hãy xem thông tin chất liệu và kháng nước trên trang chi tiết; không mặc định bao có thể chống thấm hoàn toàn.",
+      q: "Chất liệu của bao CaseUp có trượt nước tốt không?",
+      a: "Khả năng trượt nước khác nhau theo từng sản phẩm. Hãy xem thông tin chất liệu và trượt nước trên trang chi tiết; không mặc định bao có thể chống thấm hoàn toàn.",
     },
   ];
 
@@ -73,11 +71,11 @@ export default function Home() {
         <div className="animate-marquee flex whitespace-nowrap text-xs font-medium">
           {Array.from({ length: 2 }).map((_, i) => (
             <span key={i} className="mx-6 flex items-center gap-6 text-white/90">
-              <span>🎉 Nhập mã <strong>CASEUP10</strong> giảm ngay 10% đơn đầu tiên</span>
+              <span>{returningCustomerOffer.title}</span>
               <span>•</span>
               <span>🚚 Miễn phí vận chuyển toàn quốc đơn từ 300K</span>
               <span>•</span>
-              <span>🔄 Đổi Trả 3 Ngày không cần lý do</span>
+              <span>🔄 Đổi trả trong 3 ngày</span>
               <span>•</span>
               <span>🤖 Trợ lý AI tư vấn chuẩn size 24/7</span>
               <span>•</span>
@@ -216,7 +214,7 @@ export default function Home() {
         <div className="mx-auto grid max-w-7xl grid-cols-1 gap-3 p-4 sm:grid-cols-2 lg:grid-cols-4 md:p-6">
           {[
             { icon: "🚚", title: "Freeship Toàn Quốc", desc: "Áp dụng đơn từ 300.000₫" },
-            { icon: "🔄", title: "Đổi Trả 3 Ngày", desc: "Không vừa size đổi ngay" },
+            { icon: "🔄", title: "Đổi trả trong 3 ngày", desc: "Theo điều kiện chính sách" },
             { icon: "🛡️", title: "Chống Va Đập", desc: "Bảo vệ máy mỗi ngày" },
             { icon: "🤖", title: "AI Tư Vấn 24/7", desc: "Hỗ trợ chọn size" },
           ].map((item, i) => (
@@ -295,7 +293,6 @@ export default function Home() {
               {[
                 { id: "bestseller", label: "🔥 Bán chạy nhất" },
                 { id: "new", label: "✨ Hàng mới về" },
-                { id: "leather", label: "💼 Da cao cấp" },
                 { id: "shockproof", label: "🛡️ Chống sốc 360" },
                 { id: "pastel", label: "🌸 Thời trang Pastel" },
               ].map((tab) => (
@@ -512,7 +509,7 @@ export default function Home() {
               Bao laptop, iPad / Tablet handmade cùng phụ kiện và thêu tên. Chọn màu vải, phối cúc/nút, tạo dấu ấn riêng.
             </p>
             <p className="mt-4 text-xs text-[var(--yellow)] font-semibold">
-              Mã voucher chào mừng: <strong>CASEUP10</strong>
+              {returningCustomerOffer.title}
             </p>
           </div>
 

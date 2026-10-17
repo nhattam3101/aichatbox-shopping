@@ -1,6 +1,7 @@
 "use client";
 
 import Image from "next/image";
+import { productDimensions } from "@/data/product-specs";
 import Link from "next/link";
 import { useState, createContext, useContext, ReactNode } from "react";
 import type { Product } from "@/data/products";
@@ -248,7 +249,7 @@ function CompareModal() {
                 <td className="py-3 font-semibold text-gray-500">Kích thước máy tối đa</td>
                 {compareList.map((p) => (
                   <td key={p.id} className="py-3 px-3 text-center text-gray-700">
-                    {p.kind === "sleeve" ? `${p.maxWidth} × ${p.maxHeight} × ${p.maxThickness ?? "—"} cm` : "Không áp dụng"}
+                    {productDimensions(p)}
                   </td>
                 ))}
               </tr>
@@ -256,16 +257,16 @@ function CompareModal() {
                 <td className="py-3 font-semibold text-gray-500">Chất liệu chính</td>
                 {compareList.map((p) => (
                   <td key={p.id} className="py-3 px-3 text-center text-gray-700">
-                    {p.material}
+                    {p.material ?? "Chưa có thông tin xác nhận"}
                   </td>
                 ))}
               </tr>
               <tr>
-                <td className="py-3 font-semibold text-gray-500">Khả năng kháng nước</td>
+                <td className="py-3 font-semibold text-gray-500">Trượt nước</td>
                 {compareList.map((p) => (
                   <td key={p.id} className="py-3 px-3 text-center">
-                    {p.waterproof ? (
-                      <span className="font-bold text-[var(--secondary-ink)]">✓ Có (Kháng nước cao cấp)</span>
+                    {p.waterproof === undefined ? "Chưa có thông tin xác nhận" : p.waterproof ? (
+                      <span className="font-bold text-[var(--secondary-ink)]">✓ Có</span>
                     ) : (
                       <span className="text-gray-400">Tiêu chuẩn kháng bụi nhẹ</span>
                     )}
@@ -276,7 +277,7 @@ function CompareModal() {
                 <td className="py-3 font-semibold text-gray-500">Ngăn phụ kiện</td>
                 {compareList.map((p) => (
                   <td key={p.id} className="py-3 px-3 text-center">
-                    {p.hasPockets ? (
+                    {p.hasPockets === undefined ? "Chưa có thông tin xác nhận" : p.hasPockets ? (
                       <span className="font-bold text-blue-600">✓ Có ngăn riêng cho sạc/chuột</span>
                     ) : (
                       <span className="text-gray-400">Thiết kế mỏng 1 ngăn chính</span>
@@ -289,7 +290,7 @@ function CompareModal() {
                 <td className="py-3 font-semibold text-gray-500">Trọng lượng</td>
                 {compareList.map((p) => (
                   <td key={p.id} className="py-3 px-3 text-center font-medium text-gray-700">
-                    {p.weight}
+                    {p.weight ?? "Chưa có thông tin xác nhận"}
                   </td>
                 ))}
               </tr>

@@ -1,5 +1,6 @@
 import type { CartItem } from "@/components/CartContext";
 import { allProducts } from "@/data/products";
+import { DEMO_ORDER_POLICY } from "@/data/demo-orders";
 
 export type OrderStatus = "placed" | "pending" | "preparing" | "handed_over" | "shipping" | "delivered" | "cancelled";
 export type OrderReview = { rating: number; text: string; submittedAt: number };
@@ -14,6 +15,7 @@ export type Order = {
   paymentMethod: "cod" | "banking"; createdAt: number; createdAtDisplay: string;
   discountAmount?: number; status?: OrderStatus;
   cancellationReason?: string; cancelledAt?: number; reviews?: Record<string, OrderReview>;
+  demo?: boolean; completedAt?: number;
 };
 export const ORDER_STATUS_STEPS = [
   { id: "placed", title: "Đã đặt hàng", desc: "CaseUp đã tiếp nhận đơn hàng." },
@@ -33,7 +35,7 @@ export type OrderFilter = (typeof ORDER_FILTERS)[number]["id"];
 
 // Internal progression only; explicit persisted statuses override it.
 export function getOrderStatusIndex(createdAt: number, now: number = Date.now()): number {
-  return Math.min(5, Math.max(0, Math.floor((now - createdAt) / 60000)));
+  return Math.min(5, Math.max(0, Math.floor((now - createdAt) / (DEMO_ORDER_POLICY.fulfillmentDurationMs / 5))));
 }
 export function getOrderStatus(order: Order, now: number) {
   return ORDER_STATUS_STEPS.find(step => step.id === order.status) ?? ORDER_STATUS_STEPS[getOrderStatusIndex(order.createdAt, now)];
@@ -79,7 +81,7 @@ function readOrder(value: unknown): Order | null {
         typeof item.quantity === "number" && typeof item.price === "number")) return null;
   return { ...order, createdAt };
 }
-export function loadStoredOrders(): Order[] {
+export function loadStoredOrders(now = Date.now()): Order[] {
   if (typeof window === "undefined") return [];
   try {
     const raw = localStorage.getItem(ORDERS_STORAGE_KEY);
@@ -95,12 +97,40 @@ export function loadStoredOrders(): Order[] {
       try { const order = readOrder(JSON.parse(localStorage.getItem(key) ?? "null")); if (order) records.set(order.orderId, order); }
       catch { /* Ignore only the malformed record. */ }
     }
-    if (raw !== null || records.size) return [...records.values()].sort((a, b) => b.createdAt - a.createdAt);
+    if (raw !== null || records.size) return cleanupCompletedDemoOrders([...records.values()], now).sort((a, b) => b.createdAt - a.createdAt);
     const legacy = localStorage.getItem(LEGACY_ORDER_KEY);
     const order = legacy ? readOrder(JSON.parse(legacy)) : null;
-    if (order) { saveStoredOrders([order]); return [order]; }
+    if (order) { saveStoredOrders([order]); return cleanupCompletedDemoOrders([order], now); }
   } catch { /* Unavailable browser storage must not break the page. */ }
   return [];
+}
+
+export function demoCompletionTime(order: Order, now: number): number | null {
+  // Unmarked legacy records with automatic progression are also local demo orders.
+  // An explicit non-demo flag or an unmarked externally supplied status is protected.
+  const demo = order.demo === true || (order.demo !== false && order.status === undefined);
+  if (!demo || getOrderStatus(order, now).id !== "delivered") return null;
+  return typeof order.completedAt === "number" && Number.isFinite(order.completedAt)
+    ? order.completedAt : order.createdAt + DEMO_ORDER_POLICY.fulfillmentDurationMs;
+}
+
+export function cleanupCompletedDemoOrders(orders: Order[], now: number): Order[] {
+  if (!DEMO_ORDER_POLICY.cleanupEnabled) return orders;
+  const expired = orders.filter(order => {
+    const completedAt = demoCompletionTime(order, now);
+    return completedAt !== null && now - completedAt >= DEMO_ORDER_POLICY.completedRetentionMs;
+  });
+  if (!expired.length) return orders;
+  const expiredIds = new Set(expired.map(order => order.orderId));
+  const remaining = orders.filter(order => !expiredIds.has(order.orderId));
+  try {
+    // Remove only expired records; independent active-order recovery records are untouched.
+    for (const id of expiredIds) localStorage.removeItem(`${ORDER_RECORD_PREFIX}${id}`);
+    localStorage.setItem(ORDERS_STORAGE_KEY, JSON.stringify(remaining));
+    const legacy = localStorage.getItem(LEGACY_ORDER_KEY);
+    if (legacy && expiredIds.has(JSON.parse(legacy)?.orderId)) localStorage.removeItem(LEGACY_ORDER_KEY);
+  } catch { /* Hide expired records now; retry persistence on the next load. */ }
+  return remaining;
 }
 export function saveStoredOrders(orders: Order[]): boolean {
   if (typeof window === "undefined") return false;
@@ -137,7 +167,7 @@ export function createStoredOrder(input: Omit<Order, "orderId">): Promise<Order>
     // Also defend against a broken/mocked random source rather than replacing an existing order.
     while (existing.some(order => order.orderId === id)) id += "-N";
     const createdAt = existing.reduce((latest, order) => Math.max(latest, order.createdAt + 1), input.createdAt);
-    const order: Order = JSON.parse(JSON.stringify({ ...input, createdAt, orderId: id }));
+    const order: Order = JSON.parse(JSON.stringify({ ...input, demo: input.demo ?? true, createdAt, orderId: id }));
     if (!persistOrder(order, [order, ...existing])) throw new Error("order_storage_unavailable");
     return order;
   });

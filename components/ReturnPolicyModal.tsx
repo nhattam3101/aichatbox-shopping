@@ -3,6 +3,7 @@
 import Image from "next/image";
 import { useEffect } from "react";
 import { contact } from "@/data/contact";
+import { RETURN_POLICY_TITLE } from "@/data/business";
 import { useDialogFocus } from "@/components/useDialogFocus";
 
 type Props = {
@@ -48,7 +49,7 @@ export default function ReturnPolicyModal({ isOpen, onClose }: Props) {
         <div className="flex items-start justify-between gap-4 border-b border-gray-100 pb-4">
           <div>
             <span className="inline-block rounded-full bg-emerald-50 px-3 py-0.5 text-xs font-bold text-emerald-800">
-              Đổi trả trong 3 ngày
+              {RETURN_POLICY_TITLE}
             </span>
             <h2
               id="return-policy-title"

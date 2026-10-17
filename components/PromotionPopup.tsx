@@ -26,7 +26,7 @@ export default function PromotionPopup({ campaign }: { campaign: PromotionCampai
       <Image src={ad.image} alt={ad.title} width={ad.width} height={ad.height} sizes="(max-width: 640px) 90vw, 456px" className="mx-auto h-auto max-h-[50dvh] w-auto max-w-full object-contain" />
     </div>
     <p className="mt-4 text-sm leading-relaxed text-[var(--text-secondary)]">{ad.description}</p>
-    <p className="mt-4 rounded-xl border border-dashed border-[var(--border)] p-3 text-sm">Mã ưu đãi: <strong className="select-all break-all font-mono">{ad.voucherCode}</strong></p>
+    {ad.voucherCode && <p className="mt-4 rounded-xl border border-dashed border-[var(--border)] p-3 text-sm">Mã ưu đãi: <strong className="select-all break-all font-mono">{ad.voucherCode}</strong></p>}
     <Link href={ad.href} onClick={() => setOpen(false)} className="mt-5 flex min-h-11 items-center justify-center rounded-full bg-[var(--primary)] px-5 py-3 text-sm font-bold">{ad.cta}</Link>
   </AccountDialog>;
 }

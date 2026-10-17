@@ -23,7 +23,7 @@ for (const extension of ['.ts', '.tsx']) require.extensions[extension] = (module
   compilerOptions: { module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2022, jsx: ts.JsxEmit.ReactJSX, esModuleInterop: true },
 }).outputText, filename);
 const Component = require('../components/AiMockupGenerator.tsx').default;
-let props = { configuration: { productId: 1, sizeMode: 'standard', selectedColor: 'Beige', selectedButton: 'Baby Blue', embroidery: false, embroideryText: '', selectedAccessoryId: null }, valid: true, changeKey: '' };
+let props = { configuration: { productId: 1, sizeMode: 'standard', selectedColor: 'Baby Blue', selectedButton: 'Baby Blue', embroidery: false, embroideryText: '', selectedAccessoryId: null }, valid: true, changeKey: '' };
 function render() { cursor = 0; effects = []; tree = Component(props); effects.forEach(fn => fn()); return tree; }
 function nodes(node = tree) {
   if (!node || typeof node !== 'object') return [];

@@ -1,5 +1,6 @@
 import { notFound } from "next/navigation";
 import { allProducts as products } from "@/data/products";
+import CustomStudio from "@/components/CustomStudio";
 import ProductDetailClient from "@/components/ProductDetailClient";
 
 export function generateStaticParams() {
@@ -21,6 +22,8 @@ export default async function ProductDetailPage({ params }: Props) {
   if (!product) {
     notFound();
   }
+
+  if (product.madeToMeasure) return <CustomStudio />;
 
   // Find related products (same size or similar price range)
   const relatedProducts = products

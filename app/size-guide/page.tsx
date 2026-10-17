@@ -3,6 +3,7 @@
 import Image from "next/image";
 import { useMemo, useState } from "react";
 import { products, type Product } from "@/data/products";
+import { validateCustomDimensions } from "@/data/size-validation";
 import { recommendSizes } from "@/data/size-rules";
 import Navbar from "@/components/Navbar";
 import ProductCard from "@/components/ProductCard";
@@ -47,13 +48,14 @@ export default function SizeGuidePage() {
   const numWidth = parseFloat(width) || 0;
   const numHeight = parseFloat(height) || 0;
 
+  const measurements = validateCustomDimensions(width, height, thickness);
   const matchedProducts = useMemo(() => {
-    if (numWidth <= 0 || numHeight <= 0) {
+    if (!validateCustomDimensions(width, height, thickness).isValid) {
       return [];
     }
 
-    return recommendSizes(numWidth, numHeight, thickness === "" ? undefined : Number(thickness));
-  }, [numWidth, numHeight, thickness]);
+    return recommendSizes(numWidth, numHeight, Number(thickness));
+  }, [numWidth, numHeight, width, height, thickness]);
 
   function handleReset() {
     setThickness("");
@@ -97,10 +99,11 @@ export default function SizeGuidePage() {
                 <div className="grid grid-cols-2 gap-4">
                   <div>
                     <label htmlFor="device-width" className="text-xs font-semibold text-gray-600">
-                      Chiều Dài máy (cm)
+                      Chiều dài máy (cm)
                     </label>
                     <input
                       type="number"
+                      required
                       step="0.1"
                       id="device-width"
                       value={width}
@@ -114,10 +117,11 @@ export default function SizeGuidePage() {
                   </div>
                   <div>
                     <label htmlFor="device-height" className="text-xs font-semibold text-gray-600">
-                      Chiều Rộng máy (cm)
+                      Chiều rộng máy (cm)
                     </label>
                     <input
                       type="number"
+                      required
                       step="0.1"
                       id="device-height"
                       value={height}
@@ -131,10 +135,10 @@ export default function SizeGuidePage() {
                   </div>
                 </div>
 
-                <label className="mt-4 block text-xs font-semibold">Độ dày máy (cm, không bắt buộc)
-                  <input type="number" min="0.1" step="0.1" value={thickness} onChange={e => setThickness(e.target.value)} className="mt-2 w-full rounded-2xl border border-gray-200 p-3" />
+                <label className="mt-4 block text-xs font-semibold">Độ dày máy (cm)
+                  <input required type="number" min="0.3" max="6" step="0.1" value={thickness} onChange={e => setThickness(e.target.value)} className="mt-2 w-full rounded-2xl border border-gray-200 p-3" />
                 </label>
-                {thickness === "" && <p className="mt-3 text-xs text-amber-800">Gợi ý sơ bộ: cần đo độ dày trước khi mua. Size 25 × 36 × 2 chỉ dành cho máy thân mỏng ≤ 2 cm, kể cả laptop 15.6 inch.</p>}
+                {!measurements.isValid && <p role="status" className="mt-3 text-xs text-amber-800">Vui lòng nhập đầy đủ chiều dài, chiều rộng và độ dày hợp lệ trước khi chọn size.</p>}
                 {numWidth > 0 && numHeight > 0 && (
                   <div className="mt-4 flex items-center justify-between text-xs">
                     <span className="text-gray-500">
@@ -187,7 +191,7 @@ export default function SizeGuidePage() {
 
             {/* Right Column: Matched Products Results */}
             <div className="lg:col-span-7">
-              {numWidth > 0 && numHeight > 0 ? (
+              {measurements.isValid ? (
                 <div>
                   <div className="mb-6 flex items-center justify-between">
                     <div>

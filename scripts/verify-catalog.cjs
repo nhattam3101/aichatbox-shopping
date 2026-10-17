@@ -68,7 +68,7 @@ for (const directory of ['app','components','data']) {
 for (const q of ['laptop','ipad','tablet','11 inch','13 inch','13.3 inch','14 inch','15.6 inch','16 inch','17.3 inch','móc khóa','phụ kiện','tag treo']) {
   assert.ok(saleProducts.some(p => matchesProduct(p, q)), q);
 }
-assert.equal(products.length, 10);
+assert.equal(products.length, 11);
 assert.equal(accessories.length, 6);
 assert.equal(new Set(allProducts.map(p => p.id)).size, allProducts.length);
 assert.ok(accessories.every(p => p.kind === 'accessory' && p.price === 29000 && p.category === 'Móc khóa / Phụ kiện'));
@@ -91,7 +91,7 @@ assert.equal(recommendSizes(38,26,2.5)[0].id, 5);
 assert.equal(recommendSizes(38,26,2.51)[0].id, 6);
 assert.equal(recommendSizes(41,28,3)[0].id, 6);
 for (const values of [[42,29,2],[41,28,3.01],[-1,23,1],[NaN,23,1],[34,23,0]]) assert.equal(recommendSizes(...values).length, 0);
-assert.equal(recommendSizes(36,25)[0].id,4);
+assert.deepEqual(recommendSizes(36,25), []);
 for (const p of allProducts) for (const image of [p.image, ...(p.gallery || [])]) assert.ok(fs.existsSync(path.join(__dirname,'../public',image)), image);
 assert.ok(services.every(p => p.price === 29000));
 assert.ok(allProducts.every(p => p.priceConfirmed !== false));
@@ -122,8 +122,8 @@ for (const file of ['size_table.jpg','bang_mau.png','bang_mau_nut.jpg']) assert.
   const followup = await POST(new Request('http://localhost/api/chat',{method:'POST',body:JSON.stringify({messages:[{role:'user',content:'Máy 36 x 25 cm'},{role:'assistant',content:'Bạn cho biết độ dày?'},{role:'user',content:'Dày 2.4 cm'}]})}));
   assert.deepEqual((await followup.json()).recommendedProductIds,[5]);
   const provisional = await POST(new Request('http://localhost/api/chat',{method:'POST',body:JSON.stringify({messages:[{role:'user',content:'Máy 36 x 25 cm'}]})}));
-  assert.match((await provisional.json()).reply,/sơ bộ/);
+  assert.deepEqual((await provisional.json()).recommendedProductIds, []);
   const bad = await POST(new Request('http://localhost/api/chat',{method:'POST',body:JSON.stringify({messages:[{role:'user',content:23}]})}));
   assert.equal(bad.status,400);
-  console.log('PASS: 17 catalog records, prices, image mappings, size boundaries, chat, handmade variants, legacy defaults, gallery references and 3-day policy.');
+  console.log('PASS: 18 catalog records, prices, image mappings, size boundaries, chat, handmade variants, legacy defaults, gallery references and 3-day policy.');
 })().catch(error => { console.error(error); process.exitCode=1; });
