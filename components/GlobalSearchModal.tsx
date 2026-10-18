@@ -39,7 +39,7 @@ export default function GlobalSearchModal({ isOpen, onClose }: Props) {
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-start justify-center p-4 sm:p-6 md:p-12">
+    <div className="fixed inset-0 z-50 flex items-start justify-center p-3 sm:p-6 md:p-12">
       {/* Backdrop */}
       <div
         className="fixed inset-0 bg-black/50 backdrop-blur-md transition-opacity"
@@ -47,9 +47,9 @@ export default function GlobalSearchModal({ isOpen, onClose }: Props) {
       />
 
       {/* Search Container */}
-      <div ref={dialogRef} role="dialog" aria-modal="true" aria-label="Tìm kiếm sản phẩm" tabIndex={-1} className="relative z-10 w-full max-w-2xl overflow-hidden rounded-3xl bg-white shadow-2xl border border-black/10 animate-fade-in-up mt-8">
+      <div ref={dialogRef} role="dialog" aria-modal="true" aria-label="Tìm kiếm sản phẩm" tabIndex={-1} className="relative z-10 flex max-h-[calc(100dvh-1.5rem)] sm:max-h-[calc(100dvh-3rem)] md:max-h-[calc(100dvh-6rem)] w-full max-w-2xl flex-col overflow-y-auto overscroll-contain rounded-3xl bg-white shadow-2xl border border-black/10 animate-fade-in-up">
         {/* Search Input Bar */}
-        <div className="flex items-center gap-3 border-b border-gray-100 px-6 py-4">
+        <div className="flex items-center shrink-0 gap-2 border-b border-gray-100 px-4 py-3 sm:px-6">
           <svg className="h-5 w-5 text-gray-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
           </svg>
@@ -71,6 +71,7 @@ export default function GlobalSearchModal({ isOpen, onClose }: Props) {
           )}
           <button
             onClick={handleClose}
+            aria-label="Đóng tìm kiếm"
             className="rounded-full bg-gray-100 px-2.5 py-1 text-xs font-medium text-gray-500 hover:bg-gray-200 transition"
           >
             ESC
@@ -99,7 +100,7 @@ export default function GlobalSearchModal({ isOpen, onClose }: Props) {
               <p className="text-xs font-bold uppercase tracking-wider text-gray-400 mb-3">
                 Sản phẩm nổi bật hôm nay
               </p>
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 {products.slice(0, 4).map((p) => (
                   <Link
                     key={p.id}
@@ -108,10 +109,10 @@ export default function GlobalSearchModal({ isOpen, onClose }: Props) {
                     className="flex items-center gap-3 rounded-2xl p-2 hover:bg-gray-50 transition border border-transparent hover:border-gray-100"
                   >
                     <div className="relative h-12 w-12 shrink-0 overflow-hidden rounded-xl bg-gray-100">
-                      <Image src={p.image} alt={p.name} fill className="object-contain" />
+                      <Image src={p.image} alt={p.name} fill sizes="56px" className="object-contain" />
                     </div>
                     <div className="min-w-0 flex-1">
-                      <p className="text-xs font-bold text-gray-900 truncate">{p.name}</p>
+                      <p className="text-sm font-bold text-gray-900 break-words">{p.name}</p>
                       <p className="price-text text-[11px] font-semibold">{p.priceConfirmed === false ? "Giá chờ xác nhận" : p.price.toLocaleString("vi-VN") + "₫"}</p>
                     </div>
                   </Link>
@@ -123,7 +124,7 @@ export default function GlobalSearchModal({ isOpen, onClose }: Props) {
 
         {/* Search Results */}
         {query && (
-          <div className="max-h-[60vh] overflow-y-auto p-4 divide-y divide-gray-100">
+          <div className="min-h-0 overflow-y-auto p-4 divide-y divide-gray-100">
             {filtered.length === 0 ? (
               <div className="py-12 text-center">
                 <p className="text-sm font-semibold text-gray-800">Không tìm thấy sản phẩm cho &ldquo;{query}&rdquo;</p>
@@ -135,17 +136,17 @@ export default function GlobalSearchModal({ isOpen, onClose }: Props) {
                   key={item.id}
                   href={`/products/${item.id}`}
                   onClick={handleClose}
-                  className="group flex items-center justify-between gap-4 p-3 hover:bg-[var(--brand-cream)] rounded-2xl transition"
+                  className="group flex flex-wrap items-center justify-between gap-3 p-3 hover:bg-[var(--brand-cream)] rounded-2xl transition"
                 >
                   <div className="flex items-center gap-3.5 min-w-0">
                     <div className="relative h-14 w-14 shrink-0 overflow-hidden rounded-xl bg-[var(--surface-muted)] border border-gray-100">
-                      <Image src={item.image} alt={item.name} fill className="object-contain p-1 group-hover:scale-105 transition duration-300" />
+                      <Image src={item.image} alt={item.name} fill sizes="56px" className="object-contain p-1 group-hover:scale-105 transition duration-300" />
                     </div>
                     <div className="min-w-0">
-                      <h4 className="text-sm font-bold text-gray-900 truncate group-hover:text-amber-600 transition">
+                      <h4 className="text-sm font-bold text-gray-900 break-words group-hover:text-amber-600 transition">
                         {item.name}
                       </h4>
-                      <div className="flex items-center gap-2 text-xs text-gray-500 mt-0.5">
+                      <div className="flex flex-wrap items-center gap-2 text-xs text-gray-500 mt-0.5">
                         <span className="font-medium text-gray-700">{item.size}</span>
                         <span>•</span>
                         <span>{item.category}</span>

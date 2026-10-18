@@ -1,6 +1,7 @@
 "use client";
 
 import { returningCustomerOffer } from "@/data/vouchers";
+import AntigravityBackground from "@/components/AntigravityBackground";
 import { contact } from "@/data/contact";
 import Link from "next/link";
 import Image from "next/image";
@@ -27,6 +28,7 @@ export default function Home() {
   const [activeTab, setActiveTab] = useState<"bestseller" | "new" | "shockproof" | "pastel">("bestseller");
   const [quickViewProduct, setQuickViewProduct] = useState<Product | null>(null);
   const [isReturnPolicyOpen, setIsReturnPolicyOpen] = useState(false);
+  const [announcementPaused, setAnnouncementPaused] = useState(false);
   const [openFaq, setOpenFaq] = useState<number | null>(null);
 
   const bestSellers = products.filter((p) => p.badge === "Bán chạy" || p.badge === "Hot" || p.badge === "Top 1").slice(0, 8);
@@ -67,10 +69,11 @@ export default function Home() {
       <Navbar />
 
       {/* Announcement Marquee Ticker */}
-      <div className="overflow-hidden bg-[var(--text-primary)] py-2.5 text-white">
-        <div className="animate-marquee flex whitespace-nowrap text-xs font-medium">
+      <div className="relative overflow-hidden bg-[var(--text-primary)] py-2.5 pr-28 text-white">
+        <button type="button" aria-pressed={announcementPaused} onClick={() => setAnnouncementPaused(value => !value)} className="absolute right-0 top-0 z-10 h-full bg-[var(--deep-navy)] px-4 text-xs font-semibold text-white">{announcementPaused ? "Tiếp tục" : "Tạm dừng"}<span className="sr-only"> thông báo</span></button>
+        <div className="animate-marquee flex whitespace-nowrap text-xs font-medium" style={{ animationPlayState: announcementPaused ? "paused" : undefined }}>
           {Array.from({ length: 2 }).map((_, i) => (
-            <span key={i} className="mx-6 flex items-center gap-6 text-white/90">
+            <span key={i} aria-hidden={i === 1 ? true : undefined} className="mx-6 flex items-center gap-6 text-white/90">
               <span>{returningCustomerOffer.title}</span>
               <span>•</span>
               <span>🚚 Miễn phí vận chuyển toàn quốc đơn từ 300K</span>
@@ -89,7 +92,8 @@ export default function Home() {
       </div>
 
       {/* Hero Section */}
-      <section className="relative overflow-hidden pt-12 pb-20 md:pt-20 md:pb-32">
+      <section className="relative isolate overflow-hidden pt-12 pb-20 md:pt-20 md:pb-32">
+        <AntigravityBackground />
         {/* Ambient Gradient Glows */}
         <div className="absolute -right-40 -top-40 h-[550px] w-[550px] rounded-full bg-[var(--surface-muted)] opacity-40 pointer-events-none" />
         <div className="absolute -bottom-20 -left-20 h-[450px] w-[450px] rounded-full bg-[var(--surface-muted)] opacity-40 pointer-events-none" />
@@ -104,7 +108,7 @@ export default function Home() {
               <span>CaseUp Handmade · Theo gu của bạn</span>
             </div>
 
-            <h1 className="text-4xl font-extrabold leading-[1.08] tracking-tight sm:text-5xl lg:text-6xl">
+            <h1 id="main-content" tabIndex={-1} className="text-4xl font-extrabold leading-[1.08] tracking-tight sm:text-5xl lg:text-6xl">
               Bảo vệ
               <br />
               máy yêu,
@@ -156,7 +160,7 @@ export default function Home() {
               <div>
                 <div className="flex items-center gap-1">
                   {Array.from({ length: 5 }).map((_, i) => (
-                    <span key={i} className="text-[var(--yellow)] text-sm">★</span>
+                    <span key={i} aria-hidden={i === 1 ? true : undefined} className="text-[var(--yellow)] text-sm">★</span>
                   ))}
                   <span className="ml-1 text-xs font-bold text-gray-800">4.9 / 5</span>
                 </div>

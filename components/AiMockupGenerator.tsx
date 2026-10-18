@@ -56,6 +56,7 @@ export default function AiMockupGenerator({ configuration, valid, changeKey }: {
     <section aria-label="Bản mô phỏng AI" aria-busy={loading} className="min-w-0 rounded-3xl border border-[var(--border)] bg-white p-5 shadow-sm sm:p-6">
       <h3 className="font-extrabold text-[var(--deep-navy)]">Bản mô phỏng AI</h3>
       <p className="mt-2 text-sm text-[var(--text-secondary)]">Tùy chọn tạo ảnh tham khảo cho thiết kế của bạn.</p>
+      <p className="mt-3 rounded-xl border border-[var(--border)] bg-[var(--background)] p-3 text-sm leading-relaxed break-words"><strong>Tùy chọn hiện tại:</strong> {mockupSummary(configuration)}</p>
       <div aria-live="polite" className="mt-3 text-sm">
         {stale && <p className="mb-3 rounded-xl bg-[var(--secondary-soft)] p-3">Tùy chọn đã thay đổi. Hãy tạo lại bản mô phỏng để cập nhật.</p>}
         {loading && <div role="status" className="my-4 rounded-xl bg-[var(--surface-muted)] p-4">

@@ -84,7 +84,7 @@ export default function Navbar() {
           <div className="flex shrink-0 items-center gap-1.5 sm:gap-2">
             {/* Search Button */}
             <button
-              onClick={() => setIsSearchOpen(true)}
+              onClick={() => { setMobileOpen(false); setIsSearchOpen(true); }}
               className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full border border-gray-200 bg-[var(--surface-muted)] text-gray-600 transition hover:border-[var(--secondary)] hover:bg-white"
               title="Tìm kiếm (ESC để đóng)"
               aria-label="Tìm kiếm sản phẩm"
@@ -96,7 +96,7 @@ export default function Navbar() {
 
             {/* Wishlist Button */}
             <button
-              onClick={() => setIsWishlistOpen(true)}
+              onClick={() => { setMobileOpen(false); setIsWishlistOpen(true); }}
               className="relative flex h-11 w-11 shrink-0 items-center justify-center rounded-full border border-gray-200 bg-white text-gray-700 transition hover:border-rose-300 hover:bg-rose-50 hover:text-[var(--text-primary)] shadow-sm"
               aria-label="Danh sách yêu thích"
             >
@@ -121,7 +121,7 @@ export default function Navbar() {
               </svg>
               <span className="hidden sm:inline">Giỏ hàng</span>
               {totalItems > 0 && (
-                <span className="flex h-5 w-5 items-center justify-center rounded-full bg-amber-400 text-xs font-extrabold text-[var(--text-primary)] animate-pulse">
+                <span className="flex h-5 w-5 items-center justify-center rounded-full bg-amber-400 text-xs font-extrabold text-[var(--text-primary)]">
                   {totalItems > 99 ? "99+" : totalItems}
                 </span>
               )}
@@ -149,7 +149,7 @@ export default function Navbar() {
 
         {/* Mobile Navigation Dropdown */}
         {mobileOpen && (
-          <nav id="mobile-navigation" className="border-t border-[var(--brand-border)] bg-white px-6 py-4 xl:hidden space-y-1 animate-fade-in-up">
+          <nav id="mobile-navigation" aria-label="Điều hướng di động" onKeyDown={event => { if (event.key === "Escape") { setMobileOpen(false); document.querySelector<HTMLButtonElement>('[aria-controls="mobile-navigation"]')?.focus(); } }} className="max-h-[calc(100dvh-5rem)] overflow-y-auto overscroll-contain border-t border-[var(--brand-border)] bg-white px-6 py-4 xl:hidden space-y-1 animate-fade-in-up">
             <div className="mb-2 border-b border-[var(--border)] pb-2"><p className="px-4 py-2 text-xs font-bold uppercase tracking-wider text-[var(--text-secondary)]">Tài khoản</p>
               {accountLinks.map(link => <Link key={link.href} href={link.href} onClick={() => setMobileOpen(false)} aria-current={pathname === link.href ? "page" : undefined} className="block rounded-xl px-4 py-3 text-sm font-semibold text-[var(--secondary-ink)] hover:bg-[var(--secondary-soft)]">{link.label}{link.href === "/notifications" && unreadCount > 0 && <span className="ml-2 rounded-full bg-[var(--secondary-soft)] px-2 py-1 text-xs">{unreadCount}</span>}</Link>)}
             </div>

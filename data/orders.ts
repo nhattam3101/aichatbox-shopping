@@ -1,6 +1,7 @@
 import type { CartItem } from "@/components/CartContext";
 import { allProducts } from "@/data/products";
 import { DEMO_ORDER_POLICY } from "@/data/demo-orders";
+import { transferContent, type PaymentMethod, type PaymentStatus } from "@/data/payment";
 
 export type OrderStatus = "placed" | "pending" | "preparing" | "handed_over" | "shipping" | "delivered" | "cancelled";
 export type OrderReview = { rating: number; text: string; submittedAt: number };
@@ -12,7 +13,9 @@ export function notifyCustomerData() {
 export type Order = {
   orderId: string; items: CartItem[]; total: number; totalQuantity: number;
   customerName: string; phone: string; address: string; note: string;
-  paymentMethod: "cod" | "banking"; createdAt: number; createdAtDisplay: string;
+  paymentMethod: PaymentMethod; paymentStatus?: PaymentStatus;
+  paymentReference?: string; paymentContent?: string;
+  createdAt: number; createdAtDisplay: string;
   discountAmount?: number; status?: OrderStatus;
   cancellationReason?: string; cancelledAt?: number; reviews?: Record<string, OrderReview>;
   demo?: boolean; completedAt?: number;
@@ -38,6 +41,7 @@ export function getOrderStatusIndex(createdAt: number, now: number = Date.now())
   return Math.min(5, Math.max(0, Math.floor((now - createdAt) / (DEMO_ORDER_POLICY.fulfillmentDurationMs / 5))));
 }
 export function getOrderStatus(order: Order, now: number) {
+  if (order.paymentMethod === "qr" && order.paymentStatus !== "paid" && (!order.status || order.status === "placed" || order.status === "pending")) return ORDER_STATUS_STEPS[1];
   return ORDER_STATUS_STEPS.find(step => step.id === order.status) ?? ORDER_STATUS_STEPS[getOrderStatusIndex(order.createdAt, now)];
 }
 export function matchesOrderFilter(order: Order, filter: OrderFilter, now: number): boolean {
@@ -79,7 +83,12 @@ function readOrder(value: unknown): Order | null {
       !Array.isArray(order.items) || !order.items.length || typeof order.total !== "number" || !Number.isFinite(order.total) ||
       !order.items.every(item => item && typeof item.name === "string" && typeof item.image === "string" &&
         typeof item.quantity === "number" && typeof item.price === "number")) return null;
-  return { ...order, createdAt };
+  const legacyMethod = (value as { paymentMethod?: string }).paymentMethod;
+  const paymentMethod = legacyMethod === "qr" || legacyMethod === "banking" ? "qr" : "cod";
+  const paymentStatus = ["pending", "awaiting_payment", "paid", "failed"].includes(order.paymentStatus ?? "")
+    ? order.paymentStatus : paymentMethod === "qr" ? "awaiting_payment" : "pending";
+  return { ...order, createdAt, paymentMethod, paymentStatus,
+    ...(paymentMethod === "qr" ? { paymentReference: order.paymentReference ?? order.orderId, paymentContent: order.paymentContent ?? transferContent(order.orderId) } : {}) };
 }
 export function loadStoredOrders(now = Date.now()): Order[] {
   if (typeof window === "undefined") return [];
@@ -174,7 +183,9 @@ export function createStoredOrder(input: Omit<Order, "orderId">): Promise<Order>
     // Also defend against a broken/mocked random source rather than replacing an existing order.
     while (existing.some(order => order.orderId === id)) id += "-N";
     const createdAt = existing.reduce((latest, order) => Math.max(latest, order.createdAt + 1), input.createdAt);
-    const order: Order = JSON.parse(JSON.stringify({ ...input, demo: input.demo ?? true, createdAt, orderId: id }));
+    const order: Order = JSON.parse(JSON.stringify({ ...input, demo: input.demo ?? true, createdAt, orderId: id,
+      paymentStatus: input.paymentMethod === "qr" ? "awaiting_payment" : "pending",
+      ...(input.paymentMethod === "qr" ? { paymentReference: id, paymentContent: transferContent(id) } : {}) }));
     if (!persistOrder(order, [order, ...existing])) throw new Error("order_storage_unavailable");
     return order;
   });

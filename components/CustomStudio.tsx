@@ -1,4 +1,5 @@
 "use client";
+import AntigravityBackground from "@/components/AntigravityBackground";
 
 import { useState } from "react";
 import Image from "next/image";
@@ -81,7 +82,10 @@ export default function CustomStudio() {
       if (!customValidation.isValid || !customValidation.dimensions) {
         // Scroll to custom size section
         const el = document.getElementById("custom-size-step");
-        if (el) el.scrollIntoView({ behavior: "smooth" });
+        if (el) {
+          el.scrollIntoView({ behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth", block: "center" });
+          requestAnimationFrame(() => el.querySelector<HTMLInputElement>('input[aria-invalid="true"]')?.focus({ preventScroll: true }));
+        }
         return;
       }
     }
@@ -143,12 +147,13 @@ export default function CustomStudio() {
       <Navbar />
 
       {/* Header Banner */}
-      <section className="border-b border-[var(--brand-border)] bg-white py-10 md:py-14">
+      <section className="relative isolate overflow-hidden border-b border-[var(--brand-border)] bg-white py-10 md:py-14">
+        <AntigravityBackground stronger />
         <div className="mx-auto max-w-7xl px-4 sm:px-6 md:px-12 lg:px-20 text-center">
           <div className="inline-flex items-center gap-2 rounded-full bg-amber-50 border border-amber-200 px-4 py-1.5 text-xs font-bold uppercase tracking-wider text-amber-800">
             <span>✨ Tự Thiết Kế CaseUp Handmade</span>
           </div>
-          <h1 className="mt-4 text-3xl sm:text-4xl lg:text-5xl font-extrabold tracking-tight text-gray-900">
+          <h1 id="main-content" tabIndex={-1} className="mt-4 text-3xl sm:text-4xl lg:text-5xl font-extrabold tracking-tight text-gray-900">
             Cá Nhân Hóa Chiếc Bao Của Bạn
           </h1>
           <p className="mt-3 text-sm sm:text-base text-gray-600 max-w-2xl mx-auto leading-relaxed">

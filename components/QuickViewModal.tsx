@@ -66,7 +66,7 @@ function QuickViewDialog({ product, onClose }: { product: Product; onClose: () =
       />
 
       {/* Modal Dialog */}
-      <div ref={dialogRef} role="dialog" aria-modal="true" aria-label={product.name} tabIndex={-1} className="relative z-10 w-full max-w-3xl overflow-y-auto rounded-3xl bg-white shadow-2xl transition-all max-h-[92vh] flex flex-col md:flex-row border border-[var(--brand-border)] animate-fade-in-up">
+      <div ref={dialogRef} role="dialog" aria-modal="true" aria-label={product.name} tabIndex={-1} className="relative z-10 w-full max-w-3xl overflow-y-auto rounded-3xl bg-white shadow-2xl transition-all max-h-[calc(100dvh-2rem)] flex flex-col md:flex-row border border-[var(--brand-border)] animate-fade-in-up">
         {/* Close Button */}
         <button
           onClick={onClose}

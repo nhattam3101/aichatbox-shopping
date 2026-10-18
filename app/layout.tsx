@@ -31,6 +31,7 @@ export default function RootLayout({
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col font-sans selection:bg-amber-100 selection:text-amber-900">
+        <a href="#main-content" className="skip-link">Đến nội dung chính</a>
         <CartProvider>
           <WishlistProvider>
             <CompareProvider>

@@ -151,7 +151,7 @@ function CompareModal() {
         onClick={() => setIsCompareModalOpen(false)}
       />
 
-      <div ref={dialogRef} role="dialog" aria-modal="true" aria-label="So sánh sản phẩm" tabIndex={-1} className="relative z-10 w-full max-w-5xl rounded-3xl bg-white p-6 md:p-8 shadow-2xl max-h-[90vh] overflow-y-auto">
+      <div ref={dialogRef} role="dialog" aria-modal="true" aria-label="So sánh sản phẩm" tabIndex={-1} className="relative z-10 w-full max-w-5xl rounded-3xl bg-white p-6 md:p-8 shadow-2xl max-h-[calc(100dvh-2rem)] overflow-y-auto">
         <div className="flex items-center justify-between border-b border-gray-100 pb-4">
           <div>
             <h2 className="text-2xl font-bold text-gray-900">So sánh thông số sản phẩm</h2>

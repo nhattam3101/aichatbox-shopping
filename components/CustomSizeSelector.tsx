@@ -94,12 +94,14 @@ export default function CustomSizeSelector({
             <div>
               <label
                 htmlFor={lengthInputId}
-                className="block text-xs font-bold text-gray-800 mb-1"
+                className="block text-sm font-bold text-gray-800 mb-1"
               >
                 Chiều dài máy (cm) <span className="text-rose-500">*</span>
               </label>
               <input
                 id={lengthInputId}
+                aria-invalid={isSubmittedOrTouched && Boolean(validation.lengthError || validation.generalError)}
+                aria-describedby={[isSubmittedOrTouched && validation.lengthError ? `${lengthInputId}-error` : null, isSubmittedOrTouched && validation.generalError ? `${baseId}-error` : null, `${baseId}-help`].filter(Boolean).join(" ")}
                 type="number"
                 required
                 inputMode="decimal"
@@ -116,7 +118,7 @@ export default function CustomSizeSelector({
                 }`}
               />
               {isSubmittedOrTouched && validation.lengthError && (
-                <p className="mt-1 text-[11px] font-medium text-rose-600">
+                <p id={`${lengthInputId}-error`} className="mt-1 text-sm leading-relaxed font-medium text-[var(--destructive)]">
                   {validation.lengthError}
                 </p>
               )}
@@ -126,12 +128,14 @@ export default function CustomSizeSelector({
             <div>
               <label
                 htmlFor={widthInputId}
-                className="block text-xs font-bold text-gray-800 mb-1"
+                className="block text-sm font-bold text-gray-800 mb-1"
               >
                 Chiều rộng máy (cm) <span className="text-rose-500">*</span>
               </label>
               <input
                 id={widthInputId}
+                aria-invalid={isSubmittedOrTouched && Boolean(validation.widthError || validation.generalError)}
+                aria-describedby={[isSubmittedOrTouched && validation.widthError ? `${widthInputId}-error` : null, isSubmittedOrTouched && validation.generalError ? `${baseId}-error` : null, `${baseId}-help`].filter(Boolean).join(" ")}
                 type="number"
                 required
                 inputMode="decimal"
@@ -148,7 +152,7 @@ export default function CustomSizeSelector({
                 }`}
               />
               {isSubmittedOrTouched && validation.widthError && (
-                <p className="mt-1 text-[11px] font-medium text-rose-600">
+                <p id={`${widthInputId}-error`} className="mt-1 text-sm leading-relaxed font-medium text-[var(--destructive)]">
                   {validation.widthError}
                 </p>
               )}
@@ -158,12 +162,14 @@ export default function CustomSizeSelector({
             <div>
               <label
                 htmlFor={thicknessInputId}
-                className="block text-xs font-bold text-gray-800 mb-1"
+                className="block text-sm font-bold text-gray-800 mb-1"
               >
                 Độ dày máy (cm) <span className="text-rose-500">*</span>
               </label>
               <input
                 id={thicknessInputId}
+                aria-invalid={isSubmittedOrTouched && Boolean(validation.thicknessError || validation.generalError)}
+                aria-describedby={[isSubmittedOrTouched && validation.thicknessError ? `${thicknessInputId}-error` : null, isSubmittedOrTouched && validation.generalError ? `${baseId}-error` : null, `${baseId}-help`].filter(Boolean).join(" ")}
                 type="number"
                 required
                 inputMode="decimal"
@@ -180,7 +186,7 @@ export default function CustomSizeSelector({
                 }`}
               />
               {isSubmittedOrTouched && validation.thicknessError && (
-                <p className="mt-1 text-[11px] font-medium text-rose-600">
+                <p id={`${thicknessInputId}-error`} className="mt-1 text-sm leading-relaxed font-medium text-[var(--destructive)]">
                   {validation.thicknessError}
                 </p>
               )}
@@ -189,7 +195,7 @@ export default function CustomSizeSelector({
 
           {/* General error (e.g. length <= width, missing values) */}
           {isSubmittedOrTouched && validation.generalError && (
-            <div className="rounded-2xl border border-rose-200 bg-rose-50 p-2.5 text-xs text-rose-700 font-medium">
+            <div id={`${baseId}-error`} role="status" className="rounded-2xl border border-[var(--destructive)] bg-rose-50 p-3 text-sm text-[var(--destructive)] font-medium">
               ⚠️ {validation.generalError}
             </div>
           )}
@@ -205,14 +211,14 @@ export default function CustomSizeSelector({
           )}
 
           {/* Helper text */}
-          <div className="space-y-1 text-xs text-gray-600 leading-relaxed border-t border-amber-200/60 pt-3">
+          <div id={`${baseId}-help`} className="space-y-2 text-sm text-gray-600 leading-relaxed border-t border-amber-200/60 pt-3">
             <p>
               📐 <strong>CaseUp sẽ may theo thông số bạn cung cấp.</strong> Vui lòng đo trực tiếp thiết bị và kiểm tra kỹ trước khi đặt hàng.
             </p>
             <p className="text-amber-800 font-medium">
               💬 CaseUp sẽ xác nhận lại kích thước trước khi tiến hành may.
             </p>
-            <p className="text-[11px] text-gray-500">
+            <p className="text-sm text-gray-500">
               * Quy tắc: Chiều dài (10–50 cm), chiều rộng (7–40 cm), độ dày (0.3–6 cm). Chiều dài phải lớn hơn chiều rộng.
             </p>
           </div>

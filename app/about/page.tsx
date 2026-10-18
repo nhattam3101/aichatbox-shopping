@@ -19,7 +19,7 @@ export default function AboutPage() {
             Về Thương Hiệu CaseUp
           </span>
 
-          <h1 className="mt-4 text-4xl sm:text-5xl lg:text-6xl font-extrabold leading-tight tracking-tight text-gray-900">
+          <h1 id="main-content" tabIndex={-1} className="mt-4 text-4xl sm:text-5xl lg:text-6xl font-extrabold leading-tight tracking-tight text-gray-900">
             Chiếc bao vừa máy,
             <br />
             <span className="text-[var(--primary-ink)]">

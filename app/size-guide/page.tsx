@@ -75,7 +75,7 @@ export default function SizeGuidePage() {
           <span className="inline-flex items-center gap-2 rounded-full bg-amber-50 px-4 py-1 text-xs font-bold uppercase tracking-wider text-amber-700">
             Công Cụ Chọn Size Thông Minh 2.0
           </span>
-          <h1 className="mt-4 text-3xl md:text-5xl font-extrabold tracking-tight text-gray-900">
+          <h1 id="main-content" tabIndex={-1} className="mt-4 text-3xl md:text-5xl font-extrabold tracking-tight text-gray-900">
             Tìm Bao Laptop Phù Hợp Với Máy
           </h1>
           <p className="mt-3 text-sm md:text-base text-gray-500 max-w-2xl mx-auto leading-relaxed">
@@ -96,7 +96,7 @@ export default function SizeGuidePage() {
                   Nhập kích thước đo thực tế
                 </h2>
 
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>
                     <label htmlFor="device-width" className="text-xs font-semibold text-gray-600">
                       Chiều dài máy (cm)
@@ -106,6 +106,9 @@ export default function SizeGuidePage() {
                       required
                       step="0.1"
                       id="device-width"
+                      inputMode="decimal"
+                      aria-invalid={Boolean(width && measurements.lengthError)}
+                      aria-describedby="size-guide-feedback"
                       value={width}
                       onChange={(e) => {
                         setWidth(e.target.value);
@@ -124,6 +127,9 @@ export default function SizeGuidePage() {
                       required
                       step="0.1"
                       id="device-height"
+                      inputMode="decimal"
+                      aria-invalid={Boolean(height && measurements.widthError)}
+                      aria-describedby="size-guide-feedback"
                       value={height}
                       onChange={(e) => {
                         setHeight(e.target.value);
@@ -136,7 +142,7 @@ export default function SizeGuidePage() {
                 </div>
 
                 <label className="mt-4 block text-xs font-semibold">Độ dày máy (cm)
-                  <input required type="number" min="0.3" max="6" step="0.1" value={thickness} onChange={e => setThickness(e.target.value)} className="mt-2 w-full rounded-2xl border border-gray-200 p-3" />
+                  <input aria-describedby="size-guide-feedback" aria-invalid={Boolean(thickness && measurements.thicknessError)} inputMode="decimal" required type="number" min="0.3" max="6" step="0.1" value={thickness} onChange={e => setThickness(e.target.value)} className="mt-2 w-full rounded-2xl border border-gray-200 p-3" />
                 </label>
                 {!measurements.isValid && <p role="status" className="mt-3 text-xs text-amber-800">Vui lòng nhập đầy đủ chiều dài, chiều rộng và độ dày hợp lệ trước khi chọn size.</p>}
                 {numWidth > 0 && numHeight > 0 && (

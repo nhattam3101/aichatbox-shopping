@@ -1,7 +1,6 @@
 "use client";
 
 import Image from "next/image";
-import { useEffect } from "react";
 import { contact } from "@/data/contact";
 import { RETURN_POLICY_TITLE } from "@/data/business";
 import { useDialogFocus } from "@/components/useDialogFocus";
@@ -13,18 +12,6 @@ type Props = {
 
 export default function ReturnPolicyModal({ isOpen, onClose }: Props) {
   const dialogRef = useDialogFocus(isOpen, onClose);
-
-  // Close on ESC
-  useEffect(() => {
-    if (!isOpen) return;
-    function handleKeyDown(e: KeyboardEvent) {
-      if (e.key === "Escape") {
-        onClose();
-      }
-    }
-    window.addEventListener("keydown", handleKeyDown);
-    return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [isOpen, onClose]);
 
   if (!isOpen) return null;
 
@@ -44,7 +31,7 @@ export default function ReturnPolicyModal({ isOpen, onClose }: Props) {
       />
 
       {/* Modal Dialog */}
-      <div className="relative z-10 w-full max-w-2xl max-h-[90vh] overflow-y-auto rounded-3xl border border-[var(--brand-border)] bg-white p-6 shadow-2xl animate-fade-in-up">
+      <div className="relative z-10 w-full max-w-2xl max-h-[calc(100dvh-2rem)] overflow-y-auto rounded-3xl border border-[var(--brand-border)] bg-white p-6 shadow-2xl animate-fade-in-up">
         {/* Header */}
         <div className="flex items-start justify-between gap-4 border-b border-gray-100 pb-4">
           <div>

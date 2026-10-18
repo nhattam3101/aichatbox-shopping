@@ -37,7 +37,7 @@ export default function ChatBox() {
 
   useEffect(() => {
     if (isOpen) {
-      messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+      messagesEndRef.current?.scrollIntoView({ behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth", block: "nearest" });
     }
   }, [messages, isLoading, isOpen]);
 
@@ -177,7 +177,7 @@ export default function ChatBox() {
 
       {/* Chat Window */}
       {isOpen && (
-        <div className="fixed bottom-5 right-4 sm:right-6 z-50 flex h-[620px] max-h-[88vh] w-[calc(100vw-2rem)] sm:w-[420px] flex-col overflow-hidden rounded-3xl border border-black/10 bg-white shadow-[0_25px_60px_-15px_rgba(0,0,0,0.3)] backdrop-blur-xl animate-fade-in-up">
+        <div className="fixed bottom-5 right-4 sm:right-6 z-50 flex h-[620px] max-h-[calc(100dvh-2.5rem-env(safe-area-inset-bottom))] w-[calc(100vw-2rem)] sm:w-[420px] flex-col overflow-hidden rounded-3xl border border-black/10 bg-white shadow-[0_25px_60px_-15px_rgba(0,0,0,0.3)] backdrop-blur-xl animate-fade-in-up">
           {/* Header */}
           <div className="flex items-center justify-between border-b border-gray-100 bg-[var(--primary)] px-5 py-4 text-[var(--on-primary)]">
             <div className="flex items-center gap-3">
@@ -233,7 +233,7 @@ export default function ChatBox() {
           </div>
 
           {/* Messages Body */}
-          <div className="flex-1 space-y-4 overflow-y-auto bg-[var(--secondary-soft)] p-4 text-sm">
+          <div className="min-h-0 flex-1 space-y-4 overflow-y-auto overscroll-contain bg-[var(--secondary-soft)] p-4 text-sm">
             {messages.map((item, index) => (
               <div key={index} className="space-y-2">
                 <div
@@ -259,14 +259,14 @@ export default function ChatBox() {
                           className="flex items-center gap-3 rounded-2xl border border-gray-100 bg-white p-2.5 shadow-sm hover:border-amber-200 transition"
                         >
                           <div className="relative h-14 w-14 shrink-0 overflow-hidden rounded-xl bg-[var(--surface-muted)]">
-                            <Image src={prod.image} alt={prod.name} fill className="object-contain p-1" />
+                            <Image src={prod.image} alt={prod.name} fill sizes="56px" className="object-contain p-1" />
                           </div>
 
                           <div className="min-w-0 flex-1">
-                            <h4 className="truncate text-xs font-bold text-gray-900">
+                            <h4 className="break-words text-sm font-bold text-gray-900">
                               {prod.name}
                             </h4>
-                            <p className="text-[11px] text-gray-400">
+                            <p className="text-xs text-gray-600">
                               {prod.size} • {prod.category}
                             </p>
                             <p className="price-text text-xs font-extrabold mt-0.5">
@@ -277,7 +277,7 @@ export default function ChatBox() {
                           <div className="flex flex-col gap-1 shrink-0">
                             <Link
                               href={`/products/${prod.id}`}
-                              className="rounded-full bg-gray-100 px-2.5 py-1 text-[10px] font-bold text-gray-700 hover:bg-gray-200 text-center transition"
+                              className="rounded-full bg-gray-100 px-2.5 py-1 text-xs font-bold text-gray-700 hover:bg-gray-200 text-center transition"
                             >
                               Xem
                             </Link>
@@ -293,7 +293,7 @@ export default function ChatBox() {
                                   selectedColor: prod.colors[0],
                                 });
                               }}
-                              className="rounded-full bg-[var(--primary)] px-2.5 py-1 text-[10px] font-bold text-[var(--on-primary)] hover:bg-[var(--brand-primary-hover)] transition"
+                              className="rounded-full bg-[var(--primary)] px-2.5 py-1 text-xs font-bold text-[var(--on-primary)] hover:bg-[var(--brand-primary-hover)] transition"
                             >
                               + Giỏ
                             </button>
@@ -308,7 +308,7 @@ export default function ChatBox() {
 
             {/* Loading Indicator */}
             {isLoading && (
-              <div className="mr-auto flex items-center gap-2 rounded-2xl rounded-tl-sm bg-[var(--surface-muted)] px-4 py-3 text-xs text-gray-500 shadow-sm border border-[var(--brand-border)]">
+              <div role="status" className="mr-auto flex items-center gap-2 rounded-2xl rounded-tl-sm bg-[var(--surface-muted)] px-4 py-3 text-xs text-gray-500 shadow-sm border border-[var(--brand-border)]">
                 <span className="font-medium">AI đang tìm kiếm mẫu phù hợp nhất</span>
                 <span className="flex gap-1">
                   <span className="h-1.5 w-1.5 rounded-full bg-amber-500 animate-bounce" style={{ animationDelay: "0ms" }} />
@@ -325,12 +325,13 @@ export default function ChatBox() {
           <div className="border-t border-gray-100 bg-white p-3.5">
             <div className="flex items-center gap-2">
               <input
+                aria-label="Tin nhắn tư vấn CaseUp"
                 value={message}
                 onChange={(e) => setMessage(e.target.value)}
                 onKeyDown={handleKeyDown}
                 placeholder="Nhập tên laptop hoặc yêu cầu tư vấn..."
                 disabled={isLoading}
-                className="flex-1 rounded-full border border-gray-200 bg-[var(--background)] px-4 py-2.5 text-xs sm:text-sm outline-none transition focus:border-black focus:bg-white disabled:bg-gray-100"
+                className="min-w-0 flex-1 rounded-full border border-gray-200 bg-[var(--background)] px-4 py-2.5 text-xs sm:text-sm outline-none transition focus:border-black focus:bg-white disabled:bg-gray-100"
               />
 
               <button

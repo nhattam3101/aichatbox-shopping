@@ -13,6 +13,9 @@ import { useDialogFocus } from "@/components/useDialogFocus";
 import Navbar from "@/components/Navbar";
 import ChatBox from "@/components/ChatBox";
 import { type Order, createStoredOrder } from "@/data/orders";
+import QrPaymentPanel from "@/components/QrPaymentPanel";
+import AntigravityBackground from "@/components/AntigravityBackground";
+import { paymentMethodLabel } from "@/data/payment";
 
 export default function CartPage() {
   const {
@@ -37,7 +40,7 @@ export default function CartPage() {
   const [phone, setPhone] = useState<string>(contact.phone);
   const [address, setAddress] = useState("Cam Ranh, Khánh Hòa");
   const [note, setNote] = useState("Giao giờ hành chính, gọi trước khi đến");
-  const [paymentMethod, setPaymentMethod] = useState<"cod" | "banking">("cod");
+  const [paymentMethod, setPaymentMethod] = useState<"cod" | "qr">("cod");
 
   // Coupon input state
   const [couponCode, setCouponCode] = useState("");
@@ -113,8 +116,8 @@ export default function CartPage() {
       <Navbar />
 
       <section className="mx-auto max-w-7xl px-4 py-8 sm:px-6 md:px-12 lg:px-20">
-        <h1 className="text-3xl md:text-4xl font-extrabold tracking-tight text-gray-900">
-          {showSuccess ? "Đặt hàng thành công!" : "Giỏ Hàng Của Bạn"}
+        <h1 id="main-content" tabIndex={-1} className="text-3xl md:text-4xl font-extrabold tracking-tight text-gray-900">
+          {showSuccess ? placedOrder?.paymentMethod === "qr" ? "Đơn hàng đã được tạo!" : "Đặt hàng thành công!" : "Giỏ Hàng Của Bạn"}
         </h1>
         {!showSuccess && <Link href="/orders" className="mt-3 inline-flex min-h-11 items-center text-sm font-semibold text-[var(--secondary)] underline underline-offset-4">Đơn hàng của tôi</Link>}
         <p className="mt-1 text-sm text-gray-500">
@@ -148,11 +151,16 @@ export default function CartPage() {
 
         {/* Checkout confirmation */}
         {showSuccess && placedOrder ? (
-          <div className="mx-auto mt-8 max-w-xl rounded-3xl border border-[var(--brand-border)] bg-white p-6 text-center shadow-sm sm:p-10" role="status">
+          <div className="relative isolate mx-auto mt-8 max-w-xl overflow-hidden rounded-3xl border border-[var(--brand-border)] bg-white p-6 text-center shadow-sm sm:p-10">
+            <AntigravityBackground celebration />
             <Image src="/products/done_product.png" alt="Minh họa đặt hàng thành công"
               width={1254} height={1254} sizes="(min-width: 640px) 176px, 144px"
               className="mx-auto h-auto w-36 rounded-2xl object-contain sm:w-44" />
             <h2 className="mt-5 text-xl font-bold">Cảm ơn bạn, {placedOrder.customerName}!</h2>
+            <p className="mt-3 font-semibold">Mã đơn: {placedOrder.orderId}</p>
+            <p className="mt-2">Số tiền: {placedOrder.total.toLocaleString("vi-VN")}₫</p>
+            <p className="mt-2">{paymentMethodLabel(placedOrder.paymentMethod)}</p>
+            {placedOrder.paymentMethod === "qr" && <><p className="mt-2">Vui lòng hoàn tất chuyển khoản bằng mã QR.</p><QrPaymentPanel order={placedOrder} /></>}
             <div className="mt-6 flex flex-col justify-center gap-3 sm:flex-row">
               <Link href={`/orders?id=${encodeURIComponent(placedOrder.orderId)}`} className="inline-flex min-h-11 items-center justify-center rounded-full bg-[var(--primary)] px-6 py-3 text-sm font-bold focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[var(--secondary)]">Xem đơn hàng</Link>
               <Link href="/products" className="inline-flex min-h-11 items-center justify-center rounded-full border border-[var(--border)] px-6 py-3 text-sm font-bold focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[var(--secondary)]">Tiếp tục mua sắm</Link>
@@ -326,10 +334,12 @@ export default function CartPage() {
                     <form onSubmit={handleApplyCoupon} className="flex gap-2">
                       <input
                         type="text"
+                        aria-label="Mã ưu đãi"
+                        aria-describedby={couponFeedback ? "coupon-feedback" : undefined}
                         value={couponCode}
                         onChange={(e) => setCouponCode(e.target.value)}
                         placeholder="Nhập mã được CaseUp cung cấp"
-                        className="flex-1 min-h-[44px] rounded-2xl border border-gray-200 bg-[var(--background)] px-3.5 py-2 text-xs uppercase font-bold outline-none focus:border-black"
+                        className="min-w-0 flex-1 min-h-[44px] rounded-2xl border border-gray-200 bg-[var(--background)] px-3.5 py-2 text-xs uppercase font-bold outline-none focus:border-black"
                       />
                       <button
                         type="submit"
@@ -340,8 +350,8 @@ export default function CartPage() {
                     </form>
 
                     {couponFeedback && (
-                      <p
-                        className={`mt-2 text-xs font-semibold ${
+                      <p id="coupon-feedback" role="status"
+                        className={`mt-2 text-sm font-semibold ${
                           couponFeedback.success ? "text-emerald-700" : "text-rose-600"
                         }`}
                       >
@@ -386,7 +396,9 @@ export default function CartPage() {
                   </div>
                 </div>
 
-                <div className="border-t border-gray-100 pt-3 flex justify-between items-baseline">
+                {paymentMethod === "qr" && <p className="text-sm leading-relaxed text-[var(--text-secondary)]">Bản demo chưa hỗ trợ chuyển tiền bằng VietQR hoặc tự động xác nhận thanh toán. Tạo đơn không có nghĩa là đã thanh toán.</p>}
+
+              <div className="border-t border-gray-100 pt-3 flex justify-between items-baseline">
                   <span className="text-sm font-bold text-gray-900">Tạm tính thanh toán:</span>
                   <span className="price-text text-2xl font-extrabold">
                     {totalPrice.toLocaleString("vi-VN")}₫
@@ -426,7 +438,7 @@ export default function CartPage() {
             aria-hidden="true"
           />
 
-          <div className="relative z-10 w-full max-w-lg max-h-[90vh] overflow-y-auto rounded-3xl border border-[var(--brand-border)] bg-white p-6 shadow-2xl animate-fade-in-up">
+          <div className="relative z-10 w-full max-w-lg max-h-[calc(100dvh-2rem)] overflow-y-auto rounded-3xl border border-[var(--brand-border)] bg-white p-6 shadow-2xl animate-fade-in-up">
             <div className="flex items-center justify-between border-b border-gray-100 pb-4">
               <div>
                 <h3 id="checkout-modal-title" className="text-lg font-extrabold text-gray-900">
@@ -528,7 +540,7 @@ export default function CartPage() {
 
               <div>
                 <span className="block font-semibold text-gray-700 mb-2">Hình thức thanh toán</span>
-                <div className="grid grid-cols-2 gap-3">
+                <div className="grid gap-3 sm:grid-cols-2">
                   <label
                     className={`flex min-h-[44px] items-center gap-2.5 rounded-2xl border p-3 cursor-pointer transition ${
                       paymentMethod === "cod"
@@ -544,12 +556,12 @@ export default function CartPage() {
                       onChange={() => setPaymentMethod("cod")}
                       className="accent-[var(--primary)]"
                     />
-                    <span className="font-semibold text-gray-800">💵 Trả tiền khi nhận (COD)</span>
+                    <span className="font-semibold text-gray-800">Thanh toán khi nhận hàng (COD)</span>
                   </label>
 
                   <label
                     className={`flex min-h-[44px] items-center gap-2.5 rounded-2xl border p-3 cursor-pointer transition ${
-                      paymentMethod === "banking"
+                      paymentMethod === "qr"
                         ? "border-2 border-[var(--primary)] bg-[var(--primary-soft)]"
                         : "border-gray-200"
                     }`}
@@ -557,15 +569,17 @@ export default function CartPage() {
                     <input
                       type="radio"
                       name="paymentMethod"
-                      value="banking"
-                      checked={paymentMethod === "banking"}
-                      onChange={() => setPaymentMethod("banking")}
+                      value="qr"
+                      checked={paymentMethod === "qr"}
+                      onChange={() => setPaymentMethod("qr")}
                       className="accent-[var(--primary)]"
                     />
-                    <span className="font-semibold text-gray-800">🏦 Chuyển khoản QR</span>
+                    <span className="font-semibold text-gray-800">Chuyển khoản bằng QR</span>
                   </label>
                 </div>
               </div>
+
+              {paymentMethod === "qr" && <p className="text-sm leading-relaxed text-[var(--text-secondary)]">Bản demo chưa hỗ trợ chuyển tiền bằng VietQR hoặc tự động xác nhận thanh toán. Tạo đơn không có nghĩa là đã thanh toán.</p>}
 
               <div className="border-t border-gray-100 pt-3 flex justify-between items-baseline text-sm">
                 <span className="font-semibold text-gray-700">Tổng thanh toán:</span>

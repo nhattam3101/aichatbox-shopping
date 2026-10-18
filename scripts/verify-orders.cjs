@@ -8,6 +8,9 @@ const React = require('react');
 const { renderToStaticMarkup } = require('react-dom/server');
 const storage = new Map();
 global.window = {};
+// Use the browser fallback until the explicit Web Locks test below; Node's
+// native lock scheduler may exit while this isolated mock browser is awaiting it.
+Object.defineProperty(global, 'navigator', { configurable: true, value: {} });
 global.localStorage = { get length() { return storage.size; }, key: i => [...storage.keys()][i] ?? null, removeItem: key => storage.delete(key), getItem: key => storage.get(key) ?? null, setItem: (key, value) => storage.set(key, value) };
 let hookValues = [], hookIndex = 0, query = '';
 let cartItems = [], cleared = false;
@@ -150,6 +153,35 @@ cleared = false; hookIndex = 0;
 await findForm(Cart()).props.onSubmit({ preventDefault() {} });
 assert.equal(cleared, false);
 localStorage.setItem = originalSetItem;
+// Payment migration, amount accuracy and independent QR records across reloads.
+const { paymentPayload, transferContent } = require('../data/payment.ts');
+const prior = data.loadStoredOrders();
+const qrA = await data.createStoredOrder({ ...fixture, createdAt: Date.now(), total: 476000, paymentMethod: 'qr' });
+const qrB = await data.createStoredOrder({ ...fixture, createdAt: Date.now(), total: 248000, paymentMethod: 'qr' });
+assert.notEqual(qrA.orderId, qrB.orderId);
+assert.notEqual(qrA.paymentReference, qrB.paymentReference);
+assert.equal(qrA.paymentStatus, 'awaiting_payment');
+assert.equal(qrB.paymentStatus, 'awaiting_payment');
+assert.equal(qrA.paymentContent, transferContent(qrA.orderId));
+assert.ok(qrA.paymentContent.includes(qrA.orderId.replace(/[^A-Za-z0-9]/g, '')));
+const payload = JSON.parse(paymentPayload(qrA));
+assert.equal(payload.amount, 476000);
+assert.equal(payload.orderId, qrA.orderId);
+assert.equal(payload.paymentMethod, 'qr');
+assert.equal(data.getOrderStatus(qrA, qrA.createdAt + 86400000).id, 'pending');
+const reloaded = data.loadStoredOrders();
+assert.equal(reloaded.find(o => o.orderId === qrA.orderId).paymentStatus, 'awaiting_payment');
+for (const old of prior) assert.deepEqual(reloaded.find(o => o.orderId === old.orderId), old);
+const Panel = require('../components/QrPaymentPanel.tsx').default;
+const panelHtml = renderToStaticMarkup(React.createElement(Panel, { order: qrA }));
+assert.match(panelHtml, /<svg/);
+assert.ok(panelHtml.includes('476.000'));
+assert.ok(panelHtml.includes(qrA.orderId));
+assert.ok(panelHtml.includes('chưa được cấu hình'));
+data.saveStoredOrders([{ ...fixture, paymentMethod: 'banking' }, { ...fixture, orderId: '#CU-OLD', paymentMethod: undefined }]);
+assert.equal(data.loadStoredOrders().find(o => o.orderId === fixture.orderId).paymentMethod, 'qr');
+assert.equal(data.loadStoredOrders().find(o => o.orderId === '#CU-OLD').paymentStatus, 'pending');
+console.log('PASS: QR SVG, exact payable amount, unique references, pending payment, reload, legacy defaults and multi-order isolation.');
 console.log('PASS: exact A/B/cancel-A/C checkout flow, independent statuses, refresh/stale-snapshot recovery, forced ID collisions, concurrent creates, double-submit lock, storage failure, seven statuses, six filters, order detail and no timing UI.');
 
 })().catch(error => { console.error(error); process.exitCode = 1; });

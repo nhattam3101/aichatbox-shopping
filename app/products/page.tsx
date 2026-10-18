@@ -108,7 +108,7 @@ export default function ProductsPage() {
               <span className="inline-flex items-center gap-2 rounded-full bg-amber-50 px-3.5 py-1 text-xs font-bold uppercase tracking-wider text-amber-700">
                 Bộ Sưu Tập 2026
               </span>
-              <h1 className="mt-3 text-3xl md:text-5xl font-extrabold tracking-tight text-gray-900">
+              <h1 id="main-content" tabIndex={-1} className="mt-3 text-3xl md:text-5xl font-extrabold tracking-tight text-gray-900">
                 Bao Bảo Vệ & Phụ Kiện
               </h1>
               <p className="mt-2 text-sm md:text-base text-gray-500 max-w-xl leading-relaxed">
@@ -144,6 +144,7 @@ export default function ProductsPage() {
               return (
                 <button
                   key={cat}
+                  aria-pressed={isSelected}
                   onClick={() => setSelectedCategory(cat)}
                   className={`shrink-0 rounded-full px-5 py-2.5 text-xs font-bold transition-all flex items-center gap-2 ${
                     isSelected
@@ -154,7 +155,7 @@ export default function ProductsPage() {
                   <span>{cat}</span>
                   <span
                     className={`rounded-full px-1.5 py-0.2 text-[10px] ${
-                      isSelected ? "bg-white/20 text-white" : "bg-black/5 text-gray-500"
+                      isSelected ? "bg-white/60 text-[var(--text-primary)]" : "bg-black/5 text-gray-500"
                     }`}
                   >
                     {count}
@@ -167,10 +168,10 @@ export default function ProductsPage() {
       </section>
 
       {/* Filter and Control Bar */}
-      <section className="sticky top-[69px] z-30 border-b border-[var(--brand-border)] bg-white/90 backdrop-blur-md px-6 py-4 md:px-12 lg:px-20 transition-all">
+      <section className="lg:sticky lg:top-[69px] z-30 border-b border-[var(--brand-border)] bg-white/90 backdrop-blur-md px-6 py-4 md:px-12 lg:px-20 transition-all">
         <div className="mx-auto max-w-7xl flex flex-wrap items-center justify-between gap-4">
           {/* Search Input */}
-          <div className="relative min-w-[240px] flex-1 sm:max-w-xs">
+          <div className="relative min-w-0 w-full flex-1 basis-full sm:max-w-xs">
             <svg
               className="absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400"
               fill="none"
@@ -186,6 +187,7 @@ export default function ProductsPage() {
             </svg>
             <input
               type="text"
+              aria-label="Tìm sản phẩm trong danh mục"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               placeholder="Tìm theo tên máy, chất liệu..."
@@ -193,6 +195,7 @@ export default function ProductsPage() {
             />
             {search && (
               <button
+                aria-label="Xóa tìm kiếm"
                 onClick={() => setSearch("")}
                 className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-gray-400 hover:text-[var(--text-primary)]"
               >
@@ -202,11 +205,12 @@ export default function ProductsPage() {
           </div>
 
           {/* Size Pills */}
-          <div className="hidden lg:flex items-center gap-1.5">
+          <div className="flex flex-wrap items-center gap-1.5">
             <span className="text-xs font-bold text-gray-400 mr-1">Size:</span>
             {sizes.map((size) => (
               <button
                 key={size}
+                aria-pressed={selectedSize === size}
                 onClick={() => setSelectedSize(size)}
                 className={`rounded-full px-3 py-1.5 text-xs font-semibold transition ${
                   selectedSize === size
@@ -220,11 +224,12 @@ export default function ProductsPage() {
           </div>
 
           {/* Price Range */}
-          <div className="hidden sm:flex items-center gap-1.5">
+          <div className="flex flex-wrap items-center gap-1.5">
             <span className="text-xs font-bold text-gray-400 mr-1">Giá:</span>
             {priceRanges.map((r) => (
               <button
                 key={r.value}
+                aria-pressed={selectedPriceRange === r.value}
                 onClick={() => setSelectedPriceRange(r.value)}
                 className={`rounded-full px-3 py-1.5 text-xs font-semibold transition ${
                   selectedPriceRange === r.value
@@ -238,8 +243,8 @@ export default function ProductsPage() {
           </div>
 
           {/* Checkboxes & Sort */}
-          <div className="flex items-center gap-3">
-            <label className="hidden md:flex items-center gap-1.5 text-xs font-medium text-gray-700 cursor-pointer select-none">
+          <div className="flex flex-wrap items-center gap-3">
+            <label className="flex min-h-11 items-center gap-2 text-xs font-medium text-gray-700 cursor-pointer select-none">
               <input
                 type="checkbox"
                 checked={onlyWaterproof}
@@ -249,7 +254,7 @@ export default function ProductsPage() {
               <span>Trượt nước</span>
             </label>
 
-            <label className="hidden md:flex items-center gap-1.5 text-xs font-medium text-gray-700 cursor-pointer select-none">
+            <label className="flex min-h-11 items-center gap-2 text-xs font-medium text-gray-700 cursor-pointer select-none">
               <input
                 type="checkbox"
                 checked={onlyPockets}
@@ -262,6 +267,7 @@ export default function ProductsPage() {
             {/* Sort Select */}
             <div className="flex items-center gap-1.5">
               <select
+                aria-label="Sắp xếp sản phẩm"
                 value={sortBy}
                 onChange={(e) => setSortBy(e.target.value)}
                 className="rounded-full border border-gray-200 bg-white px-3 py-2 text-xs font-semibold text-gray-800 outline-none hover:border-gray-400 cursor-pointer shadow-sm"
@@ -277,6 +283,8 @@ export default function ProductsPage() {
             {/* View Switch */}
             <div className="hidden sm:flex rounded-full border border-gray-200 bg-white p-1">
               <button
+                aria-label="Lưới sản phẩm gọn"
+                aria-pressed={viewColumns === 4}
                 onClick={() => setViewColumns(4)}
                 className={`rounded-full p-1.5 transition ${
                   viewColumns === 4 ? "bg-[var(--primary)] text-[var(--on-primary)]" : "text-gray-400 hover:text-[var(--text-primary)]"
@@ -288,6 +296,8 @@ export default function ProductsPage() {
                 </svg>
               </button>
               <button
+                aria-label="Lưới sản phẩm rộng"
+                aria-pressed={viewColumns === 2}
                 onClick={() => setViewColumns(2)}
                 className={`rounded-full p-1.5 transition ${
                   viewColumns === 2 ? "bg-[var(--primary)] text-[var(--on-primary)]" : "text-gray-400 hover:text-[var(--text-primary)]"

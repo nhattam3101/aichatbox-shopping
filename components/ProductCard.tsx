@@ -102,7 +102,7 @@ export default function ProductCard({ product, onQuickView }: Props) {
                 : "bg-white text-gray-600 hover:bg-[var(--soft-blue)] hover:text-[var(--text-primary)]"
             }`}
           >
-            <svg className="h-4.5 w-4.5 fill-current" viewBox="0 0 24 24">
+            <svg aria-hidden="true" className="h-4.5 w-4.5 fill-current" viewBox="0 0 24 24">
               <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" />
             </svg>
           </button>
@@ -123,7 +123,7 @@ export default function ProductCard({ product, onQuickView }: Props) {
                 : "bg-white text-gray-600 hover:bg-[var(--soft-blue)] hover:text-amber-600"
             }`}
           >
-            <svg className="h-4.5 w-4.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+            <svg aria-hidden="true" className="h-4.5 w-4.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4" />
             </svg>
           </button>
@@ -138,6 +138,7 @@ export default function ProductCard({ product, onQuickView }: Props) {
                 e.stopPropagation();
                 onQuickView(product);
               }}
+              aria-label={`Xem nhanh: ${product.name}`}
               className="w-full rounded-xl bg-white/95 py-2 text-xs font-bold text-gray-800 border border-[var(--border)] shadow-sm transition hover:bg-[var(--brand-primary-hover)] hover:text-[var(--on-primary)] hover-lift"
             >
               Xem nhanh
@@ -173,20 +174,20 @@ export default function ProductCard({ product, onQuickView }: Props) {
             <span>Đã bán {product.sold}</span>
           </div>
 
-          {/* Color Dots */}
-          <div className="mt-2.5 flex flex-wrap items-center gap-1.5">
-            {product.colors.map((color, i) => (
-              <span
-                key={i}
-                className={`rounded-full bg-gray-100 px-2 py-0.5 text-[11px] font-medium text-gray-600 border border-gray-200 hover-scale transition-transform duration-200`}
-              >
-                {color}
-              </span>
-            ))}
-          </div>
+          {/* Keep every color available through a native keyboard disclosure. */}
+          <details className="mt-3 rounded-xl border border-[var(--border)] bg-[var(--background)] px-3">
+            <summary className="flex min-h-11 cursor-pointer items-center text-sm font-medium text-gray-700">
+              {product.colors.length} màu · Xem màu có sẵn
+            </summary>
+            <div className="flex flex-wrap gap-2 pb-3">
+              {product.colors.map(color => <span key={color} className="rounded-full border border-gray-200 bg-white px-2 py-1 text-xs text-gray-700">{color}</span>)}
+            </div>
+          </details>
         </div>
 
         {product.kind === "sleeve" && <Link href={`/products/${product.id}`} className="mt-3 text-xs leading-relaxed font-medium text-[var(--primary-ink)] underline underline-offset-4">Tùy chọn màu vải · cúc/nút · thêu tên</Link>}
+
+        <p className="mt-2 text-xs leading-relaxed text-[var(--text-secondary)]">{product.madeToMeasure ? "Nhập số đo trên trang sản phẩm trước khi thêm vào giỏ." : product.kind === "sleeve" ? `Thêm nhanh: ${product.colors[0]} · nút Baby Blue.` : `Thêm nhanh: ${product.colors[0]}.`}</p>
 
         {/* Price & Add to Cart */}
         <div className="mt-4 flex items-center justify-between gap-2 pt-3 border-t border-gray-100">
@@ -213,11 +214,11 @@ export default function ProductCard({ product, onQuickView }: Props) {
             }`}
           >
             {isAdding ? (
-              <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+              <svg aria-hidden="true" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
               </svg>
             ) : (
-              <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <svg aria-hidden="true" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
               </svg>
             )}

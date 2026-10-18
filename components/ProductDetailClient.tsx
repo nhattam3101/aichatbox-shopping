@@ -210,7 +210,7 @@ export default function ProductDetailClient({ product, relatedProducts }: Props)
             <div className="flex flex-col justify-between space-y-6">
               <div>
                 {/* Name */}
-                <h1 className="mt-3 text-3xl font-extrabold tracking-tight md:text-4xl text-gray-900">
+                <h1 id="main-content" tabIndex={-1} className="mt-3 text-3xl font-extrabold tracking-tight md:text-4xl text-gray-900">
                   {product.name}
                 </h1>
 
@@ -381,6 +381,7 @@ export default function ProductDetailClient({ product, relatedProducts }: Props)
             <div className="flex overflow-x-auto border-b border-gray-200 [&>button]:shrink-0 [&>button]:whitespace-nowrap">
               <button
                 type="button"
+                aria-pressed={activeTab === "description"}
                 onClick={() => setActiveTab("description")}
                 className={`border-b-2 pb-4 text-sm font-semibold transition-colors ${
                   activeTab === "description"
@@ -392,6 +393,7 @@ export default function ProductDetailClient({ product, relatedProducts }: Props)
               </button>
               <button
                 type="button"
+                aria-pressed={activeTab === "details"}
                 onClick={() => setActiveTab("details")}
                 className={`ml-8 border-b-2 pb-4 text-sm font-semibold transition-colors ${
                   activeTab === "details"
@@ -403,6 +405,7 @@ export default function ProductDetailClient({ product, relatedProducts }: Props)
               </button>
               <button
                 type="button"
+                aria-pressed={activeTab === "reviews"}
                 onClick={() => setActiveTab("reviews")}
                 className={`ml-8 border-b-2 pb-4 text-sm font-semibold transition-colors ${
                   activeTab === "reviews"

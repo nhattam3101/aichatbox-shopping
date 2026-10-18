@@ -11,6 +11,8 @@ import OrderActions from "@/components/OrderActions";
 import { type Order, type OrderFilter, CUSTOMER_DATA_EVENT, ORDER_FILTERS, loadStoredOrders, getOrderStatus, matchesOrderFilter, formatOrderDate } from "@/data/orders";
 import type { CartItem } from "@/components/CartContext";
 import { DEMO_ORDER_POLICY } from "@/data/demo-orders";
+import QrPaymentPanel from "@/components/QrPaymentPanel";
+import { paymentMethodLabel, paymentStatusLabel } from "@/data/payment";
 
 const action = "inline-flex min-h-11 items-center justify-center rounded-full px-5 py-2.5 text-sm font-bold transition focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[var(--secondary)]";
 const surface = "rounded-3xl border border-[var(--border)] bg-white p-5 shadow-sm sm:p-7";
@@ -81,7 +83,7 @@ function OrdersContent() {
         <Link href={listHref} className={`${action} border border-[var(--border)] bg-white`}>← Danh sách đơn hàng</Link>
         <header className={surface}>
           <div className="flex flex-wrap items-center justify-between gap-3">
-            <h1 className="break-all text-xl font-extrabold sm:text-2xl">Đơn {selectedOrder.orderId}</h1>
+            <h1 id="main-content" tabIndex={-1} className="break-all text-xl font-extrabold sm:text-2xl">Đơn {selectedOrder.orderId}</h1>
             <StatusBadge order={selectedOrder} now={now} />
           </div>
           <p className="mt-3 text-sm text-[var(--text-secondary)]">Ngày đặt hàng: {formatOrderDate(selectedOrder.createdAt)}</p>
@@ -105,18 +107,20 @@ function OrdersContent() {
                 {selectedOrder.note && <p className="mt-2 text-[var(--text-secondary)]">Ghi chú: {selectedOrder.note}</p>}
               </div>
               <div className="border-t border-[var(--border)] pt-4"><h2 className="font-bold">Thanh toán</h2>
-                <p className="mt-2 text-[var(--text-secondary)]">{selectedOrder.paymentMethod === "cod" ? "Thanh toán khi nhận hàng (COD)" : "Chuyển khoản ngân hàng VietQR"}</p>
+                <p className="mt-2">Phương thức thanh toán: {paymentMethodLabel(selectedOrder.paymentMethod)}</p>
+                <p className="mt-2">Trạng thái thanh toán: {paymentStatusLabel(selectedOrder.paymentStatus ?? (selectedOrder.paymentMethod === "qr" ? "awaiting_payment" : "pending"))}</p>
+                {selectedOrder.paymentMethod === "qr" && <QrPaymentPanel order={selectedOrder} />}
               </div>
             </section>
           </div>
           <div className="min-w-0"><OrderTrackingTimeline order={selectedOrder} currentTime={now} /></div>
         </div>
       </div> : <div className={`${surface} text-center`}>
-        <h1 className="text-xl font-bold">Không tìm thấy đơn hàng</h1><p className="mt-2 text-sm text-[var(--text-secondary)]">Vui lòng kiểm tra mã đơn hoặc quay lại danh sách.</p>
+        <h1 id="main-content" tabIndex={-1} className="text-xl font-bold">Không tìm thấy đơn hàng</h1><p className="mt-2 text-sm text-[var(--text-secondary)]">Vui lòng kiểm tra mã đơn hoặc quay lại danh sách.</p>
         <Link href="/orders" className={`${action} mt-5 bg-[var(--primary)]`}>Đơn hàng của tôi</Link>
       </div> : <div className="space-y-6">
         <header><p className="mb-2 text-xs font-bold uppercase tracking-[0.2em] text-[var(--secondary)]">CaseUp · Mua sắm cùng bạn</p>
-          <h1 className="text-2xl font-extrabold tracking-tight sm:text-3xl">Đơn hàng của tôi</h1>
+          <h1 id="main-content" tabIndex={-1} className="text-2xl font-extrabold tracking-tight sm:text-3xl">Đơn hàng của tôi</h1>
           <p className="mt-3 text-sm text-[var(--text-secondary)]">Xem lại sản phẩm yêu thích và theo dõi hành trình đơn hàng của bạn.</p>
         </header>
         <nav aria-label="Lọc đơn hàng theo trạng thái" className="max-w-full overflow-x-auto rounded-2xl border border-[var(--border)] bg-white p-1.5 shadow-sm">
